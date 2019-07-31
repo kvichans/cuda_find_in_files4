@@ -1,0 +1,123 @@
+[info]
+version=4.1.01
+title=Find in Files 4
+desc=Gives dialog to search for multiple files containing some string/regex, like in file managers.
+type=cudatext-plugin
+subdir=cuda_find_in_files4
+homepage=https://github.com/kvichans/cuda_find_in_files4
+api=1.0.291
+
+;[item400]
+;section=events
+;events=on_goto_def~,on_click_dbl~
+
+[item1]
+section=commands
+caption=&Find in Files 4\&Find in files...
+method=show_dlg
+
+;[item2]
+;section=commands
+;caption=&Find in Files\Find in &current tab...
+;method=find_in_ed
+;;menu=0
+;
+;[item3]
+;section=commands
+;caption=&Find in Files\Find in &all tabs...
+;method=find_in_tabs
+;;menu=0
+;
+;[item4]
+;section=commands
+;caption=&Find in Files\Repeat search for this report-tab...
+;method=repeat_find_by_rpt
+;menu=0
+;
+;;[item4]
+;;section=commands
+;;caption=Find in Files\Undo replacements by report
+;;method=undo_by_report
+;;menu=0
+;
+;[item10]
+;section=commands
+;caption=&Find in Files\-
+;method=_
+;
+;[item11]
+;section=commands
+;caption=&Find in Files\Navigate to source, to &same group
+;method=nav_to_src_same
+;;menu=0
+;
+;[item12]
+;section=commands
+;caption=&Find in Files\Navigate to source, to &next group
+;method=nav_to_src_next
+;;menu=0
+;
+;[item13]
+;section=commands
+;caption=&Find in Files\Navigate to source, to &prev group
+;method=nav_to_src_prev
+;;menu=0
+;
+;[item21]
+;section=commands
+;caption=&Find in Files\Navigate to source, to next group, and &activate
+;method=nav_to_src_next_act
+;;menu=0
+;
+;[item22]
+;section=commands
+;caption=&Find in Files\Navigate to source, to prev group, and act&ivate
+;method=nav_to_src_prev_act
+;;menu=0
+;
+;[item23]
+;section=commands
+;caption=&Find in Files\-
+;method=_
+;
+;[item24]
+;section=commands
+;caption=&Find in Files\Configure navigation with &double-click in tab report...
+;method=dlg_nav_by_dclick
+;menu=op
+;
+[item25]
+section=commands
+caption=&Find in Files 4\&View and edit extra options...
+method=dlg_fif_opts
+menu=op
+
+;[item30]
+;section=commands
+;caption=&Find in Files\-
+;method=_
+;
+;[item31]
+;section=commands
+;caption=&Find in Files\Jump to next fragment
+;method=jump_to_next_rslt
+;;menu=0
+;
+;[item32]
+;section=commands
+;caption=&Find in Files\Jump to prev fragment
+;method=jump_to_prev_rslt
+;;menu=0
+;
+;[item33]
+;section=commands
+;caption=&Find in Files\Jump to next file fragment
+;method=jump_to_next_file
+;;menu=0
+;
+;[item34]
+;section=commands
+;caption=&Find in Files\Jump to next folder fragment
+;method=jump_to_next_fold
+;;menu=0
+;
