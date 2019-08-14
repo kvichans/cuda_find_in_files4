@@ -189,7 +189,7 @@ DHLP_KEYS_TABLE = _(r'''
 │ Move focus: Results >> Source >> Find │                  Tab │                                      │
 │ Move focus: Results << Source << Find │            Shift+Tab │                                      │
 ├───────────────────────────────────────┼──────────────────────┼──────────────────────────────────────┤
-│ Show history of search patterns       │               Alt+Dn │ If focus not in "Find"               │
+│ Show history of search patterns       │               Alt+Dn │ If focus in "Find"                   │
 │ Depth: All << Only << +1 <<...<< All  │              Ctrl+Up │                                      │
 │ Depth: All >> Only >> +1 >>...>> All  │              Ctrl+Dn │                                      │
 │ Choose folder                         │               Ctrl+B │                                      │
@@ -361,7 +361,7 @@ ISUES_C     = _('You are welcome to the plugin forum')
 
 
 Walker_ROOT_IS_TABS= '<tabs>'                   # For user input word
-OTH4FND = _('Extra options to find')
+OTH4FND = _('Extra search options')
 OTH4RPT = _('Options to view Results')
 
 EDS_HINTS       = f(_('F3/{u}F3 - next/prev fragment, ^F3/^{u}F3 - next/prev file fragment, Enter - open.')
@@ -426,3 +426,33 @@ what_hi = _('Pattern to find. '
             '\nIt can be multi-line. EOL is shown as "§".'
             '\nUse Shift+Enter to append "§" at pattern end.'
             '\nOr switch to multi-line mode ("+") to see/insert natural EOLs.')
+
+STD_VARS= [
+    ('{t}'                  ,'"<tabs>"'
+    ,_('To search in tabs') 
+    ),
+    ('{ed:FileName}'        ,'ed.get_filename()'
+    ,_('Full path') 
+    ),
+    ('{ed:FileDir}'         ,'os.path.dirname(ed.get_filename())'
+    ,_('Folder path, without file name') 
+    ),
+    ('{ed:FileNameOnly}'    ,'os.path.basename(ed.get_filename())'
+    ,_('File name only, without folder path')
+    ),
+    ('{ed:FileNameNoExt}'   ,"'.'.join(os.path.basename(ed.get_filename()).split('.')[0:-1])"
+    ,_('File name without extension and path')
+    ),
+    ('{ed:FileExt}'         ,"os.path.basename(ed.get_filename()).split('.')[-1]"
+    ,_('File extension')
+    ),
+    ('{ed:CurrentLine}'     ,'ed.get_text_line(ed.get_carets()[0][1])'
+    ,_('Text of current line')
+    ),
+    ('{ed:SelectedText}'    ,'ed.get_text_sel()'
+    ,_('Selected text')
+    ),
+    ('{ed:CurrentWord}'     ,'get_word_at_caret()'
+    ,_('Text of current word')
+    ),
+]

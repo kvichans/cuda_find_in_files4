@@ -2,7 +2,7 @@
 Authors:
     Andrey Kvichansky   (kvichans on github.com)
 Version:
-    '4.4.03 2019-08-13'
+    '4.4.04 2019-08-14'
 ToDo: (see end of file)
 '''
 import  re, os, traceback, locale, itertools, codecs, time, datetime as dt #, types, json, sys
@@ -484,6 +484,7 @@ class Fif4D:
                )
             ,us_focus='in_what'                 # Start/Last focused control
             ,ps_pset=[]                         # List of presets
+            ,vs_defs=[]                         # List of cusrom vars [{nm:'N', cm:'cmnt', bd:'str{VV}'}]
             )
         pref    = prefix_for_opts()
         hi_opts = fget_hist([pref, 'opts'] if pref else 'opts', {})
@@ -1052,6 +1053,34 @@ class Fif4D:
             ed.cmd(to_dlg)
             return None
 
+        if aid=='vr-sub':                       # Expand all vars
+            m.var_acts('expa')
+            return []
+        
+        if aid=='vr-new':                       # Create var
+            var = m.var_acts('new')
+            if var:
+                m.opts.vs_defs += [var]
+            return []
+
+        if aid[:6]=='vr-edt':                   # Change/Del var
+            var_num = int(aid.split('_')[1])
+            var     = m.opts.vs_defs[var_num]
+            var     = m.var_acts('edit', var)
+            if not var:
+                del m.opts.vs_defs[var_num]
+            return []
+            
+        if aid=='vr-add':                       # Append var
+            cid     = ag.focused()
+            cid     = self.cid_what() if cid=='di_menu' else cid
+            vr_sgn  = m.var_acts('ask')
+            pass;                   log("vr_sgn={}",(vr_sgn))
+            if not vr_sgn:  return []
+            cval    = ag.val(cid)+vr_sgn
+            return d(ctrls={cid:d(val=cval)}
+                    ,fid=cid)
+
         pass;                   msg_box('??do '+aid)
         return d(fid=self.cid_what())
        #def do_acts
@@ -1228,8 +1257,17 @@ class Fif4D:
     ),d(                         cap='-') ] + [
       d(tag='a:ps_load_'+str(n) ,cap=M.ZIP_PS4MENU(ps)
        ,key=('Ctrl+'+str(n+1) if n<9 else '')
-                                          ) for n,ps in enumerate(m.opts.ps_pset)
-   ]),d(tag='opts'      ,cap=_('Engine options.&..')
+                                            ) for n,ps in enumerate(m.opts.ps_pset)]
+    ),d(                 cap=_('Macro v&ars')    ,sub=[(
+    ),d(tag='a:vr-add'          ,cap=_('&Add embeded/project/custom var')+DDD 
+    ),d(tag='a:vr-new'          ,cap=_('Define n&ew custom var')+DDD
+    ),d(                         cap=_('Chan&ge/remove custom var') ,en=bool(m.opts.vs_defs)    ,sub=[
+      d(tag='a:vr-edt_'+str(n)  ,cap='{'+var['nm']+'}: '+var['bd'][:25]+DDD)
+                                                            for n,var in enumerate(m.opts.vs_defs)]
+    ),d(                         cap='-'
+    ),d(tag='a:vr-sub'          ,cap=_('E&xpand all vars')+DDD
+                                                   )] 
+    ),d(tag='opts'      ,cap=_('Engine options.&..')
        ,key='Ctrl+E' 
     ),(*mn_i4op
     ),d(                 cap='-'
@@ -1536,6 +1574,88 @@ class Fif4D:
         return False
        #def do_key_down
 
+    def var_acts(self, act, par=None):
+        M,m = self.__class__,self
+        
+        if act in ('new', 'edit'):
+            var = dcta(nm='', bd='')    if act=='new' else dcta(par)
+            oks = 'Create'              if act=='new' else 'Save'
+            fcap= 'Create custom var'   if act=='new' else 'Change custom var'
+            fid = 'name'                if act=='new' else 'body'
+            def addv(ag, aid, data):
+                vr_sgn  = m.var_acts('ask')
+                if not vr_sgn:  return []
+                return d(ctrls=d(body=d(val=ag.val('body')+vr_sgn)) ,fid='body')
+            def addp(ag, aid, data):
+                path    = app.dlg_file(True, '', '', '')
+                if not path:  return []
+                return d(ctrls=d(body=d(val=ag.val('body')+path))   ,fid='body')
+            ret,vals= DlgAg(
+                 ctrls  =[
+    ('nam_',d(tp='labl' ,tid='name' ,x=  5  ,w=60   ,cap='>'+_('&Name:')            )),
+    ('name',d(tp='edit' ,y=5        ,x= 70  ,r=-5   ,val=var.nm             ,a='r>' )),
+    ('bod_',d(tp='labl' ,tid='body' ,x=  5  ,w=60   ,cap='>'+_('Val&ue:')           )),
+    ('body',d(tp='edit' ,y=33       ,x= 70  ,r=-5   ,val=var.bd             ,a='r>' )),
+    ('addv',d(tp='bttn' ,tid='okok' ,x= 70  ,w=90   ,cap=_('Add &var')+DDD          ,on=addv)),
+    ('addp',d(tp='bttn' ,tid='okok' ,x=165  ,w=90   ,cap=_('Add &path')+DDD         ,on=addp)),
+    ('remv',d(tp='bttn' ,tid='okok' ,x=-150 ,r=-80  ,cap=_('Remove')        ,a='>>' ,on=CB_HIDE ,vis=(act=='edit'))),
+    ('okok',d(tp='bttn' ,y=61       ,x=-75  ,r=-5   ,cap=oks                ,a='>>' ,on=CB_HIDE ,def_bt=True)),
+               ],form   =d(  h=90,h_max=90  ,w=450  ,cap=fcap               ,frame='resize')
+                ,fid    =fid
+                ,opts   =d(negative_coords_reflect=True)).show()
+            if ret=='remv':
+                return None if app.ID_YES==msg_box(_('Remove?')
+                                                , app.MB_YESNO+app.MB_ICONQUESTION) else par
+            if ret!='okok' or not vals['name'] or not vals['body']: return par
+            var         = {} if act=='new' else par
+            var['nm']   = '{'+vals['name'].strip('{}')+'}'
+            var['bd']   = vals['body']
+            return var
+
+        if act=='ask':
+            vars_l  = [v['nm']+'\t'+v['bd'] for v in m.opts.vs_defs]
+            vars_l += [vnm    +'\t'+vcm     for vnm,vev,vcm in STD_VARS]
+#           vars_l += ['{OS:'+env_k+'}\t'+env_v for env_k, env_v in os.environ.items()]
+                        
+            var_i   = app.dlg_menu(app.MENU_LIST_ALT, '\n'.join(vars_l), caption=_('Variables'))
+#           var_i   = app.dlg_menu(app.MENU_LIST    , '\n'.join(vars_l), caption=_('Variables'))
+            if var_i is None:   return None
+            return vars_l[var_i].split('\t')[0]
+            
+        if act=='expa':
+            sep_h   = m.ag.cattr('di_sptr', 'y')+15
+            f_xyw   = m.ag.fattrs(('x', 'y', 'w'))
+            attrs   = ('tp', 'y', 'x', 'w', 'h', 'cap', 'a', 'vis', 'val')
+            cids    = ('in_wh_t','in_what','in_wh_M','in_whaM'
+                      ,'wk_inc_','wk_incl'
+                      ,'wk_exc_','wk_excl'
+                      ,'wk_fol_','wk_fold')
+            ctrls   = [(cid, m.ag.cattrs(cid, attrs)) for cid in cids]
+            for (cid,cnt) in ctrls:
+                if 'val' in cnt and '{' in cnt.get('val'):
+                    cnt['val']  = m.var_acts('repl', cnt['val'])
+            DlgAg(ctrls=ctrls
+                 ,form ={**f_xyw, **d(h=sep_h,h_max=sep_h  ,cap='Expand all vars' ,frame='resize')}
+                 ,opts ={'restore_position':False}
+                 ).show()
+
+        if act=='repl':
+            sval    = par
+            for dpth in range(3):               # 3 - max count of ref-jumps
+                chngd   = False
+                for v in m.opts.vs_defs:
+                    if v['nm']  not in sval: continue#for
+                    chngd   = True
+                    sval    = sval.replace(v['nm']  , v['bd'])
+                    if '{'  not in sval: return sval
+                if not chngd:    break#for dpth
+            for vnm,vev,vcm in STD_VARS:
+                if vnm          not in sval: continue#for
+                sval        = sval.replace(vnm      , eval(vev))
+                if '{'      not in sval: return sval
+            return sval
+            
+       #def var_acts
 
     def stbrProxy(self):
         M,m     = self.__class__,self
@@ -1750,18 +1870,25 @@ class Fif4D:
                 self._locked_cids.clear()
            #def lock_act
 
+        wopts = dcta(m.opts)
+        wopts.in_what = m.var_acts('repl', wopts.in_what)
+        wopts.wk_incl = m.var_acts('repl', wopts.wk_incl)
+        wopts.wk_excl = m.var_acts('repl', wopts.wk_excl)
+        wopts.wk_fold = m.var_acts('repl', wopts.wk_fold)
+        pass;                  #log("wopts={}",pfw(wopts))
+
         # Inspect user values
-        if not m.opts.in_what:
+        if not wopts.in_what:
             m.stbr_act(f(_('Fill the field "{}"')           , m.caps['in_what']))   ;return d(fid=self.cid_what())
-        if not m.opts.wk_incl:
+        if not wopts.wk_incl:
             m.stbr_act(f(_('Fill the field "{}"')           , m.caps['wk_incl']))   ;return d(fid='wk_incl')
-        if not m.opts.wk_fold:
+        if not wopts.wk_fold:
             m.stbr_act(f(_('Fill the field "{}"')           , m.caps['wk_fold']))   ;return d(fid='wk_fold')
-        if 0 != m.opts.wk_fold.count('"')%2:
+        if 0 != wopts.wk_fold.count('"')%2:
             m.stbr_act(f(_('Fix quotes in the field "{}"')  , m.caps['wk_fold']))   ;return d(fid='wk_fold')
-        if 0 != m.opts.wk_incl.count('"')%2:
+        if 0 != wopts.wk_incl.count('"')%2:
             m.stbr_act(f(_('Fix quotes in the field "{}"')  , m.caps['wk_incl']))   ;return d(fid='wk_incl')
-        if 0 != m.opts.wk_excl.count('"')%2:
+        if 0 != wopts.wk_excl.count('"')%2:
             m.stbr_act(f(_('Fix quotes in the field "{}"')  , m.caps['wk_excl']))   ;return d(fid='wk_excl')
         if m.opts.in_reex:
             try:
@@ -1776,26 +1903,26 @@ class Fif4D:
         # Prepare actors
         pass;                  #log__("?? Prepare actors",()         ,__=(log4fun,M.log4cls)) if _log4mod>=0 else 0
         m.observer  = Observer(
-                        opts    =m.opts
+                        opts    =wopts
                        ,dlg_status=m.stbrProxy()
                        )
         m.reporter  = Reporter(
-                        rp_opts ={k:m.opts[k] for k in m.opts if k[:3] in ('rp_',)}
+                        rp_opts ={k:wopts[k] for k in m.opts if k[:3] in ('rp_',)}
                        ,observer=m.observer
                        )
         walkers     = Walker.walkers(
-                        wk_opts ={k:m.opts[k] for k in m.opts if k[:3] in ('wk_',)}
+                        wk_opts ={k:wopts[k] for k in m.opts if k[:3] in ('wk_',)}
                        ,observer=m.observer
                        )
         frgfilters  = LexFilter.filters(
-                        wk_opts ={k:m.opts[k] for k in m.opts if k[:3] in ('wk_',)}
+                        wk_opts ={k:wopts[k] for k in m.opts if k[:3] in ('wk_',)}
 #                      ,ed4lx   =m.srcf
                        ,ed4lx   =m.tl_edtr
                        ,observer=m.observer
                        )
         fragmer     = Fragmer(
-                        in_opts ={k:m.opts[k] for k in m.opts if k[:3] in ('in_',)}
-                       ,rp_opts ={k:m.opts[k] for k in m.opts if k[:3] in ('rp_',)}
+                        in_opts ={k:wopts[k] for k in m.opts if k[:3] in ('in_',)}
+                       ,rp_opts ={k:wopts[k] for k in m.opts if k[:3] in ('rp_',)}
                        ,observer=m.observer
                        )
         pass;                   log__("ok Prepare actors",()         ,__=(log4fun,M.log4cls)) if _log4mod>=0 else 0
@@ -1830,6 +1957,30 @@ class Fif4D:
         return []
        #def work
    #class Fif4D
+
+
+def get_word_at_caret(ed_=ed):
+    sel_text    = ed_.get_text_sel()
+    if sel_text:    return sel_text;
+    c_crt, r_crt= ed_.get_carets()[0][:2]
+    wrdchs      = apx.get_opt('word_chars', '') + '_'
+    wrdcs_re    = re.compile(r'^[\w'+re.escape(wrdchs)+']+')
+    line        = ed_.get_text_line(r_crt)
+    c_crt       = max(0, min(c_crt, len(line)-1))
+    c_bfr       = line[c_crt-1] if c_crt>0         else ' '
+    c_aft       = line[c_crt]   if c_crt<len(line) else ' '
+    gp_aft_l    = 0
+    gp_bfr_l    = 0
+    if (c_bfr.isalnum() or c_bfr in wrdchs):   # abc|
+        tx_bfr  = line[:c_crt]
+        tx_bfr_r= ''.join(reversed(tx_bfr))
+        gp_bfr_l= len(wrdcs_re.search(tx_bfr_r).group())
+    if (c_aft.isalnum() or c_aft in wrdchs):   # |abc
+        tx_aft  = line[ c_crt:]
+        gp_aft_l= len(wrdcs_re.search(tx_aft  ).group())
+    pass;              #LOG and log('gp_bfr_l,gp_aft_l={}',(gp_bfr_l,gp_aft_l))
+    return line[c_crt-gp_bfr_l:c_crt+gp_aft_l]
+   #def get_word_at_caret
 
 
 
@@ -2322,7 +2473,8 @@ class Reporter:
 #                       , **self.observer.get_gstat())]
 #       body        = [f(_('+Search #{mtcs}')
 #                       , **self.observer.get_gstat())]
-        body        = [f(_('+Search #{mtcs}'), mtcs=self.stat(Reporter.FRST_FRGS))]
+#       body        = [f(_('+Search #{mtcs}'), mtcs=self.stat(Reporter.FRST_FRGS))]
+        body        = [_('+Search')]
         fit_ftim    = lambda f: ':'.join(str(mtime(f)).split(':')[:2]) # 2019-07-19 18:05:14.90 -> "2019-07-19 18:05"
         def node2body(kids, body, marks, locs, dpth=1):
             for kid in kids:
@@ -3076,10 +3228,11 @@ ToDo
 [ ][kv-kv][10aug19] Add command to count files with frgm
 [ ][kv-kv][11aug19] Fit code to use many fs-roots
 [ ][kv-kv][11aug19] ? Find files are NOT contain pattern
-[ ][kv-kv][11aug19] OS/Proj/Custom vars as "{SEL}" or "{CFILE}"
+[+][kv-kv][11aug19] OS/Proj/Custom vars as "{SEL}" or "{CFILE}"
 [+][kv-kv][12aug19] ? Replace in code not ASCII char with unicode names
 [+][kv-kv][12aug19] Repare using Results after reopen dlg
 [+][kv-kv][12aug19] <(NUMLINE)> -> <NUMLINE>
 [+][kv-kv][13aug19] Stop w/o asking on second search
-[ ][kv-kv][13aug19] Auto-sel first found frag (by op?)
+[+][kv-kv][13aug19] Auto-sel first found frag (by op?)
+[ ][kv-kv][14aug19] Empty val in history
 '''
