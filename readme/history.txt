@@ -1,4 +1,7 @@
 4.4.04 2019-08-14
+fixed: Show main dlg with need turning single/multi-line
+
+4.4.04 2019-08-14
 added: Macro vars
 
 4.4.03 2019-08-13

@@ -2,7 +2,7 @@
 Authors:
     Andrey Kvichansky   (kvichans on github.com)
 Version:
-    '4.4.04 2019-08-14'
+    '4.4.05 2019-08-15'
 ToDo: (see end of file)
 '''
 import  re, os, traceback, locale, itertools, codecs, time, datetime as dt #, types, json, sys
@@ -46,6 +46,7 @@ fset_hist   = lambda key, value: \
 get_opt     = lambda opt, defv=None: \
                 apx.get_opt(opt, defv                ,user_json=CFG_FILE)
 
+                               #import rpdb;rpdb.Rpdb().set_trace()    # telnet 127.0.0.1 4444
 pass;                           from pprint import pformat
 pass;                           pfw=lambda d,w=150:pformat(d,width=w)
 pass;                           pfwg=lambda d,w,g='': re.sub('^', g, pfw(d,w), flags=re.M) if g else pfw(d,w)
@@ -819,6 +820,7 @@ class Fif4D:
             return d(ctrls=ctrls,form=d(h=form_h+diff))
 
         if aid=='vw_mlin':                      # Switch single/multi-lines for FindWhat
+            pass;              #log("m.opts.vw.mlin={}",(m.opts.vw.mlin))
             what_y  = ag.cattr('in_what', 'y')
             what_h  = m.opts.vw.mlin_h    if m.opts.vw.mlin else 25
             diff_h  = m.opts.vw.mlin_h-25 if m.opts.vw.mlin else 25-m.opts.vw.mlin_h
@@ -1468,9 +1470,11 @@ class Fif4D:
             sel     = ed.get_text_sel()
             sel     = sel.replace('\r', '')
             m.opts.in_reex      = False
-            if '\n' in sel:
-                m.opts.vw.mlin  = True
-                m.opts.us_focus = 'in_whaM' if m.opts.us_focus=='in_what' else m.opts.us_focus
+            need_mlin           = '\n' in sel
+            if need_mlin!=m.opts.vw.mlin:
+                m.ag.update(d(ctrls=d(vw_mlin=d(val=need_mlin))))
+                m.ag.update(m.do_acts(m.ag, 'vw_mlin'))
+#               m.opts.us_focus = 'in_whaM' if m.opts.us_focus=='in_what' else m.opts.us_focus
             m.opts.in_what  = sel
             m.sl_what_l     = add_to_history(M.FIT_OPT4SL(
                                              m.opts.in_what),m.sl_what_l     , unicase=False)
