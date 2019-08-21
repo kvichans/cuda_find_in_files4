@@ -17,17 +17,12 @@ from            cudatext_keys   import *
 import          cudatext_cmd        as cmds
 import          cudax_lib           as apx
 
-#try:    from    cuda_kv_base    import *        # as separated plugin
-#except: from     .cd_kv_base    import *        # as part of this plugin
-from            .cd_kv_base     import *        # as part of this plugin
-#try:    from    cuda_kv_dlg     import *        # as separated plugin
-#except: from     .cd_kv_dlg     import *        # as part of this plugin
-from            .cd_kv_dlg      import *        # as part of this plugin
-
 import          chardet                         # Part of Cud/Conda
 import          logging
 logging.getLogger('chardet').setLevel(logging.WARNING)
 
+from            .cd_kv_base     import *        # as part of this plugin
+from            .cd_kv_dlg      import *        # as part of this plugin
 from            .cd_fif4_cs     import *        # Public strings/struct
 from            .encodings      import *        # List of encoding data
 
@@ -2918,19 +2913,17 @@ class TabsWalker:
             # Use!
             self.stats[Walker.WKST_UFNS]   += 1
             fp      = path
-#           body    = try_ed.get_text_all()
             yield fp
-#           yield fp, body
            #for h_tab
        #def provide_path
        
        
-        def path2body(self, path, ops=None):
-            if not path.startswith('tab:'):  return ''
-            tab_id   = path[len('tab:'):].split('/')[0]
-            tab_ed   = apx.get_tab_by_id(tab_id)
-            return tab_ed.get_text_all() if tab_ed else ''
-          #def path2body
+    def path2body(self, path, ops=None):
+        if not path.startswith('tab:'):  return ''
+        tab_id   = path[len('tab:'):].split('/')[0]
+        tab_ed   = apx.get_tab_by_id(tab_id)
+        return tab_ed.get_text_all() if tab_ed else ''
+       #def path2body
    #class TabsWalker
 
 
@@ -3066,11 +3059,6 @@ class FSWalker:
                     mtfps.append( (os.path.getmtime(path), path) )
                 else:
                     yield path
-#                   if self.need_body:
-#                       yield       path, FSWalker.get_filebody(path, self.enco_l)
-#                   else:
-#                       with open(  path, 'rt', encoding=self.enco_l[0]) as ofile:
-#                           yield   path, ofile
            #for dirpath
         if sort:
             pass;              #log__('mtfps={}',pfw(mtfps,100)             ,__=(log4fun,FSWalker.log4cls))
@@ -3078,11 +3066,6 @@ class FSWalker:
 #           yield from paths
             for path in paths:
                 yield path
-#               if self.need_body:
-#                   yield           path, FSWalker.get_filebody(path, self.enco_l)
-#               else:
-#                   with open(      path, 'rt', encoding=self.enco_l[0]) as ofile:
-#                       yield       path, ofile
        #def provide_path
     
     
