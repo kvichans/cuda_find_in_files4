@@ -485,7 +485,13 @@ is turned on.
 ———————————————————————————————————————————————————————————————————————————————————————————— 
 Special cases.
 
-If pattern is regular expresion (".*" is checked) then it can be indirectly Multi-line.
+If pattern is regular expresion (".*" is checked) then it can be indirectly multi-line.
+So in the case (not to guess) state of "+" is used to mark what search is needed.
+
+Huge files can also be involved in the search. For optimal memory usage you need
+- Turn off appending context lines ("-N+M").
+- Turn off multi-line pattern ("+") and remove EOL character "§".
+- Turn off any "Syntax elements".
 
 '''), reex=reex_hi, case=case_hi, word=word_hi).strip()
 
