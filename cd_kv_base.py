@@ -351,19 +351,36 @@ MAX_HIST= apx.get_opt('ui_max_history_edits', 20)
 
 def add_to_history(val:str, lst:list, max_len=MAX_HIST, unicase=True)->list:
     """ Add/Move val to list head. """
-    pass;                  #LOG and log('val, lst={}',(val, lst))
+    pass;                      #log('val, lst={}',(val, lst))
     lst_u = [ s.upper() for s in lst] if unicase else lst
     val_u = val.upper()               if unicase else val
     if val_u in lst_u:
         if 0 == lst_u.index(val_u):   return lst
         del lst[lst_u.index(val_u)]
     lst.insert(0, val)
-    pass;                  #LOG and log('lst={}',lst)
+    pass;                      #log('lst={}',lst)
     if len(lst)>max_len:
         del lst[max_len:]
-    pass;                  #LOG and log('lst={}',lst)
+    pass;                      #log('lst={}',lst)
     return lst
    #def add_to_history
+
+
+def append_to_history(val, lst:list, max_len=MAX_HIST)->list:
+    """ Add/Move val to list end. """
+    pass;                      #log('val, lst={}',(val, lst))
+    pass;                      #import rpdb;rpdb.Rpdb().set_trace() if lst else 0
+    if val in lst:
+        pos = lst.index(val)
+        if pos == (len(lst)-1):  return lst
+        del lst[pos]
+    lst.append(val)
+    pass;                      #log('lst={}',lst)
+    if len(lst)>max_len:
+        del lst[0]
+    pass;                      #log('lst={}',lst)
+    return lst
+   #def append_to_history
 
 
 ######################################

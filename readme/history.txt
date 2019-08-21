@@ -1,3 +1,8 @@
+4.4.06 2019-08-20
+added: Load prev/next executed search params
+added: Auto unfolding on Next/Prev in Results
+fixed: Skip folding of root in Results
+
 4.4.04 2019-08-14
 fixed: Show main dlg with need turning single/multi-line
 
