@@ -83,11 +83,9 @@ FIF4_META_OPTS=[
                   For these lexers extra filters and info will work:
                     Search into lexer tree path,
                     Search in/out comment and/or literal string.
-                  Empty list - for all lexers.""")),
+                  If empty list then for all lexers.""")),
         'opt': 'lexers_to_filter',
-        'def': [
-            'Python'
-        ],
+        'def': [],
         'frm': 'json',
         'chp': _('Results'),
     },
@@ -128,7 +126,7 @@ FIF4_META_OPTS=[
     },
     {   'cmt': _('If value>0, not show all files, which sizes are bigger than this value (in Kb).'),
         'opt': 'not_show_file_size_more(Kb)',
-        'def': 0,
+        'def': 1000,
         'frm': 'int',
         'chp': _('Results'),
     },
@@ -193,21 +191,21 @@ case_hi = _('Case sensitive')
 word_hi = _('Whole words')
 mlin_hi = _('Use multi-line input field')
 sort_hi = _('Sort picked files by modification time.'
-    '\n↓↓ from newest.'
-    '\n↑↑ from oldest.')
+            '\n↓↓ from newest.'
+            '\n↑↑ from oldest.')
 find_ca = _('Fin&d')
 find_hi = _('Start search')
 mask_hi = _('Space-separated file or folder masks.'
-    '\nFolder mask starts with "/".'
-    '\nDouble-quote mask, which needs space-char.'
-    '\nUse ? for any character and * for any fragment.'
-    '\nNote: "*" matches all names, "*.*" doesn\'t match all.')
+            '\nFolder mask starts with "/".'
+            '\nDouble-quote mask, which needs space-char.'
+            '\nUse ? for any character and * for any fragment.'
+            '\nNote: "*" matches all names, "*.*" doesn\'t match all.')
 excl_hi_ = _('Exclude file[s]/folder[s]\n')+mask_hi+_(''
-    '\n'
-    '\nAlways excluded:'
-    '\n   {}'
-    '\nSee engine option "always_not_in_files" to change.'
-    )
+            '\n'
+            '\nAlways excluded:'
+            '\n   {}'
+            '\nSee engine option "always_not_in_files" to change.'
+            )
 
 fold_hi = f(_('Start folder(s).'
             '\nSpace-separated folders.'
@@ -215,7 +213,7 @@ fold_hi = f(_('Start folder(s).'
             '\n~ is user Home folder.'
             '\n$VAR or ${{VAR}} is environment variable.'
             '\n{} to search in tabs.'
-#                   '\n{} to search in project folders (in short <p>).'
+#           '\n{} to search in project folders (in short <p>).'
             ), Walker_ROOT_IS_TABS
             )
 dept_hi = _('How many folder levels to search.'
@@ -276,51 +274,54 @@ STD_VARS= [
 ]
 
 DHLP_KEYS_TABLE = _(r'''
-┌──────────────────────────────────────────────┬──────────────────────┬─────────────────────────────────────────┐
-│                   Command                    │        Hotkey        │                 Comment                 │
-╞══════════════════════════════════════════════╪══════════════════════╪═════════════════════════════════════════╡
-│ Find                                         │                Alt+D │                                         │
-│ Find                                         │                Enter │ If focus not in                         │
-│                                              │                      │    multi-line "Find"/Results/Source     │
-├──────────────────────────────────────────────┼──────────────────────┼─────────────────────────────────────────┤
-│ Go to next found fragment                    │                   F3 │                                         │
-│ Go to prev found fragment                    │             Shift+F3 │                                         │
-│ Go to next tab/file found fragment           │              Ctrl+F3 │                                         │
-│ Go to prev tab/file found fragment           │        Ctrl+Shift+F3 │                                         │
-│ Open found fragment                          │                Enter │ If focus in Results/Source              │
-│ Open found fragment and close dialog         │          Shift+Enter │ If focus in Results/Source              │
-├──────────────────────────────────────────────┼──────────────────────┼─────────────────────────────────────────┤
-│ Put focus to Results                         │           Ctrl+Enter │ If focus is not in Results/Source       │
-│ Move focus: Results >> Source >> Find        │                  Tab │                                         │
-│ Move focus: Results << Source << Find        │            Shift+Tab │                                         │
-├──────────────────────────────────────────────┼──────────────────────┼─────────────────────────────────────────┤
-│ Show history of search patterns              │               Alt+Dn │ If focus in "Find"                      │
-│ Depth: All << Only << +1 <<...<< All         │              Ctrl+Up │                                         │
-│ Depth: All >> Only >> +1 >>...>> All         │              Ctrl+Dn │                                         │
-│ Choose folder                                │               Ctrl+B │                                         │
-│ Choose file                                  │         Ctrl+Shift+B │                                         │
-│ Use folder of the current file               │               Ctrl+U │                                         │
-│ To find in the current tab                   │         Ctrl+Shift+U │                                         │
-│ Prepare to find in the current source        │                  F11 │                                         │
-│ Append newline char "§" to "Find"            │          Shift+Enter │ If focus in sigle-line "Find"           │
-├──────────────────────────────────────────────┼──────────────────────┼─────────────────────────────────────────┤
-│ Load preset #1/#2/../#9                      │        Ctrl+1/2/../9 │ More presets via menu                   │
-│ Load prev/next executed search params        │            Alt+Lf/Rt │                                         │
-├──────────────────────────────────────────────┼──────────────────────┼─────────────────────────────────────────┤
-│ Fold/Unfold the caret branch                 │               Ctrl+= │ If focus in Results                     │
-│ Fold/Unfold all branches                     │         Ctrl+Shift+= │ By state of the caret branch            │
-├──────────────────────────────────────────────┼──────────────────────┼─────────────────────────────────────────┤
-│ Expand/Shrink Results height                 │       Ctrl+Alt+Dn/Up │                                         │
-│ Expand/Shrink dialog height                  │      Shift+Alt+Dn/Up │                                         │
-│ Expand/Shrink dialog width                   │      Shift+Alt+Rt/Lf │                                         │
-│ Expand/Shrink height of multi-line "Find"    │ Shift+Ctrl+Alt+Dn/Up │ If multi-line "Find" is visible         │
-├──────────────────────────────────────────────┼──────────────────────┼─────────────────────────────────────────┤
-│ Show engine options                          │               Ctrl+E │                                         │
-│ Show dialog "Help"                           │               Ctrl+H │                                         │
-├──────────────────────────────────────────────┼──────────────────────┼─────────────────────────────────────────┤
-│ Call CudaText's "Find" dialog                │               Ctrl+F │ And copy pattern and search options     │
-│ Call CudaText's "Replace" dialog             │               Ctrl+R │ And copy pattern and search options     │
-└──────────────────────────────────────────────┴──────────────────────┴─────────────────────────────────────────┘
+┌───────────────────────────────────────┬──────────────────────┬───────────────────────────────────┐
+│                Command                │        Hotkey        │              Comment              │
+╞═══════════════════════════════════════╪══════════════════════╪═══════════════════════════════════╡
+│ Find                                  │                Alt+D │                                   │
+│ Find                                  │                Enter │ Except focus in multi-line "Find" │
+│                                       │                      │    or in Results or in Source     │
+├───────────────────────────────────────┼──────────────────────┼───────────────────────────────────┤
+│ Go to next found fragment             │                   F3 │                                   │
+│ Go to prev found fragment             │             Shift+F3 │                                   │
+│ Go to next file(tab) found fragment   │              Ctrl+F3 │                                   │
+│ Go to prev file(tab) found fragment   │        Ctrl+Shift+F3 │                                   │
+│ Open found fragment                   │                Enter │ If focus in Results/Source        │
+│ Open found fragment and close dialog  │          Shift+Enter │ If focus in Results/Source        │
+├───────────────────────────────────────┼──────────────────────┼───────────────────────────────────┤
+│ Put focus to Results                  │           Ctrl+Enter │ Except focus in Results/Source    │
+│ Move focus: Results >> Source >> Find │                  Tab │                                   │
+│ Move focus: Results << Source << Find │            Shift+Tab │                                   │
+├───────────────────────────────────────┼──────────────────────┼───────────────────────────────────┤
+│ Show history of search patterns       │               Alt+Dn │ If focus in "Find"                │
+│ Depth: All << Only << +1 <<...<< All  │              Ctrl+Up │                                   │
+│ Depth: All >> Only >> +1 >>...>> All  │              Ctrl+Dn │                                   │
+│ Choose folder                         │               Ctrl+B │                                   │
+│ Choose file                           │         Ctrl+Shift+B │                                   │
+│ Use folder of the current file        │               Ctrl+U │                                   │
+│ To search in the current tab          │         Ctrl+Shift+U │                                   │
+│ Prepare to find in the current source │                  F11 │                                   │
+│ Append newline char "§" to "Find"     │          Shift+Enter │ If focus in sigle-line "Find"     │
+├───────────────────────────────────────┼──────────────────────┼───────────────────────────────────┤
+│ Load preset #1/#2/../#9               │        Ctrl+1/2/../9 │ More presets via menu             │
+│ Create new preset                     │               Ctrl+S │                                   │
+│ Choose preset to apply                │                Alt+S │                                   │
+│ Load prev/next executed search params │            Alt+Lf/Rt │                                   │
+├───────────────────────────────────────┼──────────────────────┼───────────────────────────────────┤
+│ Fold/Unfold the caret branch          │               Ctrl+= │ If focus in Results               │
+│ Fold/Unfold all branches              │         Ctrl+Shift+= │ By state of the caret branch      │
+├───────────────────────────────────────┼──────────────────────┼───────────────────────────────────┤
+│ Expand/Shrink Results height          │       Ctrl+Alt+Dn/Up │                                   │
+│ Expand/Shrink dialog height           │      Shift+Alt+Dn/Up │                                   │
+│ Expand/Shrink dialog width            │      Shift+Alt+Rt/Lf │                                   │
+│ Expand/Shrink height of               │                      │                                   │
+│   multi-line "Find"                   │ Shift+Ctrl+Alt+Dn/Up │ If multi-line "Find" is visible   │
+├───────────────────────────────────────┼──────────────────────┼───────────────────────────────────┤
+│ Show engine options                   │               Ctrl+E │                                   │
+│ Show dialog "Help"                    │               Ctrl+H │                                   │
+├───────────────────────────────────────┼──────────────────────┼───────────────────────────────────┤
+│ Call CudaText's "Find" dialog         │               Ctrl+F │ And copy pattern and              │
+│ Call CudaText's "Replace" dialog      │               Ctrl+R │     search options                │
+└───────────────────────────────────────┴──────────────────────┴───────────────────────────────────┘
 ''').strip()
 
 DHLP_TIPS_FIND  = f(_(r'''
@@ -420,37 +421,37 @@ Results options:
 │                                    │ Turn option on to show config dialog.            │
 ├────────────────────────────────────┼──────────────────────────────────────────────────┤
 │ Show relative paths                │ The option immediately toggles between           │
-│                                    │     <c:/dir1/search-root/dir2>: #NN              │
-│                                    │     <c:/dir1/search-root/dir2/filename.ext>: #NN │
+│                                    │   <c:/dir1/search-root/dir2>: #NN                │
+│                                    │   <c:/dir1/search-root/dir2/filename.ext>: #NN   │
 │                                    │ and                                              │
-│                                    │     <dir2>: #NN                                  │
-│                                    │     <dir2/filename.ext>: #NN                     │
+│                                    │   <dir2>: #NN                                    │
+│                                    │   <dir2/filename.ext>: #NN                       │
 ├────────────────────────────────────┼──────────────────────────────────────────────────┤
 │ Show modification time             │ If files are shown on separate lines             │
 │                                    │ (tree format is not "<path:r>:line")             │
 │                                    │ the option immediately toggles between           │
-│                                    │    <...filename.ext>: #NN                        │
+│                                    │   <...filename.ext>: #NN                         │
 │                                    │ and                                              │
-│                                    │    <...filename.ext (1999.12.31 23:59)>: #NN     │
+│                                    │   <...filename.ext (1999.12.31 23:59)>: #NN      │
 ├────────────────────────────────────┼──────────────────────────────────────────────────┤
 │ Format for Result tree             │ Full info about each fragment in one line.       │
 │   <path:r>:line                    │ Example                                          │
-│                                    │     <dir1/dir2/filename1.ext:12>: fragment line  │
-│                                    │     <dir1/dir3/filename2.ext:21>: fragment line  │
+│                                    │   <dir1/dir2/filename1.ext:12>: fragment line    │
+│                                    │   <dir1/dir3/filename2.ext:21>: fragment line    │
 ├────────────────────────────────────┼──────────────────────────────────────────────────┤
 │ Format for Result tree             │ Separate line per each file.                     │
 │   <path>#N/<r>:line                │ Example                                          │
-│                                    │     <dir1/dir2/filename1.ext>: #1                │
-│                                    │      <12>: fragment line                         │
-│                                    │     <dir1/dir3/filename2.ext>: #2                │
-│                                    │      <21>: fragment line                         │
+│                                    │   <dir1/dir2/filename1.ext>: #1                  │
+│                                    │    <12>: fragment line                           │
+│                                    │   <dir1/dir3/filename2.ext>: #2                  │
+│                                    │    <21>: fragment line                           │
 ├────────────────────────────────────┼──────────────────────────────────────────────────┤
 │ Format for Result tree             │ Separate line per each folder with files.        │
 │   <dir>#N/<file:r>:line            │ Example                                          │
-│                                    │     <dir1/dir2>: #1                              │
-│                                    │      <filename1.ext:12>: fragment line           │
-│                                    │     <dir1/dir3>: #2                              │
-│                                    │      <filename2.ext:21>: fragment line           │
+│                                    │   <dir1/dir2>: #1                                │
+│                                    │    <filename1.ext:12>: fragment line             │
+│                                    │   <dir1/dir3>: #2                                │
+│                                    │    <filename2.ext:21>: fragment line             │
 └────────────────────────────────────┴──────────────────────────────────────────────────┘
     
 To set the mark style of found fragmets, use the engine options dialog (Ctrl+E).
@@ -485,14 +486,16 @@ is turned on.
 ———————————————————————————————————————————————————————————————————————————————————————————— 
 Special cases.
 
-If pattern is regular expresion (".*" is checked) then it can be indirectly multi-line.
+If pattern is regular expresion (".*" is checked) then it can be implicitly multi-line.
 So in the case (not to guess) state of "+" is used to mark what search is needed.
 
 Huge files can also be involved in the search. For optimal memory usage you need
 - Turn off appending context lines ("-N+M").
-- Turn off multi-line pattern ("+") and remove EOL character "§".
-- Turn off any "Syntax elements".
-
+- Turn off multi-line state ("+") and ensure no EOL character "§" in the pattern.
+- Turn off all "Syntax elements".
+Also see engine options 
+- skip_file_size_more(Kb),
+- not_show_file_size_more(Kb).
 '''), reex=reex_hi, case=case_hi, word=word_hi).strip()
 
 GH_ISU_URL  = 'https://github.com/kvichans/cuda_find_in_files4/issues'

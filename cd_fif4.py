@@ -2,7 +2,7 @@
 Authors:
     Andrey Kvichansky   (kvichans on github.com)
 Version:
-    '4.4.06 2019-08-20'
+    '4.4.08 2019-08-21'
 ToDo: (see end of file)
 '''
 import  re, os, traceback, locale, itertools, codecs, time, datetime as dt #, types, json, sys
@@ -67,6 +67,7 @@ pass;                           _log4cls_Fragmer            = -1
 pass;                           _log4cls_Reporter           =  0
 pass;                           import cudatext_keys
 pass;                           log("start",('')) if _log4mod>=0 else 0
+pass;                           _dev_kv                     =  get_opt('_dev_kv', False)
 
 # i18n
 try:    _   = get_translation(__file__)
@@ -270,9 +271,9 @@ def dlg_fif4_help(fif):
     TIPS_FAST   = TIPS_FAST.replace( 'Ctrl+', 'Meta+') if c2m else TIPS_FAST
     
     page        = fget_hist('help.page', 0)
-    pags_its    = [_('Hotkeys'),_('Search'),_('Results'),_('Speedy')]
+    pags_its    = [_('Hotkeys'),_('Search'),_('Results'),_('Speed')]
     res,vals    = DlgAg(
-          form  =dict(cap=_('"Find in Files4" help'), frame ='resize', w=870, h=600)
+          form  =dict(cap=_('"Find in Files4" help'), frame ='resize', w=850, h=600)
         , ctrls = [((
   )),('pags',d(tp='pags',x=5,y=5,r=-5,b=-35 ,a='b.r>'   ,val=page       ,items=pags_its
   )),('keys',d(tp='memo',p='pags.0'         ,ali=ALI_CL ,val=KEYS_TABLE ,ro_mono_brd='1,1,1'
@@ -385,8 +386,8 @@ class Fif4D:
     # Lambda methods (to simplify Tree)
     cid_what    =  lambda self, only=False: \
         ('in_whaM'    if self.opts.vw.mlin else        'in_what') \
-            if only or self.ag.cattr(self.ag.focused(), 'tp') in ('bttn', 'chbt') else \
-        self.ag.focused()
+            if only or not self.last_fid else \
+        self.last_fid
     
     do_dept     = lambda self, ag, aid, data='': \
         d(vals=d(wk_dept= (ag.val('wk_dept')+1)%len(Fif4D.DEPT_UL) if aid=='depD' else \
@@ -397,7 +398,7 @@ class Fif4D:
           '&-?+?'
     cntx_ca     = lambda self: Fif4D.CNTX_CA(self.opts)
     
-    SORT_CA     = lambda opts: \
+    SORT_CA     = lambda opts: '' if opts.wk_sort is None else \
         SORT_DN         if  opts.wk_sort=='new' else \
         SORT_UP         if  opts.wk_sort=='old' else ''
     sort_ca     = lambda self: Fif4D.SORT_CA(self.opts)
@@ -408,19 +409,23 @@ class Fif4D:
                         not opts.wk_agef.startswith('0') else ''
     agef_ca     = lambda self: Fif4D.AGEF_CA(self.opts)
     
-    SKIP_CA     = lambda opts: \
+    SKIP_CA     = lambda opts: '' if opts.wk_skip is None else \
                         opts.wk_skip.replace('h', '-h').replace('b', '-b')
     skip_ca     = lambda self: Fif4D.SKIP_CA(self.opts)
     
-    SYCM_CA     = lambda opts: \
+    SYCM_CA     = lambda opts: '' if opts.wk_sycm is None else \
         '/*?*/'         if  opts.wk_sycm=='in' else \
         '?/**/?'        if  opts.wk_sycm=='ot' else ''
     sycm_ca     = lambda self: Fif4D.SYCM_CA(self.opts)
 
-    SYST_CA     = lambda opts: \
+    SYST_CA     = lambda opts: '' if opts.wk_syst is None else \
         '"?"'           if  opts.wk_syst=='in' else \
         '?""?'          if  opts.wk_syst=='ot' else ''
     syst_ca     = lambda self: Fif4D.SYST_CA(self.opts)
+    
+    ENCO_CA     = lambda opts: '' if opts.wk_enco is None else \
+                        opts.wk_enco[0] if opts.wk_enco and opts.wk_enco[0]!=DEF_LOC_ENCO else ''
+    enco_ca     = lambda self: Fif4D.ENCO_CA(self.opts)
     
     I4OP_CA     = lambda opts: ' '.join(
                     [   Fif4D.SORT_CA(opts) 
@@ -428,6 +433,7 @@ class Fif4D:
                     ,   Fif4D.SKIP_CA(opts)
                     ,   Fif4D.SYCM_CA(opts) 
                     ,   Fif4D.SYST_CA(opts) 
+                    ,   Fif4D.ENCO_CA(opts) 
                     ]).replace('    ', '  ').strip()
     i4op_ca     = lambda self: Fif4D.I4OP_CA(self.opts)
     
@@ -435,15 +441,15 @@ class Fif4D:
     FIT_SL4OPT  = lambda s: s.replace('\\'+FF_EOL, chr(1)).replace(FF_EOL, C10).replace(chr(1), FF_EOL)
     FIT_OPT4SL  = lambda s: s.replace(FF_EOL  , '\\'+FF_EOL ).replace(C10, FF_EOL)
     
-    ZIP_PS4MENU = lambda ps:(( '"'+ps['nm']+'" ')
+    ZIP_PS4MENU = lambda ps, wnm=True:(( '"'+ps['nm']+'" ' if wnm else '')
                             +( '[.*] '                                              if 'in_reex' in ps else '')
                             +( '[-+] '                                              if 'rp_cntx' in ps else '')
-                            +( '[ext] '                                             if 'wk_sort' in ps else '')
                             +(f(' "{}" '    , ps['in_what'].strip()[:20].strip())   if 'in_what' in ps else '')
                             +(f(' in "{}" ' , ps['wk_incl'].strip()[:20].strip())   if 'wk_incl' in ps else '')
                             +(f(' ex "{}" ' , ps['wk_excl'].strip()[:10].strip())   if 'wk_excl' in ps else '')
                             +(f(' from "{}" ',ps['wk_fold'].strip()[:20].strip())   if 'wk_fold' in ps else '')
                             +(f(' {} '      , Fif4D.DEPT_UL[ps['wk_dept']])         if 'wk_dept' in ps else '')
+                            +( Fif4D.I4OP_CA(ps)                                                              )
                             ).replace('  ',' ').strip()
     
     TIMER_DELAY = 300   # msec
@@ -522,6 +528,8 @@ class Fif4D:
         m.rslt  = None
         m.srcf  = None
         m.stbr  = None
+        
+        m.last_fid  = ''
 
         # Work tools
         m.tl_edtr       = None                  # Editor to apply lexer to source
@@ -708,7 +716,7 @@ class Fif4D:
         # in_reex in_case in_word
         # more-fh less-fh more-fw less-fw more-r less-r more-ml less-ml
         # addEOL hist vw_mlin wk_agef wk_enco_d rp_cntx
-        # di_menu ps_prev ps_next ps_save ps_remv_N ps_load_N
+        # di_menu ps_prev ps_next ps_save ps_menu ps_remv_N ps_load_N
         # ac_usec di_brow
         # nf_frag 
         # up_rslt di_fnd! vi_fldi
@@ -914,7 +922,6 @@ class Fif4D:
             return []
 
         if aid=='rp_cntx':                      # View/Edit "before/after context lines"
-            pass;               log("ag.focused()={}",(ag.focused()))
             if not m.opts.rp_cntx:
                 return d(fid=self.cid_what()
                         ,ctrls=d(rp_cntx=d(cap=m.cntx_ca())))     # Turn off
@@ -953,6 +960,11 @@ class Fif4D:
                 return d(vals=m.vals_opts('o2v')
                         ,ctrls=d(di_i4op=d(cap=m.i4op_ca())
                                 ,rp_cntx=d(cap=m.cntx_ca())))
+            if aid=='ps_menu':
+                ps_num = app.dlg_menu(app.MENU_LIST, '\n'.join([
+                      ps['nm']+'\t'+M.ZIP_PS4MENU(ps, False) for ps in m.opts.ps_pset]))
+                if ps_num is None: return []
+                aid  = 'ps_load_'+str(ps_num)
 
             if aid=='ps_save':
                 ps  = m.dlg_preset()
@@ -1021,11 +1033,13 @@ class Fif4D:
         or (aid,scam)==('di_brow','s'):         # Browse file
             return set_fn(
                         app.dlg_file(True,     m.opts.wk_incl
-                           ,os.path.expanduser(m.opts.wk_fold), ''))
+                           ,os.path.expanduser(m.opts.wk_fold), ''
+                           ,_('Choose file to find in it')))
         if (aid,data)==('di_brow',''    ):      # Browse folder
             return set_dir(
                         app.dlg_dir(
-                            os.path.expanduser(m.opts.wk_fold)))
+                            os.path.expanduser(m.opts.wk_fold)
+                           ,_('Start folder to search')))
         
         if aid=='up_rslt':                      # Update Results view
             m.reporter.show_results(
@@ -1188,7 +1202,8 @@ class Fif4D:
     ),d(                 cap=f(_('En&codings plan: {}'), ', '.join(m.opts.wk_enco))        ,sub=[(
     ),d(tag='a:wk_enco_0'   ,cap=f(_('Step &1: {}')+DDD, m.opts.wk_enco[0])
     ),d(tag='a:wk_enco_1'   ,cap=f(_('Step &2: {}')+DDD, m.opts.wk_enco[1])  ,en=bool(m.opts.wk_enco[1])
-    ),d(tag='a:wk_enco_2'   ,cap=f(_('Step &3: {}')+DDD, m.opts.wk_enco[2])  ,en=bool(m.opts.wk_enco[2])
+    ),d(tag='a:wk_enco_2'   ,cap=f(_('Step &3: {}')    , m.opts.wk_enco[2])  ,en=False
+#   ),d(tag='a:wk_enco_2'   ,cap=f(_('Step &3: {}')+DDD, m.opts.wk_enco[2])  ,en=bool(m.opts.wk_enco[2])
     ),d(                     cap='-'
     ),d(tag='a:wk_enco_d'   ,cap=f(_('Use &default plan: {}'), ', '.join(WK_ENCO))   , en=(WK_ENCO!=m.opts.wk_enco)
                                                                                             )]),(
@@ -1267,6 +1282,8 @@ class Fif4D:
     ),d(                 cap=_('Pre&sets')    ,sub=[(
     ),d(tag='a:ps_save'         ,cap=_('&Create new preset')+DDD
        ,key='Ctrl+S'
+    ),d(tag='a:ps_menu'         ,cap=_('Choo&se preset')+DDD
+       ,key='Alt+S'
     ),d(                         cap=_('&Remove preset')    ,en=m.opts.ps_pset  ,sub=[
       d(tag='a:ps_remv_'+str(n) ,cap=M.ZIP_PS4MENU(ps)) for n,ps in enumerate(m.opts.ps_pset)]
     ),d(                         cap=_('&View preset')      ,en=m.opts.ps_pset  ,sub=[
@@ -1397,6 +1414,15 @@ class Fif4D:
             m.do_menu(ag, 'di_i4op', data) if 1==data['btn'] else []
         ctrls['di_i4op']['on_click_dbl']    = lambda ag, aid, data='': \
             m.do_acts(ag, 'wk_clea')
+        # To save last focus useful place
+        def save_fid(cid):m.last_fid  = cid; return []
+        ctrls['in_what']['on_focus_enter']  = lambda ag, aid, data='':save_fid(aid)
+        ctrls['in_whaM']['on_focus_enter']  = lambda ag, aid, data='':save_fid(aid)
+        ctrls['wk_incl']['on_focus_enter']  = lambda ag, aid, data='':save_fid(aid)
+        ctrls['wk_excl']['on_focus_enter']  = lambda ag, aid, data='':save_fid(aid)
+        ctrls['wk_fold']['on_focus_enter']  = lambda ag, aid, data='':save_fid(aid)
+        ctrls['di_rslt']['on_focus_enter']  = lambda ag, aid, data='':save_fid(aid)
+        ctrls['di_srcf']['on_focus_enter']  = lambda ag, aid, data='':save_fid(aid)
 
         pass;                   log__('form_h0,form_h,form_w={}',(form_h0,form_h,form_w)         ,__=(log4fun,M.log4cls)) if _log4mod>=0 else 0
         
@@ -1576,6 +1602,7 @@ class Fif4D:
         elif skey==( 'c',ord('B')):                         upd=m.do_acts(ag, 'di_brow')                    # Ctrl      +B
         elif skey==('sc',ord('B')):                         upd=m.do_acts(ag, 'di_brow', 'file')            # Ctrl+Shift+B
         elif skey==( 'c',ord('S')):                         upd=m.do_acts(ag, 'ps_save')                    # Ctrl+S
+        elif skey==( 'a',ord('S')):                         upd=m.do_acts(ag, 'ps_menu')                    # Alt+S
         elif skey==( 'a',VK_LEFT):                          upd=m.do_acts(ag, 'ps_prev')                    # Alt+LF
         elif skey==( 'a',VK_RIGHT):                         upd=m.do_acts(ag, 'ps_next')                    # Alt+RT
         elif ('c',ord('1'))<=skey<=('c',ord('9')):          upd=m.do_acts(ag, 'ps_load_'+str(int(chr(key))-1))  # Ctrl+1..9
@@ -1725,7 +1752,7 @@ class Fif4D:
 
         if act=='load-srcf':                    # Load file
             path    = par
-            if os.path.isfile(path) and os.path.getsize(path)>NSHOW_BIGGER*1024:
+            if os.path.isfile(path) and os.path.getsize(path)>NSHOW_BIGGER*1024>0:
                 m.srcf.set_prop(app.PROP_LEXER_FILE, '')
                 m.srcf.set_prop(app.PROP_RO, False)
                 m.srcf.set_text_all('The Source file is too big.\nSee engine option "not_show_file_size_more(Kb)".') 
@@ -2003,7 +2030,7 @@ class Fif4D:
         
         # Main work
         pass;                  #log("m.working={}",(m.working))
-        if -1==-1:                              # UNSAFE work
+        if _dev_kv:                             # UNSAFE work
             fifwork(    m.observer, m.rslt, walkers, fragmer, frgfilters, m.reporter)
         else:                                   # SAFE work: with lock/try/finally
             lock_act('lock')
@@ -2191,57 +2218,71 @@ class LexFilter:
 #NOTE: non GUI main tools
 
 def fifwork(observer, ed4rpt, walkers, fragmer, frgfilters, reporter):
-    pass;                      #log4fun=1
-    pass;                       log4fun=_log4fun_fifwork
+    pass;                       log4fun=1
+    pass;                      #log4fun=_log4fun_fifwork
     pass;                      #log__('observer,walkers,fragmer,reporter={}',(observer,walkers,fragmer,reporter)         ,__=(log4fun,)) if _log4mod>=0 else 0
-    work_start  = ptime()
-    prev_show   = ptime()
+    enco_l  = observer.opts.wk_enco
+    
+    work_start_t= ptime()
+    prev_stat_t = ptime()
+    prev_show_t = ptime()
     reporter.show_results(ed4rpt)
-#   fin_msg     = 'Search complete'
-#   pass;                       log("fin_msg={}",(fin_msg))
     for walker in walkers:
-        for fn,body in walker.provide_body():
+#       for fn,body in walker.provide_path():
+        for fn     in walker.provide_path():
             pass;               log__("fn={}",(fn)         ,__=(log4fun,)) if _log4mod>=0 else 0
-            observer.dlg_status('msg', fn)
-            observer.dlg_status('dirs', [reporter.stat(Reporter.FRST_DIRS),walker.stats[Walker.WKST_DIRS]])
-            observer.dlg_status('fils', [reporter.stat(Reporter.FRST_FILS),walker.stats[Walker.WKST_UFNS],walker.stats[Walker.WKST_AFNS]])
-            observer.dlg_status('frgs',  reporter.stat(Reporter.FRST_FRGS))
-            observer.dlg_status('tim',  f('({:.2f})', ptime()-work_start))
             if fn is None:
                 break#for fn
+            if  prev_stat_t+0.1 < ptime():
+                prev_stat_t     = ptime()
+                observer.dlg_status('msg', fn)
+                observer.dlg_status('dirs', [reporter.stat(Reporter.FRST_DIRS),walker.stats[Walker.WKST_DIRS]])
+                observer.dlg_status('fils', [reporter.stat(Reporter.FRST_FILS),walker.stats[Walker.WKST_UFNS],walker.stats[Walker.WKST_AFNS]])
+                observer.dlg_status('frgs',  reporter.stat(Reporter.FRST_FRGS))
+                observer.dlg_status('tim',  f('({:.2f})', ptime()-work_start_t))
             if observer.need_break:
-#               fin_msg     = 'Search is stopped'
-#               pass;           log("fin_msg={}",(fin_msg))
                 break#for fn
-            if  prev_show+1 < ptime():
-                prev_show   = ptime()
+            if  prev_show_t+2 < ptime():
+                prev_show_t   = ptime()
                 reporter.show_results(ed4rpt)
-            for frgs in fragmer.provide_frag(body):
-                pass;           log__("frgs={}",(frgs)         ,__=(log4fun,)) if _log4mod>=0 else 0
-                filter_ok   = True
-                for flt in frgfilters:
-                    if not flt.suit(fn, frgs):
-                        filter_ok   = False
-                        break#for flt
-                if not filter_ok:   continue#for frg
-                reporter.add_frg(fn, frgs)
+                app.app_idle()
+            for enco_n,enco in enumerate(enco_l):
+                try:
+                    pass;      #log("enco={}",(enco))
+                    body    = walker.path2body(fn, d(enco=enco))
+                    pass;      #log__("type(body)={}",(type(body))         ,__=(log4fun,)) if _log4mod>=0 else 0
+                    for frgs in fragmer.provide_frag(body):
+                        pass;  #log__("frgs={}",(frgs)         ,__=(log4fun,)) if _log4mod>=0 else 0
+                        filter_ok   = True
+                        for flt in frgfilters:
+                            if not flt.suit(fn, frgs):
+                                filter_ok   = False
+                                break#for flt
+                        if not filter_ok:   continue#for frg
+                        reporter.add_frg(fn, frgs)
+                       #for frgs
+                except UnicodeError as ex:
+                    print(f(_('Cannot read "{}": ({}) {}'), fn, enco, ex))  if enco_n==len(enco_l)-1 else 0
+                    reporter.remove_last_frgs(fn)
+                    continue
+                break
+               #for enco
+           #for fn
         observer.dlg_status('dirs', [reporter.stat(Reporter.FRST_DIRS),walker.stats[Walker.WKST_DIRS]])
         observer.dlg_status('fils', [reporter.stat(Reporter.FRST_FILS),walker.stats[Walker.WKST_UFNS],walker.stats[Walker.WKST_AFNS]])
         observer.dlg_status('frgs',  reporter.stat(Reporter.FRST_FRGS))
         if observer.need_break:
-#           fin_msg     = 'Search is stopped'
-#           pass;               log("fin_msg={}",(fin_msg))
             break#for walk
        #for walker
     fin_msg = 'Search is stopped' if observer.need_break else 'Search complete'
     observer.dlg_status('msg', fin_msg)
     reporter.finish()
     pass;                       search_end    = ptime()
-    pass;                       print(f('search done: {:.2f} secs', search_end-work_start))
+    pass;                       print(f('search done: {:.2f} secs', search_end-work_start_t)) if _dev_kv else 0
     reporter.show_results(ed4rpt)
     pass;                       work_end    = ptime()
-    pass;                       print(f('report done: {:.2f} secs', work_end-search_end))
-    pass;                       print(f('woks   done: {:.2f} secs', work_end-work_start))
+    pass;                       print(f('report done: {:.2f} secs', work_end-search_end)) if _dev_kv else 0
+    pass;                       print(f('woks   done: {:.2f} secs', work_end-work_start_t)) if _dev_kv else 0
    #def fifwork
 
 
@@ -2290,6 +2331,28 @@ class Reporter:
                                                 #          )
                                                 #         ])}
        #def __init__
+
+    
+    def remove_last_frgs(self, fn):
+        pass;                  #log("fn={!r}",(fn))
+        pass;                  #log("self.rfrgs[-3:]={}",pfw(self.rfrgs[-3:]))
+        pos_to_rm   = len(self.rfrgs)
+        rm_cnt      = 0
+        for pos in range(len(self.rfrgs)-1, -1, -1):
+            rfr     = self.rfrgs[pos]
+            pass;              #log("pos,rfr={}",(pos, rfr))
+            pass;              #log("rfr.f != fn={}",(rfr.f != fn))
+            pos_to_rm       = pos
+            if rfr.f != fn:
+                pos_to_rm  += 1
+                break
+            rm_cnt += 1 if rfr.cws else 0
+        pass;                  #log("pos_to_rm, len(self.rfrgs)={}",(pos_to_rm, len(self.rfrgs)))
+        if 0==rm_cnt:   return 
+        pass;                  #log("rm_cnt={}",(rm_cnt))
+        self.stats[Reporter.FRST_FRGS] -= rm_cnt
+        del self.rfrgs[pos_to_rm:]
+       #def remove_last_frgs
 
     
     def add_frg(self, fn, frgs):
@@ -2829,7 +2892,7 @@ class TabsWalker:
        #def __init__
 
 
-    def provide_body(self):                    
+    def provide_path(self):                    
         " Create generator to yield tabs's title/body "
         pass;                   log4fun=0
         self.stats      = Walker.new_stats()
@@ -2855,9 +2918,19 @@ class TabsWalker:
             # Use!
             self.stats[Walker.WKST_UFNS]   += 1
             fp      = path
-            body    = try_ed.get_text_all()
-            yield fp, body
-       #def provide_body
+#           body    = try_ed.get_text_all()
+            yield fp
+#           yield fp, body
+           #for h_tab
+       #def provide_path
+       
+       
+        def path2body(self, path, ops=None):
+            if not path.startswith('tab:'):  return ''
+            tab_id   = path[len('tab:'):].split('/')[0]
+            tab_ed   = apx.get_tab_by_id(tab_id)
+            return tab_ed.get_text_all() if tab_ed else ''
+          #def path2body
    #class TabsWalker
 
 
@@ -2908,7 +2981,7 @@ class FSWalker:
                dt <  age_d['thr']
 
     
-    def provide_body(self):                        #NOTE: FS walk
+    def provide_path(self):                        #NOTE: FS walk
         " Create generator to yield file's path/body "
         pass;                  #log4fun= 1
         pass;                   log4fun=_log4fun_FSWalker_walk
@@ -2932,14 +3005,6 @@ class FSWalker:
         age_d   = FSWalker.fit_age(age_s) 
         mtfps   = [] if sort else None
         
-#       def vals4yield(path):
-#           if self.need_body:
-#               body    = FSWalker.get_filebody(path, self.enco_l)
-#               return      path, body
-#           else:
-#               with open(path, 'rt', encoding=self.enco_l[0]) as ofile:
-#                   return  path, ofile
-#          #def vals4yield
         for dirpath, dirnames, filenames in os.walk(self.root, topdown=not WALK_DOWNTOP):
             pass;               log__('dirpath={}',(dirpath)         ,__=(log4fun,FSWalker.log4cls)) if _log4mod>=0 else 0
             if self.observer.time_to_stop():    return      ##?? Not at every loop
@@ -2997,29 +3062,47 @@ class FSWalker:
                 # Use!
                 self.stats[Walker.WKST_UFNS]   += 1
                 
-#               fp      = Path(dirpath+'/'+filename)
                 if sort:
                     mtfps.append( (os.path.getmtime(path), path) )
                 else:
-#                   yield vals4yield(path)
-                    if self.need_body:
-                        yield       path, FSWalker.get_filebody(path, self.enco_l)
-                    else:
-                        with open(path, 'rt', encoding=self.enco_l[0]) as ofile:
-                            yield   path, ofile
+                    yield path
+#                   if self.need_body:
+#                       yield       path, FSWalker.get_filebody(path, self.enco_l)
+#                   else:
+#                       with open(  path, 'rt', encoding=self.enco_l[0]) as ofile:
+#                           yield   path, ofile
            #for dirpath
         if sort:
             pass;              #log__('mtfps={}',pfw(mtfps,100)             ,__=(log4fun,FSWalker.log4cls))
             paths   = [tp[1] for tp in sorted(mtfps, reverse=(sort=='new'))]
-            for fp in paths:
-#               yield vals4yield(fp)
-                if self.need_body:
-                    yield       fp, FSWalker.get_filebody(fp, self.enco_l)
-                else:
-                    with open(fp, 'rt', encoding=self.enco_l[0]) as ofile:
-                        yield   fp, ofile
-       #def provide_body
-       
+#           yield from paths
+            for path in paths:
+                yield path
+#               if self.need_body:
+#                   yield           path, FSWalker.get_filebody(path, self.enco_l)
+#               else:
+#                   with open(      path, 'rt', encoding=self.enco_l[0]) as ofile:
+#                       yield       path, ofile
+       #def provide_path
+    
+    
+    def path2body(self, path, ops=None):
+        if self.need_body:
+            return FSWalker.get_filebody(path, self.enco_l)
+
+        if open(path, mode='rb').read(4).startswith(codecs.BOM_UTF8):
+            ofile   = open(path, 'rt', encoding='utf-8-sig')
+            return ofile
+        
+        enco_s      = ops.get('enco', Walker.ENCO_DETD)
+        if enco_s==Walker.ENCO_DETD:
+            enco_s  = chardet.detect(open(path, mode='rb').read(4*1024))['encoding']
+#       ofile       = open(path, 'rt', encoding=enco_s)
+        pass;                   ofile   = open(path, 'rt', encoding=enco_s, buffering=1024)
+        return ofile
+       #def path2body
+    
+    
     @staticmethod
     def get_filebody(fp, enco_l):
         pass;                   log4fun= 1
@@ -3080,6 +3163,7 @@ class Fragmer:
 
     @staticmethod
     def fit_pattern(in_opts):
+        pass;                   log4fun=1
         pttn_s  =       in_opts['in_what']
         flags   = 0 if  in_opts['in_case'] else re.I
         EOLM    = first_true(('EOL'*n for n in itertools.count(1)), pred=lambda eol: eol not in pttn_s)
@@ -3350,8 +3434,8 @@ ToDo
 [?][kv-kv][04aug19] Try to use StringIO in Reporter
 [ ][kv-kv][07aug19] Smth blocks shrinking dlg height
 [+][kv-kv][07aug19] Move const strings to separed py
-[ ][kv-kv][07aug19] Try cgitb
-[ ][kv-kv][08aug19] New walker to only count in file (w/o fragments)
+[+][kv-kv][07aug19] Try cgitb
+[ ][kv-kv][08aug19] ? New walker to only count in file (w/o fragments)
 [ ][kv-kv][08aug19] BUG-OpEd: no edit json val (not knowns where storing file)
 [+][kv-kv][08aug19] How to exlcude root?
 [ ][kv-kv][09aug19] ? Show (as dlg_menu to replace pttn) list of literal fragments which matches re-pattern
@@ -3371,4 +3455,5 @@ ToDo
 [ ][kv-kv][19aug19] ? Add more annotains (with typing module)
 [+][kv-kv][20aug19] Store (in mem) some last search param sets. Alt+Lf/Rt to load
 [ ][kv-kv][20aug19] Show speed of search: files/sec or frags/sec
+[ ][kv-kv][21aug19] Check: all roots are not included each others
 '''
