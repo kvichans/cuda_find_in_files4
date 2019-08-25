@@ -7,10 +7,10 @@ except: _   = lambda p:p
 
 FIF4_META_OPTS=[
     {   'cmt': re.sub(r'  +', r'', _(
-               """Option allows to save separated search settings
+               """Option allows to save separate search settings
                 (pattern, files mask, folders etc)
                 per each mentioned session or project.
-                Each item in the option is pair (Prefix,RegEx).
+                Each item in the option is a pair (Prefix,RegEx).
                 RegEx is compared with the full path of session (project).
                 First matched item is used.
                 Prefix is appended to keys.
@@ -22,14 +22,14 @@ FIF4_META_OPTS=[
         'chp': _('History'),
     },
 
-    {   'cmt': _('Use selected text from document for "Find".'),
+    {   'cmt': _('Use selected text from document for the field "Find what".'),
         'opt': 'use_selection_on_start',
         'def': True,
         'frm': 'bool',
         'chp': _('Start'),
     },
 
-    {   'cmt': _('Append specified string to the field "Ex".'),
+    {   'cmt': _('Append specified string to the field "Exclude".'),
         'opt': 'always_not_in_files',
         'def': '/.svn /.git /.hg /.idea /.cudatext',
         'frm': 'str',
@@ -42,10 +42,10 @@ FIF4_META_OPTS=[
         'chp': _('Search'),
     },
     {   'cmt': re.sub(r'  +', r'', _(
-               """Allow comments in multi-line re-exp.
-               Whitespace is ignored, except when in a character class or when preceded by an unescaped backslash.
-               All characters from the leftmost # through the end of the line are ignored.
-               Example. Single-line "\d\w+$" is same as multi-line re-exp
+               """Allow comments in multi-line reg-exp.
+               Whitespaces are ignored, except when in a character class or when preceded by an unescaped backslash.
+               All characters from the leftmost "#" through the end of the line are ignored.
+               Example. Single-line "\d\w+$" is same as multi-line reg-exp
                  \d  # Start digit
                  \w+ # Some letters
                  $   # End of source
@@ -81,9 +81,9 @@ FIF4_META_OPTS=[
     {   'cmt': re.sub(r'  +', r'', _(
                """List of source file lexers.
                   For these lexers extra filters and info will work:
-                    Search into lexer tree path,
-                    Search in/out comment and/or literal string.
-                  If empty list then for all lexers.""")),
+                    Search by lexer tree path,
+                    Search inside/outside of comments and/or literal strings.
+                  Empty list - allow all lexers.""")),
         'opt': 'lexers_to_filter',
         'def': [],
         'frm': 'json',
@@ -101,7 +101,7 @@ FIF4_META_OPTS=[
         'chp': _('Results'),
     },
     {   'cmt': re.sub(r'  +', r'', _(
-               """Style to mark found fragment in Results panel.
+               """Style to mark found fragment in the Results panel.
                 Full form:
                    "mark_style":{
                      "color_back":"", 
@@ -124,14 +124,14 @@ FIF4_META_OPTS=[
         'frm': 'bool',
         'chp': _('Results'),
     },
-    {   'cmt': _('If value>0, not show all files, which sizes are bigger than this value (in Kb).'),
-        'opt': 'not_show_file_size_more(Kb)',
+    {   'cmt': _('If value>0, do not show all files, which sizes are bigger than this value (in Kb).'),
+        'opt': 'dont_show_file_size_more(Kb)',
         'def': 1000,
         'frm': 'int',
         'chp': _('Results'),
     },
 
-    {   'cmt': _('Height of control grid cell (min 25)'),
+    {   'cmt': _('Height of dialog grid cell (min 25)'),
         'opt': 'vertical_gap',
         'def': 28,
         'min': 25,
@@ -145,7 +145,7 @@ FIF4_META_OPTS=[
         'frm': 'int',
         'chp': _('Dialog layout'),
     },
-    {   'cmt': _('Width of button to switch reex/case/word (min 30)'),
+    {   'cmt': _('Width of button to switch regex/case/words (min 30)'),
         'opt': 'width_word_button',
         'def': 38,
         'min': 30,
@@ -159,14 +159,14 @@ FIF4_META_OPTS=[
         'frm': 'int',
         'chp': _('Dialog layout'),
     },
-    {   'cmt': _('Widths of statusbar fields'),
+    {   'cmt': _('Width of statusbar fields'),
         'opt': 'statusbar_field_widths',
         'def': [50,90,50,0,50],
         'frm': 'json',
         'chp': _('Dialog layout'),
     },
 
-    {   'cmt': 'Specifies filename of log file (Need app restart).',
+    {   'cmt': 'Full file path of log file (requires app restart)',
         'def': '',
         'frm': 'file',
         'opt': 'log_file',
@@ -194,11 +194,11 @@ sort_hi = _('Sort picked files by modification time.'
             '\n↓↓ from newest.'
             '\n↑↑ from oldest.')
 find_ca = _('Fin&d')
-find_hi = _('Start search')
+find_hi = _('Start search (F2)')
 mask_hi = _('Space-separated file or folder masks.'
             '\nFolder mask starts with "/".'
-            '\nDouble-quote mask, which needs space-char.'
-            '\nUse ? for any character and * for any fragment.'
+            '\nDouble-quote mask, which needs space char.'
+            '\nUse "?" for any character and "*" for any fragment.'
             '\nNote: "*" matches all names, "*.*" doesn\'t match all.')
 excl_hi_ = _('Exclude file[s]/folder[s]\n')+mask_hi+_(''
             '\n'
@@ -209,15 +209,15 @@ excl_hi_ = _('Exclude file[s]/folder[s]\n')+mask_hi+_(''
 
 fold_hi = f(_('Start folder(s).'
             '\nSpace-separated folders.'
-            '\nDouble-quote folder, which needs space-char.'
-            '\n~ is user Home folder.'
-            '\n$VAR or ${{VAR}} is environment variable.'
-            '\n{} to search in tabs.'
+            '\nDouble-quote folder, which needs space char.'
+            '\n"~" is user home folder.'
+#           '\n$VAR or ${{VAR}} is environment variable.'
+            '\n{} or {{t}} to search in tabs.'
 #           '\n{} to search in project folders (in short <p>).'
             ), Walker_ROOT_IS_TABS
             )
 dept_hi = _('How many folder levels to search.'
-            '\nUse Ctrl+Up/Down to modify setting.'
+            '\nUse Ctrl+Up/Down to change this option.'
             )
 brow_hi = _('Click or Ctrl+B'
           '\n   Choose folder.'
@@ -231,17 +231,13 @@ cntx_hi = _('Show result line with its adjacent lines (above/below).'
 i4op_hi = f(_('{}. '
             '\nUse popup menu to change.'), OTH4FND)
 WHA__CA = '>*'+_('&Find:')
-#WHA__CA = '>*'+_('&Find what:')
 INC__CA = '>*'+_('F&iles:')
-#INC__CA = '>*'+_('&In files:')
 EXC__CA = '>'+_('E&x:')
-#INC__CA = '>'+_('Ex&:')
 FOL__CA = '>*'+_('F&rom:')
-#FOL__CA = '>*'+_('I&n folder:')
 what_hi = _('Pattern to find. '
-            '\nIt can be multi-line. EOL is shown as "§".'
+            '\nIt can be multi-line. Newline is shown as "§".'
             '\nUse Shift+Enter to append "§" at pattern end.'
-            '\nOr switch to multi-line mode ("+") to see/insert natural EOLs.')
+            '\nOr switch to multi-line mode ("+") to see/insert natural newlines.')
 
 STD_VARS= [
     ('{t}'                  ,'"<tabs>"'
@@ -271,6 +267,10 @@ STD_VARS= [
     ('{ed:CurrentWord}'     ,'get_word_at_caret()'
     ,_('Text of current word')
     ),
+]+[
+    ('{os:'+env_k+'}'       ,repr(env_v)
+    ,env_v
+    )   for env_k, env_v in os.environ.items()
 ]
 
 DHLP_KEYS_TABLE = _(r'''
@@ -279,7 +279,8 @@ DHLP_KEYS_TABLE = _(r'''
 ╞═══════════════════════════════════════╪══════════════════════╪═══════════════════════════════════╡
 │ Find                                  │                Alt+D │                                   │
 │ Find                                  │                Enter │ Except focus in multi-line "Find" │
-│                                       │                      │    or in Results or in Source     │
+│                                       │                      │  or in Results or in Source       │
+│ Find                                  │                   F2 │                                   │
 ├───────────────────────────────────────┼──────────────────────┼───────────────────────────────────┤
 │ Go to next found fragment             │                   F3 │                                   │
 │ Go to prev found fragment             │             Shift+F3 │                                   │
@@ -302,13 +303,17 @@ DHLP_KEYS_TABLE = _(r'''
 │ Prepare to find in the current source │                  F11 │                                   │
 │ Append newline char "§" to "Find"     │          Shift+Enter │ If focus in sigle-line "Find"     │
 ├───────────────────────────────────────┼──────────────────────┼───────────────────────────────────┤
+│ Fold/Unfold the caret branch          │               Ctrl+= │ If focus in Results               │
+│ Fold/Unfold all branches              │         Ctrl+Shift+= │ By state of the caret branch      │
+├───────────────────────────────────────┼──────────────────────┼───────────────────────────────────┤
 │ Load preset #1/#2/../#9               │        Ctrl+1/2/../9 │ More presets via menu             │
 │ Create new preset                     │               Ctrl+S │                                   │
 │ Choose preset to apply                │                Alt+S │                                   │
 │ Load prev/next executed search params │            Alt+Lf/Rt │                                   │
 ├───────────────────────────────────────┼──────────────────────┼───────────────────────────────────┤
-│ Fold/Unfold the caret branch          │               Ctrl+= │ If focus in Results               │
-│ Fold/Unfold all branches              │         Ctrl+Shift+= │ By state of the caret branch      │
+│ Append macro var to carrent field     │               Ctrl+A │ To pattern if focus               │
+│                                       │                      │  in Results/Source                │
+│ Show fields after macros substitution │         Ctrl+Shift+A │                                   │
 ├───────────────────────────────────────┼──────────────────────┼───────────────────────────────────┤
 │ Expand/Shrink Results height          │       Ctrl+Alt+Dn/Up │                                   │
 │ Expand/Shrink dialog height           │      Shift+Alt+Dn/Up │                                   │
@@ -325,7 +330,7 @@ DHLP_KEYS_TABLE = _(r'''
 ''').strip()
 
 DHLP_TIPS_FIND  = f(_(r'''
-Some search options are set via menu.
+Some search options can be changed via menu.
     · Sort collected files before reading text.
     · Age of files.
     · Skip hidden/binary files.
@@ -338,26 +343,26 @@ The infobar shows not trivial values of "{OTH4FND}".
     <4d         Skip file older than 4 days.
     <3w         Skip file older than 3 weeks.
     <2m         Skip file older than 2 months.
-    <1y         Skip file older than 1 years.
+    <1y         Skip file older than 1 year.
     -h          Skip hidden files.
     -b          Skip binary files.
-    /*?*/       Search only inside  comments.
-    ?/**/?      Search only outside comments.
-    "?"         Search only inside  literal strings.
-    ?""?        Search only outside literal strings.
+    /*?*/       Search only inside of comments.
+    ?/**/?      Search only outside of comments.
+    "?"         Search only inside of literal strings.
+    ?""?        Search only outside of literal strings.
     /*?*/ "?"   Search only inside comments or literal strings.
-RightClick on the infobar shows local menu with "{OTH4FND}".
-DoubleClick on the infobar clears all values.
+Right-click on the infobar shows local menu with "{OTH4FND}".
+Double-click on the infobar clears all values.
 
-Caution! 
-    Be careful to use "Syntax elements" filter in long search. 
+Warning! 
+    Be careful when using "Syntax elements" filter in long search. 
     The filters significantly slow down the search.
 
 See also engine option "lexers_to_filter".
 
 ———————————————————————————————————————————————————————————————————————————————————————————— 
 String to find (pattern) can be multi-line. Button "+" sets single-line or multi-line control.
-In single-line control the endlines are shown as §. Use \§ to find the character §.
+In single-line control the newlines are shown as §.
  
 ———————————————————————————————————————————————————————————————————————————————————————————— 
 Values in fields "{incl}" and "{excl}" can contain
@@ -377,22 +382,35 @@ Example.
     Depth       : All
 Search will consider all *.txt files in folder c:/root and in all subfolders a* except ab*.
 
-Trick. If field "{excl}" contains " /. " then the root folder(s) will be skipped.
- 
-Set special value "{tabs}" for field "{fold}" to search in tabs - opened documents.
+Set special value "{tabs}" for field "{fold}" to search in tabs (opened documents).
 Fields "{incl}" and "{excl}" will be used to filter tab titles, in this case.
 To search in all tabs, use mask "*" in the field "{incl}".
 See also: 
     Items of submenu "Scope".
     Hotkey Ctrl+Shift+U.
- 
+
+Value parts in fields "{incl}" and "{excl}" can filter lexer path if they are embraced
+with "[:" and ":]".
+The filter for lexer path is path-like string with elements
+    >       path separator. Ex: "a>b>c" - node "c" is subnode of "b" and "b" is subnode of "a".
+    >>      recursive descent. Ex: "a>>c" - node "c" appears in branch "a"
+    word    name of a node
+    *word
+    word*   partial name of a node
+Example.
+    {incl:12}: *.py [:def main:]
+    {excl:12}: [:def main..class*:]
+    {fold:12}: <tabs>
+Search will consider all *.py open files and will search in module function "main"
+except searching in classes defined inside the function.
+
 ———————————————————————————————————————————————————————————————————————————————————————————— 
 ".*" - Option "Regular Expression". 
-It allows to use in the field "{find}" special symbols:
+It allows to use in the field "{find}" such special symbols:
     .   any character
     \d  digit character (0..9)
     \w  word-like character (digits, letters, "_")
-See engine option "re_verbose" to use complex re-expr.
+See engine option "re_verbose" to use complex reg-exp.
 See full documentation on the page
     docs.python.org/3/library/re.html
  
@@ -458,15 +476,16 @@ To set the mark style of found fragmets, use the engine options dialog (Ctrl+E).
 See "mark_style" in section "Results".
 
 How Results are shown, when files were sorted?
-Found fragments always are shown in the finding order. 
-If tree format is "<path:r>: line" no problem. For other formats content of 
+Found fragments are always shown by the found order. 
+If tree format is "<path:r>: line", it is not a problem. For other formats content of 
 "folder lines" and "file lines" adapts (via folder merging) to show correct data. 
-In extreme case format automatically sets to "<path:r>: line".
+In extreme cases format automatically sets to "<path:r>: line".
 ''').strip()
 
 DHLP_TIPS_FAST  = f(_(r'''
-Some of the search parameters slightly decrease its speed. Others reduce dramatically.
-To get optimal search, you need to consider notes.
+Some of the search parameters slightly decrease the search speed.
+Others reduce the speed dramatically.
+To perform optimal search, you need to consider these notes.
 
 1. The parameters 
     .*   {reex}
@@ -478,7 +497,7 @@ do not reduce the speed at all.
 
 3. Multi-line pattern ("+") markedly decrease the speed.
 
-4. Inappropriate "Encoding plan" can greatly reduce the speed if too many files need to read.
+4. Inappropriate "Encoding plan" can greatly reduce the speed if too many files need to be read.
 
 5. The slowest search (the slowdown in dozens of times) occurs if any of "Syntax elements"
 is turned on.
@@ -486,19 +505,54 @@ is turned on.
 ———————————————————————————————————————————————————————————————————————————————————————————— 
 Special cases.
 
-If pattern is regular expresion (".*" is checked) then it can be implicitly multi-line.
-So in the case (not to guess) state of "+" is used to mark what search is needed.
+If pattern is regular expresion (".*" is checked) then it can be indirectly multi-line.
+So in this case, to avoid guessing, plugin sees single-line or multi-line state, 
+to detect which search is needed.
 
 Huge files can also be involved in the search. For optimal memory usage you need
-- Turn off appending context lines ("-N+M").
-- Turn off multi-line state ("+") and ensure no EOL character "§" in the pattern.
+- Turn off the appending context lines ("-N+M").
+- Turn off the multi-line pattern ("+") and remove newline character "§".
 - Turn off all "Syntax elements".
 Also see engine options 
 - skip_file_size_more(Kb),
-- not_show_file_size_more(Kb).
+- dont_show_file_size_more(Kb).
 '''), reex=reex_hi, case=case_hi, word=word_hi).strip()
 
+DHLP_TIPS_TRCK  = f(_(r'''
+If 
+    field "{excl}" contains " /. " 
+then 
+    the root folder(s) will be skipped.
+
+———————————————————————————————————————————————————————————————————————————————————————————— 
+If 
+    search is finished and
+    you cannot close dialog in usual way ("Stop?" message appears) 
+then
+    hold Shift and click on "x" in titlebar. 
+
+———————————————————————————————————————————————————————————————————————————————————————————— 
+Use \§ to find the character §.
+
+You can use macros in any editable fields. For ex, "~ {{t}}" will be auto-replaced to "~ <tabs>". 
+To use the expression with brackets like "{{t}}", escape brackets with backslashes like "\{{t\}}" 
+(or like "\{{t}}", if field doesn't have the outer bracket pair).
+
+———————————————————————————————————————————————————————————————————————————————————————————— 
+Engine option 
+    "use_selection_on_start"
+    Use selected text from document for the field "Find what".
+can be replaced with using of macro var
+    {{ed:SelectedText}}.
+So you can use document selection many times but not only on start.
+
+The macro 
+    {{ed:CurrentWord}}
+allows to use part of document text without selection.
+''')
+, excl=EXC__CA[1:].replace('&', '').replace(':', '')
+).strip()
+
+
 GH_ISU_URL  = 'https://github.com/kvichans/cuda_find_in_files4/issues'
-ISUES_C     = _('You are welcome to the plugin forum')
-
-
+ISUES_C     = _('Welcome to the plugin\'s GitHub page')
