@@ -2,7 +2,7 @@
 Authors:
     Andrey Kvichansky   (kvichans on github.com)
 Version:
-    '4.4.09 2019-08-22'
+    '4.5.01 2019-08-26'
 ToDo: (see end of file)
 '''
 import  re, os, traceback, locale, itertools, codecs, time, datetime as dt #, types, json, sys
@@ -1479,9 +1479,9 @@ class Fif4D:
         m.srcf.fif_tid          = m.ag.chandle('tl_trvw')
 
         m.stbr  = m.ag.fit_statusbar('di_stbr', {
-                    M.STBR_FRGS: d(sz=STBR_SZS[0], a='R', h=_('Count of found fragments'))
-                   ,M.STBR_FILS: d(sz=STBR_SZS[1], a='R', h=_('Reported/Parsed/Stacked files'))
-                   ,M.STBR_DIRS: d(sz=STBR_SZS[2], a='R', h=_('Reported/Stacked dirs'))
+                    M.STBR_FRGS: d(sz=STBR_SZS[0], a='R', h=_('Reported / Found fragments'))
+                   ,M.STBR_FILS: d(sz=STBR_SZS[1], a='R', h=_('Reported / Parsed / Stacked files'))
+                   ,M.STBR_DIRS: d(sz=STBR_SZS[2], a='R', h=_('Reported / Stacked dirs'))
                    ,M.STBR_MSG : d()
                    ,M.STBR_TIM:  d(sz=STBR_SZS[4], a='R', h=_('Last act duration (seconds)'))
                 })
@@ -1719,7 +1719,7 @@ class Fif4D:
         M,m = self.__class__,self
         tag = M.STBR_MSG if tag is None else tag
         if not m.stbr:  return 
-        val = '/'.join(str(v) for v in val) if likeslist(val) else val
+        val = ' / '.join(str(v) for v in val) if likeslist(val) else val
         app.statusbar_proc(m.stbr, app.STATUSBAR_SET_CELL_TEXT, tag=tag, value=str(val))
         return []
        #def stbr_act
@@ -2091,18 +2091,18 @@ class LexFilter:
         lexfltrs        = []
         if wk_opts.get('wk_sycm') or \
            wk_opts.get('wk_syst'):
-            lexfltrs   += [LexFilter.LxSyFilter(wk_opts, ed4lx, observer)]
+            lexfltrs   += [LexFilter.LxSynt(wk_opts, ed4lx, observer)]
         incl    = wk_opts.get('wk_incl', '')
         excl    = wk_opts.get('wk_excl', '')
         if '[:' in incl and ':]' in incl:
-            lexfltrs   += [LexFilter.LxPthFilter('incl', incl, wk_opts, ed4lx, observer)]
+            lexfltrs   += [LexFilter.LxPath('incl', incl, wk_opts, ed4lx, observer)]
         if '[:' in excl and ':]' in excl:
-            lexfltrs   += [LexFilter.LxPthFilter('excl', excl, wk_opts, ed4lx, observer)]
+            lexfltrs   += [LexFilter.LxPath('excl', excl, wk_opts, ed4lx, observer)]
         return lexfltrs
        #def filters
 
 
-    class LxPthFilter:
+    class LxPath:
         def __init__(self, how, fullopt, wk_opts, ed4lx, observer):
             self.observer   = observer
             self.ed4lx      = ed4lx
@@ -2112,12 +2112,12 @@ class LexFilter:
             self.wk_enco    = wk_opts['wk_enco']
             self.how        = how
             self.conds      = [mtch.group(1) for mtch in re.finditer(r'\[:([^:]+):\]', fullopt)]
-            pass;               log("self.conds={}",(self.conds))
+            pass;              #log("self.conds={}",(self.conds))
            #def __init__
         
         
         def suit(self, fn, frgs):
-            pass;               log("fn, frgs={}",(fn, frgs))
+            pass;              #log("fn, frgs={}",(fn, frgs))
             ed4lx,lex   = LexFilter._prep(fn, self.ed4lx, self.wk_enco, need_tree=True)
             if not ed4lx:
                 return True                         # Nothing to filter
@@ -2127,7 +2127,7 @@ class LexFilter:
                 lx_path= LexFilter.get_lx_path(ed4lx.fif_tid, (frg.r,frg.c)).strip(SEP4LEXPATH)
                 pass;           log("lx_path={}",(lx_path))
                 for cond in self.conds:
-                    if LxPthFilter.match(cond, lx_path):
+                    if LexFilter.LxPath.match(cond, lx_path, dbg=True):
                         if  self.how=='excl':    return False
                     else:
                         if  self.how=='incl':    return False
@@ -2138,15 +2138,51 @@ class LexFilter:
            
            
         @staticmethod
-        def match(cond, path):
+        def match(cond, path, _start=True, dbg=False, g=''):
             """ cond        a>b*>>c>*d
                 path        smth1 > smth2 > ... > smthN
             """
-            cond    = re.sub(r'\s+>', '>', cond);   cond    = re.sub(r'>\s+', '>', cond)
-            path    = re.sub(r'\s+>', '>', path);   path    = re.sub(r'>\s+', '>', path)
-            return False
+            if len(g)>100:  return 
+            pass;               log(g+"cond=",(cond)) if dbg else 0
+            pass;               log(g+"path=",(path)) if dbg else 0
+            if path.startswith(cond):
+                pass;           log(g+'ok startswith') if dbg else 0
+                return True
+            if _start:
+                pass;          #log('cond, path, _start, dbg=', (cond, path, _start, dbg))
+#               pass;           log('cond, path, _start, dbg={}', (cond, path, _start, dbg))
+                cond    = re.sub(r'\s+>', '>', cond);   cond    = re.sub(r'>\s+', '>', cond)
+                path    = re.sub(r'\s+>', '>', path);   path    = re.sub(r'>\s+', '>', path)
+                cond    = re.escape(cond).replace('\\>', '>').replace('\\*', '[^>]*')
+                path    = path + '>'
+                return LexFilter.LxPath.match(cond, path, _start=False, dbg=dbg, g=g+'  ')
+            if cond[:2]=='>>':
+                # ">>cit>ctail"
+                cond        = cond.replace('^>', '^^')
+                cit,t,ctail = cond[2:].partition('>')
+                ctail       = ctail.replace('^^', '^>')
+                pass;           log(g+'cit=',cit,' ctail=',ctail) if dbg else 0
+                mt          = re.search(cit+'>', path)
+                if not mt:
+                    pass;       log(g+'no cit=',cit,' in path=',path) if dbg else 0
+                    return False
+                ptail       = path[mt.end():]
+                return LexFilter.LxPath.match(ctail, ptail, _start=False, dbg=dbg, g=g+'  ')
+
+            cond        = cond.replace('^>', '^^')
+            cit,t,ctail = cond.partition('>')
+            cit         =   cit.replace('^^', '^>')
+            ctail       = ctail.replace('^^', '^>') if ctail else ''
+            pass;               log(g+'cit=',cit,' ctail=',ctail) if dbg else 0
+            pit,t,ptail = path.partition('>')
+            pass;               log(g+'pit=',pit,' ptail=',ptail) if dbg else 0
+            mt          = re.search(cit+'$', pit)
+            if not mt:
+                pass;           log(g+'cit<>pit') if dbg else 0
+                return False
+            return LexFilter.LxPath.match(ctail, ptail, _start=False, dbg=dbg, g=g+'  ')
            #match
-       #class LxPthFilter:
+       #class LxPath:
     
     lex_infs    = {}                            # {lex:{cm_styles:[], st_styles:[], }}
 
@@ -2163,7 +2199,7 @@ class LexFilter:
        #def lex_inf
     
     
-    class LxSyFilter:
+    class LxSynt:
         def __init__(self, wk_opts, ed4lx, observer):
             self.observer   = observer
             self.ed4lx      = ed4lx
@@ -2242,20 +2278,22 @@ class LexFilter:
             pass;               log__('other',()         ,__=(log4fun,)) if _log4mod>=0 else 0
             return True
            #def suit
-       #class LxSyFilter
+       #class LxSynt
     
 
     @staticmethod
     def _prep(fn, ed4lx, wk_enco, need_tree=False)->(app.Editor,str):
-        fif_tid     = ed4lx.fif_tid
         lex         = ''
         if fn[:4]=='tab:':
             tab_id  = int(fn.split('/')[0].split(':')[1])
-            ed4lx   = apx.get_tab_by_id(tab_id)
-            ed4lx.fif_tid   = fif_tid
-            lex     = ed4lx.get_prop(app.PROP_LEXER_FILE)
-            return (ed4lx, lex)
-            
+            edtab   = apx.get_tab_by_id(tab_id)
+            lex     = edtab.get_prop(app.PROP_LEXER_FILE)
+            if not (lex and (not ADV_LEXERS or lex in ADV_LEXERS)):
+                return (None, lex)
+            pass;              #log__('fn body=\n{}',(FSWalker.get_filebody(fn, wk_enco))         ,__=(log4fun,)) if _log4mod>=0 else 0
+            if ed4lx.loaded_file != fn:
+                ed4lx.set_text_all(edtab.get_text_all())
+                ed4lx.loaded_file = fn
         if os.path.isfile(fn):
             lex     = app.lexer_proc(app.LEXER_DETECT, fn)
             pass;               log__('lex={}',(lex)         ,__=(log4fun,)) if _log4mod>=0 else 0
@@ -2266,13 +2304,17 @@ class LexFilter:
                 ed4lx.set_text_all(FSWalker.get_filebody(fn, wk_enco))
                 ed4lx.loaded_file = fn
                 pass;          #log__('ed4lx.get_text_all=\n{}',(ed4lx.get_text_all())         ,__=(log4fun,)) if _log4mod>=0 else 0
-            if not ed4lx.fif_ready_scan:
-                ed4lx.set_prop(app.PROP_LEXER_FILE, lex)
-                ed4lx.action(app.EDACTION_LEXER_SCAN, 0)
-                ed4lx.fif_ready_scan = True
-            if need_tree and not ed4lx.fif_ready_tree:
-                ed4lx.action(app.EDACTION_CODETREE_FILL, ed4lx.fif_tid)
-                ed4lx.fif_ready_tree = True
+
+        if not lex:
+            return (None, lex)
+
+        if not ed4lx.fif_ready_scan:
+            ed4lx.set_prop(app.PROP_LEXER_FILE, lex)
+            ed4lx.action(app.EDACTION_LEXER_SCAN, 0)
+            ed4lx.fif_ready_scan = True
+        if need_tree and not ed4lx.fif_ready_tree:
+            ed4lx.action(app.EDACTION_CODETREE_FILL, ed4lx.fif_tid)
+            ed4lx.fif_ready_tree = True
         return (ed4lx, lex)
        #def _prep
    #class LexFilter
@@ -2301,9 +2343,13 @@ def fifwork(observer, ed4rpt, walkers, fragmer, frgfilters, reporter):
             if  prev_stat_t+0.1 < ptime():
                 prev_stat_t     = ptime()
                 observer.dlg_status('msg', fn)
-                observer.dlg_status('dirs', [reporter.stat(Reporter.FRST_DIRS),walker.stats[Walker.WKST_DIRS]])
-                observer.dlg_status('fils', [reporter.stat(Reporter.FRST_FILS),walker.stats[Walker.WKST_UFNS],walker.stats[Walker.WKST_AFNS]])
-                observer.dlg_status('frgs',  reporter.stat(Reporter.FRST_FRGS))
+                observer.dlg_status('dirs', [reporter.stat(Reporter.FRST_DIRS)
+                                            ,walker.stats[   Walker.WKST_DIRS]])
+                observer.dlg_status('fils', [reporter.stat(Reporter.FRST_FILS)
+                                            ,walker.stats[   Walker.WKST_UFNS]
+                                            ,walker.stats[   Walker.WKST_AFNS]])
+                observer.dlg_status('frgs', [reporter.stat(Reporter.FRST_FRGS)
+                                            ,fragmer.stats[ Fragmer.WKST_FRGS]])
                 observer.dlg_status('tim',  f('({:.2f})', ptime()-work_start_t))
             if observer.need_break:
                 break#for fn
@@ -2333,9 +2379,13 @@ def fifwork(observer, ed4rpt, walkers, fragmer, frgfilters, reporter):
                 break
                #for enco
            #for fn
-        observer.dlg_status('dirs', [reporter.stat(Reporter.FRST_DIRS),walker.stats[Walker.WKST_DIRS]])
-        observer.dlg_status('fils', [reporter.stat(Reporter.FRST_FILS),walker.stats[Walker.WKST_UFNS],walker.stats[Walker.WKST_AFNS]])
-        observer.dlg_status('frgs',  reporter.stat(Reporter.FRST_FRGS))
+        observer.dlg_status('dirs', [reporter.stat(Reporter.FRST_DIRS)
+                                    ,walker.stats[   Walker.WKST_DIRS]])
+        observer.dlg_status('fils', [reporter.stat(Reporter.FRST_FILS)
+                                    ,walker.stats[   Walker.WKST_UFNS]
+                                    ,walker.stats[   Walker.WKST_AFNS]])
+        observer.dlg_status('frgs', [reporter.stat(Reporter.FRST_FRGS)
+                                    ,fragmer.stats[ Fragmer.WKST_FRGS]])
         if observer.need_break:
             break#for walk
        #for walker
@@ -3203,6 +3253,9 @@ class WFrg(namedtuple('WFrg', [
 
 
 class Fragmer:
+    WKST_FRGS   = 0
+    new_stats   = lambda:[0]
+    
     pass;                       log4cls=_log4cls_Fragmer
 
     cntb_lst    = lambda cntb, row, lines: [] if not cntb else \
@@ -3255,6 +3308,8 @@ class Fragmer:
             self.rp_opts    = rp_opts
             self.observer   = observer
 
+            self.stats      = Fragmer.new_stats()
+
             self.pttn_r     = Fragmer.fit_pattern(self.in_opts)
            #def __init__
 
@@ -3264,6 +3319,7 @@ class Fragmer:
             for rw,line in enumerate(itlines):
                 for mtch in self.pttn_r.finditer(line):
                     pass;      #log__("rw,cnta_lst(rw)={}",(rw,cnta_lst(rw))       ,__=(log4fun,Fragmer.log4cls))
+                    self.stats[Fragmer.WKST_FRGS]   += 1
                     yield [ WFrg(r=rw, c=mtch.start(), w=mtch.end()-mtch.start(), s=line.strip('\r\n'))]
                    #for mtch
                #for ln
@@ -3280,6 +3336,8 @@ class Fragmer:
             self.rp_opts    = rp_opts
             self.observer   = observer
 
+            self.stats      = Fragmer.new_stats()
+
             self.pttn_r     = Fragmer.fit_pattern(self.in_opts)
            #def __init__
 
@@ -3295,14 +3353,18 @@ class Fragmer:
                     pass;      #log__("rw,cnta_lst(rw)={}",(rw,cnta_lst(rw))       ,__=(log4fun,Fragmer.log4cls))
                     if False:pass
                     elif cntb==0 and cnta==0:
+                        self.stats[Fragmer.WKST_FRGS]   += 1
                         yield [ WFrg(r=rw, c=mtch.start(), w=mtch.end()-mtch.start(), s=line)]
                     elif cntb >0 and cnta==0:
+                        self.stats[Fragmer.WKST_FRGS]   += 1
                         yield [*Fragmer.cntb_lst(cntb, rw, lines)
                               , WFrg(r=rw, c=mtch.start(), w=mtch.end()-mtch.start(), s=line)]
                     elif cntb==0 and cnta >0:
+                        self.stats[Fragmer.WKST_FRGS]   += 1
                         yield [ WFrg(r=rw, c=mtch.start(), w=mtch.end()-mtch.start(), s=line)
                               ,*Fragmer.cnta_lst(cnta, rw, lines)]
                     else:
+                        self.stats[Fragmer.WKST_FRGS]   += 1
                         yield [*Fragmer.cntb_lst(cntb, rw, lines)
                               , WFrg(r=rw, c=mtch.start(), w=mtch.end()-mtch.start(), s=line)
                               ,*Fragmer.cnta_lst(cnta, rw, lines)]
@@ -3336,10 +3398,12 @@ class Fragmer:
                 r_bgn,c_bgn = to_rc(mtch.start())
                 r_end,c_end = to_rc(mtch.end(  ))
                 if r_bgn==r_end:                    # Fragment into one line
+                    self.stats[Fragmer.WKST_FRGS]   += 1
                     yield [* Fragmer.cntb_lst(cntb, r_bgn, lines)
                           ,  WFrg(r=r_bgn, c=c_bgn, w=c_end            -c_bgn, s=lines[r_bgn])
                           ,* Fragmer.cnta_lst(cnta, r_end, lines)]
                 else:                               # Fragment into more one lines
+                    self.stats[Fragmer.WKST_FRGS]   += 1
                     yield [* Fragmer.cntb_lst(cntb, r_bgn, lines)
                           ,  WFrg(r=r_bgn, c=c_bgn, w=len(lines[r_bgn])-c_bgn, s=lines[r_bgn], e=False)
                           ,*[WFrg(r=r    , c=    0, w=len(lines[r    ])      , s=lines[r    ], e=True) for r in range(r_bgn+1, r_end)]

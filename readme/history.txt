@@ -1,3 +1,10 @@
+4.5.01 2019-08-26
+added: Filter lexer path with "[:condition:]"
+
+4.4.09 2019-08-22
+added: "F2" hotkey to start search
+fixed: Fill Source on the second search
+
 4.4.08 2019-08-20
 added: New engine option "not_show_file_size_more(Kb)" to show Results and not load big source file
 added: Titles in dlg to choose dir/file to search

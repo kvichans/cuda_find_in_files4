@@ -1002,6 +1002,7 @@ class DlgAg:
         lsPr = lsPr.split(',')
         pass;                   log__('lsPr={}',(lsPr)      ,__=(log4fun,)) if _log4mod>=0 else 0
         if False:pass
+        elif 'ex0' in cnt:pass                              # exN wins others
         elif tp=='button'       and 0<len(lsPr):
             cnt['ex0']  = '1'==lsPr[0]                      #bool: default for Enter key
         elif tp in ('edit', 'memo') \
@@ -1355,7 +1356,7 @@ class DlgAg:
         # Make repro-code has only core API calls
         pass;                   log4fun=0                       # Order  log in the function
         rtf     = self.opts.get('gen_repro_to_file', False) if rtf is None else rtf
-        if not rtf: return 
+        if not rtf: return self
         rerpo_fn= tempfile.gettempdir()+os.sep+(rtf if likesstr(rtf) else 'repro_dlg_proc.py')
         print(f('exec(open(r"{}", encoding="UTF-8").read())', rerpo_fn))
 
