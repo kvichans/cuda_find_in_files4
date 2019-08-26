@@ -346,9 +346,9 @@ The infobar shows not trivial values of "{OTH4FND}".
     <1y         Skip file older than 1 year.
     -h          Skip hidden files.
     -b          Skip binary files.
-    /*?*/       Search only inside of comments.
+    /*?*/       Search only inside comments.
     ?/**/?      Search only outside of comments.
-    "?"         Search only inside of literal strings.
+    "?"         Search only inside literal strings.
     ?""?        Search only outside of literal strings.
     /*?*/ "?"   Search only inside comments or literal strings.
 Right-click on the infobar shows local menu with "{OTH4FND}".

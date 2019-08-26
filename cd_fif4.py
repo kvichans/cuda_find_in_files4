@@ -373,9 +373,9 @@ class Fif4D:
     
     SYNT_CP = _('S&yntax elements (slowdown)')
     INCMM_CP= _('Inside &comment')
-    OTCMM_CP= _('Outside c&omment')
+    OTCMM_CP= _('Outside of c&omment')
     INSTR_CP= _('Inside literal &string')
-    OTSTR_CP= _('Outside literal s&tring')
+    OTSTR_CP= _('Outside of literal s&tring')
     
     # Layout data
     MLIN_H  = 70                                # Min height of m-lines What
@@ -621,7 +621,7 @@ class Fif4D:
         ok_c    = _('Create')                   if nps else _('Save')
         tit_c   = _('Create new preset')        if nps else _('View preset')
         
-        w_x     = m.ag.cattr('in_what', 'x') + 10 # 10 for check
+        w_x     = m.ag.cattr('in_what', 'x') + 15 # 10 for check
 
         reex_v  = ivals.in_reex                 if nps or chcks[RAW] else False
         case_v  = ivals.in_case                 if nps or chcks[RAW] else False
@@ -636,17 +636,17 @@ class Fif4D:
         dept_v  = M.DEPT_UL[ivals.wk_dept]      if nps or chcks[DEP] else ''
         ag      = DlgAg(
                      ctrls  =[((
-      )),(RAW    ,d(tp='chck'   ,y=5        ,x=w_x-30   ,w= 40  ,cap='&1:'      ,val=chcks[RAW] ,en=nps
+      )),(RAW    ,d(tp='chck'   ,y=5        ,x=w_x-35   ,w= 40  ,cap='&1:'      ,val=chcks[RAW] ,en=nps
       )),('_eex' ,d(tp='chbt'   ,tid=RAW    ,x=w_x+WRDW*0,w=WRDW,cap='.*'       ,val=reex_v     ,en=nps
       )),('_ase' ,d(tp='chbt'   ,tid=RAW    ,x=w_x+WRDW*1,w=WRDW,cap='aA'       ,val=case_v     ,en=nps
       )),('_ord' ,d(tp='chbt'   ,tid=RAW    ,x=w_x+WRDW*2,w=WRDW,cap='"w"'      ,val=word_v     ,en=nps
                                    
-      )),(CNT    ,d(tp='chck'   ,tid=RAW    ,x=w_x+120  ,w= 40  ,cap='&2:'      ,val=chcks[CNT] ,en=nps
-      )),('_ntx' ,d(tp='edit'   ,tid=RAW    ,x=w_x+145  ,w= 50  ,en=False       ,val=cntx_v
-      )),(I4O    ,d(tp='chck'   ,tid=RAW    ,x=w_x+210  ,w= 40  ,cap='&3:'      ,val=chcks[I4O] ,en=nps
-      )),('_4op' ,d(tp='edit'   ,tid=RAW    ,x=w_x+240  ,w= 90  ,en=False       ,val=i4op_v             ,a='r>' 
-      )),(ENC    ,d(tp='chck'   ,tid=RAW    ,x=w_x+345  ,w= 40  ,cap='&4:'      ,val=chcks[ENC] ,en=nps ,a='>>' 
-      )),('_nco' ,d(tp='edit'   ,tid=RAW    ,x=w_x+375  ,r= -5  ,en=False       ,val=enco_v             ,a='>>' 
+      )),(CNT    ,d(tp='chck'   ,tid=RAW    ,x=w_x+115  ,w= 40  ,cap='&2:'      ,val=chcks[CNT] ,en=nps
+      )),('_ntx' ,d(tp='edit'   ,tid=RAW    ,x=w_x+150  ,w= 50  ,en=False       ,val=cntx_v
+      )),(I4O    ,d(tp='chck'   ,tid=RAW    ,x=w_x+215  ,w= 40  ,cap='&3:'      ,val=chcks[I4O] ,en=nps
+      )),('_4op' ,d(tp='edit'   ,tid=RAW    ,x=w_x+250  ,w= 80  ,en=False       ,val=i4op_v             ,a='r>' 
+      )),(ENC    ,d(tp='chck'   ,tid=RAW    ,x=w_x+350  ,w= 40  ,cap='&4:'      ,val=chcks[ENC] ,en=nps ,a='>>' 
+      )),('_nco' ,d(tp='edit'   ,tid=RAW    ,x=w_x+385  ,r= -5  ,en=False       ,val=enco_v             ,a='>>' 
                                    
                                    
       )),(WHA    ,d(tp='chck'   ,y=5+vgp*1  ,x=  5      ,w= 90  ,cap=WHA__CA[2:],val=chcks[WHA] ,en=nps
@@ -654,13 +654,13 @@ class Fif4D:
                                    
       )),(INC    ,d(tp='chck'   ,y=5+vgp*2  ,x=  5      ,w= 90  ,cap=INC__CA[2:],val=chcks[INC] ,en=nps
       )),('_ncl' ,d(tp='edit'   ,tid=INC    ,x=w_x      ,w=330  ,en=False       ,val=incl_v             ,a='r>' 
-      )),(EXC    ,d(tp='chck'   ,tid=INC    ,x=w_x+345  ,w= 40  ,cap='&5:'      ,val=chcks[EXC] ,en=nps ,a='>>' 
-      )),('_xcl' ,d(tp='edit'   ,tid=INC    ,x=w_x+375  ,r= -5  ,en=False       ,val=excl_v             ,a='>>' 
+      )),(EXC    ,d(tp='chck'   ,tid=INC    ,x=w_x+350  ,w= 40  ,cap='&5:'      ,val=chcks[EXC] ,en=nps ,a='>>' 
+      )),('_xcl' ,d(tp='edit'   ,tid=INC    ,x=w_x+385  ,r= -5  ,en=False       ,val=excl_v             ,a='>>' 
                                    
       )),(FOL    ,d(tp='chck'   ,y=5+vgp*3  ,x=  5      ,w= 90  ,cap=FOL__CA[2:],val=chcks[FOL] ,en=nps ,a='r>' 
       )),('_old' ,d(tp='edit'   ,tid=FOL    ,x=w_x      ,w=330  ,en=False       ,val=fold_v             ,a='r>' 
-      )),(DEP    ,d(tp='chck'   ,tid=FOL    ,x=w_x+345  ,w= 40  ,cap='&6:'      ,val=chcks[DEP] ,en=nps ,a='>>' 
-      )),('_ept' ,d(tp='edit'   ,tid=FOL    ,x=w_x+375  ,r= -5  ,en=False       ,val=dept_v             ,a='>>' 
+      )),(DEP    ,d(tp='chck'   ,tid=FOL    ,x=w_x+350  ,w= 40  ,cap='&6:'      ,val=chcks[DEP] ,en=nps ,a='>>' 
+      )),('_ept' ,d(tp='edit'   ,tid=FOL    ,x=w_x+385  ,r= -5  ,en=False       ,val=dept_v             ,a='>>' 
                                 
       )),('nam_' ,d(tp='labl'   ,tid='save' ,x=5        ,w=w_x-10,cap=_('>Na&me:')
       )),('name' ,d(tp='edit'   ,tid='save' ,x=w_x      ,w=205                  ,val=nm
