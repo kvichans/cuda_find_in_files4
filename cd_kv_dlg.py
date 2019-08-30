@@ -11,12 +11,10 @@ ToDo: (see end of file)
 import  sys, os, tempfile, json, re
 from    time        import perf_counter
 
-import          cudatext        as app
-from            cudatext    import ed
-import          cudax_lib       as apx
-#try:    from    cuda_kv_base    import *    # as separated plugin
-#except: from     .cd_kv_base    import *    # as part of this plugin
-from            .cd_kv_base import *         # as part of this plugin
+import      cudatext        as app
+from        cudatext    import ed
+import      cudax_lib       as apx
+from        .cd_kv_base import *         # as part of this plugin
 
 VERSION     = re.split('Version:', __doc__)[1].split("'")[1]
 VERSION_V,  \
@@ -30,6 +28,8 @@ try:
 except:pass
 
 pass;                           _log4mod = -1 #LOG_FREE             # Order log in the module
+pass;                           from pprint import pformat
+pass;                           pfw=lambda d,w=150:pformat(d,width=w)
     
 _TYPE_ABBRS  = {
      'labl': 'label'
@@ -118,7 +118,7 @@ ALI_BT  = app.ALIGN_BOTTOM
 
 SCROLL_W= app.app_proc(app.PROC_GET_GUI_HEIGHT, 'scrollbar')
 
-to_odct = lambda pair_lst: odct(p for p in pair_lst if p)
+pair_list_to_dict = lambda pair_lst: {p[0]:p[1] for p in pair_lst if p}
 
 class DlgAg:
     # See github.com/kvichans/cuda_kv_dlg/wiki
@@ -251,10 +251,8 @@ class DlgAg:
         """ Return form properties """
         pr  = _dlg_proc(self.did, app.DLG_PROP_GET) if live else    self.form
         return pr      if not attrs else \
-               odict([(attr,(self.focused(live) if attr in ('focused', 'fid') else pr.get(attr)))
-                      for attr in attrs])
-#              {attr:(self.focused(live) if attr in ('focused', 'fid') else pr.get(attr)) 
-#                   for attr in attrs}
+               {attr:(self.focused(live) if attr in ('focused', 'fid') else pr.get(attr)) 
+                    for attr in attrs}
        #def fattrs
 
     def _cattr(self, lpr, cid, attr, attr_=None, defv=None):
@@ -288,7 +286,7 @@ class DlgAg:
             If no the attribute return defv.
             Take attribute value from screen (live) or from last settings (not live).
         """
-        if name not in self.ctrls:  raise ValueError(f('Unknown name: {}', name))
+        if name not in self.ctrls:  raise ValueError(f'Unknown name: {name}')
         if attr=='cols_ws':
             return self._cols_serv('get-ws', name, live=live)
         attr_   = _ATTR_TP_ABBRS.get(attr, attr)
@@ -308,16 +306,20 @@ class DlgAg:
     def cattrs(self, name, attrs=None, live=True):
         """ Return the control attributes """
         pass;                   log4fun=1                       # Order log in the function
-        if name not in self.ctrls:  raise ValueError(f('Unknown name: {}', name))
+        if name not in self.ctrls:  raise ValueError(f'Unknown name: {name}')
         mpr     = self.ctrls[name]
         if not live:
             attrs   = attrs if attrs else mpr
-            return  odct([(attr
-                          ,self.cattr(name, attr, live=live) if attr=='cols_ws' else 
-                           mpr.get(attr)
-                          ) 
-                            for attr in attrs
-                         ])
+#           return  odct([(attr
+#                         ,self.cattr(name, attr, live=live) if attr=='cols_ws' else 
+#                          mpr.get(attr)
+#                         ) 
+#                           for attr in attrs
+#                        ])
+            return  {attr: self.cattr(name, attr, live=live) if attr=='cols_ws' else 
+                                    mpr.get(attr)
+                        for attr in attrs
+                    }
         elif attrs:# and live
             # Are all attrs not changable? - return mem-values (if is)
             rsp_attrs   = {}
@@ -332,16 +334,21 @@ class DlgAg:
                     break#for
             pass;              #log("rsp_attrs={}",(rsp_attrs))
             if rsp_attrs:
-                return odct([(attr, mpr.get(rsp_attrs[attr])) for attr in rsp_attrs])
+#               return odct([(attr, mpr.get(rsp_attrs[attr])) for attr in rsp_attrs])
+                return {attr: mpr.get(rsp_attrs[attr]) for attr in rsp_attrs}
         
         lpr     = _dlg_proc(self.did, app.DLG_CTL_PROP_GET, name=name)
         attrs   = attrs if attrs else list(lpr.keys())
-        return      odct([(attr
-                          ,self.cattr(name, attr, live=live) if attr=='cols_ws' else 
+#       return      odct([(attr
+#                         ,self.cattr(name, attr, live=live) if attr=='cols_ws' else 
+#                          self._cattr(lpr, name, attr)
+#                         )
+#                           for attr in attrs
+#                        ])
+        return      {attr: self.cattr(name, attr, live=live) if attr=='cols_ws' else 
                            self._cattr(lpr, name, attr)
-                          )
                             for attr in attrs
-                         ])
+                    }
        #def cattrs
        
     def val(self, name, live=True):
@@ -355,8 +362,10 @@ class DlgAg:
                     if names else \
                   [cid  for (cid,cfg) in self.ctrls.items() 
                         if cfg['type'] in _TYPE_WITH_VALUE]
-        return  odct([(cid, self.cattr(cid, 'val', defv=None, live=live))
-                        for cid in names])
+#       return  odct([(cid, self.cattr(cid, 'val', defv=None, live=live))
+#                       for cid in names])
+        return  {cid:       self.cattr(cid, 'val', defv=None, live=live)
+                        for cid in names}
     
 
     ###############
@@ -414,7 +423,7 @@ class DlgAg:
                 if shown and self._hidden:    break             # hide is called on update
             return
         cupds   = upds.get('ctrls',  [])
-        cupds   = to_odct(cupds)    if likeslist(cupds)     else cupds
+        cupds   = pair_list_to_dict(cupds)    if likeslist(cupds)     else cupds
         pass;                   log__('cupds={}',(cupds)      ,__=(log4fun,)) if _log4mod>=0 else 0
         vals    = upds.get('vals', {})
         form    = upds.get('form', {})
@@ -477,14 +486,14 @@ class DlgAg:
             cids    = [cid_cnt[0] for cid_cnt in ctrls if cid_cnt]
             cids_d  = [cid for cid in cids if cids.count(cid)>1]
             if cids_d:
-                raise ValueError(f('Repeated names: {}', set(cids_d)))
+                raise ValueError(f'Repeated names: {set(cids_d)}')
         
         no_tids = {cnt['tid'] 
                     for cnt in ctrls 
                     if  cnt and 'tid' in cnt and 
                         cnt['tid'] not in mem_ctrls}
         if no_tids:
-            raise ValueError(f('No name for tid: {}', no_tids))
+            raise ValueError(f'No name for tid: {no_tids}')
 
         if 'fid' in form and form['fid'] not in mem_ctrls:
             raise ValueError(f('No name for form[fid]: {}', form['fid']))
@@ -493,10 +502,10 @@ class DlgAg:
                     for cid in vals 
                     if cid not in mem_ctrls} if vals else None
         if no_vals:
-            raise ValueError(f('No name for val: {}', no_vals))
+            raise ValueError(f'No name for val: {no_vals}')
         
         if fid is not None and fid not in mem_ctrls:
-            raise ValueError(f('No name for fid: {}', fid))
+            raise ValueError(f'No name for fid: {fid}')
        #def _check_data
        
     def _setup(self, ctrls, form, vals=None, fid=None):
@@ -511,7 +520,7 @@ class DlgAg:
         """
         pass;                   log4fun=0                       # Order log in the function
         #NOTE: DlgAg init
-        self.ctrls  = to_odct(ctrls)   if likeslist(ctrls)     else ctrls.copy()
+        self.ctrls  = pair_list_to_dict(ctrls)   if likeslist(ctrls)     else ctrls.copy()
         self.form   = form.copy()
         fid         = fid           if fid else form.get('fid', form.get('focused'))    # focused?
         
@@ -525,7 +534,7 @@ class DlgAg:
         for cid, ccfg in self.ctrls.items():
             tp      = ccfg.get('tp',  ccfg.get('type'))
             if not tp:
-                raise ValueError(f('No type/tp for name: {}', cid))
+                raise ValueError(f'No type/tp for name: {cid}')
             ccfg['tp']      = tp
             ccfg['type']    = _TYPE_ABBRS.get(tp, tp)
             pass;              #log("tp,type={}",(tp,ccfg['type']))
@@ -743,10 +752,12 @@ class DlgAg:
             pass;               log__('prnt={}',(prnt)      ,__=(log4fun,)) if _log4mod>=0 else 0
             pass;               log__('prnt_w,prnt_h={}',(prnt_w,prnt_h)      ,__=(log4fun,)) if _log4mod>=0 else 0
             pass;               log__('cnt={}',(cnt)      ,__=(log4fun,)) if _log4mod>=0 else 0
+            pass;              #log('cnt={}',({k:v for k,v in cnt.items() if k in [('x','r','w')]}))
             do_reflect(cnt, 'x', prnt_w)
             do_reflect(cnt, 'r', prnt_w)
             do_reflect(cnt, 'y', prnt_h)
             do_reflect(cnt, 'b', prnt_h)
+            pass;              #log('cnt={}',({k:v for k,v in cnt.items() if k in [('x','r','w')]}))
             pass;               log__('cnt={}',(cnt)      ,__=(log4fun,)) if _log4mod>=0 else 0
 
         def calt_third(kasx, kasr, kasw, src, trg):
@@ -758,7 +769,7 @@ class DlgAg:
                 trg[kasx]   = src[kasx]
                 trg[kasw]   = src[kasw]
             elif kasr in src and kasw in src:                   # r,w or b,h to calc
-                trg[kasx]   = src[kasw] - src[kasr]
+                trg[kasx]   = src[kasr] - src[kasw]
                 trg[kasw]   = src[kasw]
             elif kasx in src and kasr in src:                   # x,r or y,b to calc
                 trg[kasx]   = src[kasx]
@@ -766,8 +777,11 @@ class DlgAg:
             return trg
            #def calt_third
         
+        pass;                  #log('cnt={}',cnt)#({k:cnt[k] for k in cnt if k in [('x','r','w')]}))
+        pass;                  #log('prP={}',prP)#({k:prP[k] for k in prP if k in [('x','r','w')]}))
         prP = calt_third('x', 'r', 'w', cnt, prP)
         prP = calt_third('y', 'b', 'h', cnt, prP)
+        pass;                  #log('prP={}',prP)#({k:prP[k] for k in prP if k in [('x','r','w')]}))
         pass;                  #log__('cid, prP={}',(cid, prP)      ,__=(log4fun,)) if _log4mod>=0 else 0
         return prP
        #def _prep_pos_attrs
@@ -833,7 +847,7 @@ class DlgAg:
                 if 'cols_ws' in cfg_ctrl:
                     cols_ws  = cfg_ctrl['cols_ws']
                     pass;      #log("cols_ws={}",(cols_ws))
-                    if len(cols_ws)!=len(cols): raise ValueError(f('Inconsistent attribures: cols/columns and cols_ws'))
+                    if len(cols_ws)!=len(cols): raise ValueError('Inconsistent attribures: cols/columns and cols_ws')
                     for n,w in enumerate(cols_ws):
                         cols[n]['wd']   = w
                 # For listview, checklistview: 
@@ -931,13 +945,21 @@ class DlgAg:
             new_val= [ci.split('\r')      for ci in new_val.split('\t')]
             pass;              #log('new_val={}',repr(new_val))
             int_sc = lambda s: _os_scale('unscale', {'w':int(s)})['w']
-            new_val= [odct(('hd',       ci[0])
-                          ,('wd',int_sc(ci[1]))
-                          ,('mi',int_sc(ci[2]))
-                          ,('ma',int_sc(ci[3]))
-                          ,('al',       ci[4])
-                          ,('au','1'==  ci[5])
-                          ,('vi','1'==  ci[6])
+#           new_val= [odct(('hd',       ci[0])
+#                         ,('wd',int_sc(ci[1]))
+#                         ,('mi',int_sc(ci[2]))
+#                         ,('ma',int_sc(ci[3]))
+#                         ,('al',       ci[4])
+#                         ,('au','1'==  ci[5])
+#                         ,('vi','1'==  ci[6])
+#                         ) for ci in new_val]
+            new_val= [ dict(hd=       ci[0]
+                           ,wd=int_sc(ci[1])
+                           ,mi=int_sc(ci[2])
+                           ,ma=int_sc(ci[3])
+                           ,al=       ci[4]
+                           ,au='1'==  ci[5]
+                           ,vi='1'==  ci[6]
                           ) for ci in new_val]
             pass;              #log('new_val={}',(new_val))
         
@@ -1358,7 +1380,7 @@ class DlgAg:
         rtf     = self.opts.get('gen_repro_to_file', False) if rtf is None else rtf
         if not rtf: return self
         rerpo_fn= tempfile.gettempdir()+os.sep+(rtf if likesstr(rtf) else 'repro_dlg_proc.py')
-        print(f('exec(open(r"{}", encoding="UTF-8").read())', rerpo_fn))
+        print(f'exec(open(r"{rerpo_fn}", encoding="UTF-8").read())')
 
         l       = '\n'
         cattrs  = [  ('type', 'tag', 'act')
@@ -1387,10 +1409,10 @@ class DlgAg:
             if apr:
                 out     += afix + repr(apr).strip('{}') 
             for k in pr:
-                out     += afix + f('"{}":(lambda idd,idc,data:print("{}"))', k, k)
+                out     += afix + f'"{k}":(lambda idd,idc,data:print("{k}"))'
             out         += '}'
             return out
-        srp     =    f('# >>> exec(open(r"{}", encoding="UTF-8").read())', rerpo_fn)
+        srp     = f'# >>> exec(open(r"{rerpo_fn}", encoding="UTF-8").read())'
         srp    += l+ 'idd=dlg_proc(0, DLG_CREATE)'
         srp    += l
         cids    = []
@@ -1428,8 +1450,8 @@ class DlgAg:
         fid     = prD.get('fid', prD['focused'])
         if fid not in cids:
             prD.pop('focused')
-        srp    +=l+f('dlg_proc(idd, DLG_PROP_SET, prop={})', out_attrs(prD, fattrs))
-        srp    +=l+(f('dlg_proc(idd, DLG_CTL_FOCUS, name="{}")', fid) if fid in cids else '')
+        srp    +=l+f'dlg_proc(idd, DLG_PROP_SET, prop={out_attrs(prD, fattrs)})'
+        srp    +=l+(f'dlg_proc(idd, DLG_CTL_FOCUS, name="{fid}")' if fid in cids else '')
         srp    +=l+  'dlg_proc(idd, DLG_SHOW_MODAL)'
         srp    +=l+  'dlg_proc(idd, DLG_FREE)'
         open(rerpo_fn, 'w', encoding='UTF-8').write(srp)
@@ -1469,7 +1491,7 @@ def show_menu(mn_content, x, y, ag=None, cmd4all=None, repro_to_file=None, opts=
     c2m     = opts.get('c2m', False)
     
     rfn     = tempfile.gettempdir()+os.sep+repro_to_file            if repro_to_file else None
-    print(f(r'exec(open(r"{}", encoding="UTF-8").read())', rfn))    if rfn else 0
+    print(f'exec(open(r"{rfn}", encoding="UTF-8").read())')         if rfn else 0
     repro   = lambda line,*args,mod='a':(
                 open(rfn, mod).write(line.format(*args)+'\n')       if rfn else 0)
     repro('import  cudatext as app', mod='w')                   # To sync conf- and repro-code
@@ -1515,7 +1537,7 @@ def show_menu(mn_content, x, y, ag=None, cmd4all=None, repro_to_file=None, opts=
     mid_top = app.menu_proc(    0,       app.MENU_CREATE)
     repro("m{}=app.menu_proc(0,          app.MENU_CREATE)", mid_top)
     fill_mn(mid_top, mn_content)
-    app.menu_proc(              mid_top, app.MENU_SHOW                  , command=f('{},{}', x, y))
+    app.menu_proc(              mid_top, app.MENU_SHOW                  , command=f'{x},{y}')
     repro("app.menu_proc(       m{},     app.MENU_SHOW                  , command='{},{}')", mid_top, x, y)
     return []
    #def show_menu
@@ -1646,10 +1668,10 @@ def _os_scale(id_action, prop=None, index=-1, index2=-1, name=''):
 
 _gui_width_cache= {}
 def get_gui_autosize_width(ctrl_def):
-    wd  = _gui_width_cache.get(ctrl_def, 0)
+    ctrl_str    = str(ctrl_def)
+    wd  = _gui_width_cache.get(ctrl_str, 0)
     if wd==0:
-        prc     = odict(ctrl_def)
-        prc.update(dict(autosize='1',x=0, y=0))
+        prc     = {**dict(autosize='1',x=0, y=0), **ctrl_def}
         tp      = prc.get('tp', prc.get('type'))
         tp      = _TYPE_ABBRS.get(tp, tp)
         idd=app.dlg_proc(   0,   app.DLG_CREATE)
@@ -1660,7 +1682,7 @@ def get_gui_autosize_width(ctrl_def):
         prc = app.dlg_proc( idd, app.DLG_CTL_PROP_GET, index=idc)
         app.dlg_proc(       idd, app.DLG_FREE)
         wd      = prc['w']
-        _gui_width_cache[ctrl_def]  = wd
+        _gui_width_cache[ctrl_str]  = wd
     return wd
     
 def get_gui_height(ctrl_tp):
@@ -1836,7 +1858,7 @@ def dlg_tuning_valigns():
     seqeq   = '================='
     sbl44   = ' 4444444444444444'
     n4444   = 444444444
-    sped_pr = f('0,{},1', n4444)
+    sped_pr = f'0,{n4444},1'
     cs      = CTRLS
     cnts    = [0
     ,('lb1' ,dict(tp='labl' ,y= 10              ,x=   5 ,w=110  ,cap=cs[0]+sbleq))

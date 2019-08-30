@@ -161,7 +161,7 @@ FIF4_META_OPTS=[
     },
     {   'cmt': _('Width of statusbar fields'),
         'opt': 'statusbar_field_widths',
-        'def': [50,90,50,0,50],
+        'def': [70,100,60,0,50],
         'frm': 'json',
         'chp': _('Dialog layout'),
     },
@@ -207,14 +207,12 @@ excl_hi_ = _('Exclude file[s]/folder[s]\n')+mask_hi+_(''
             '\nSee engine option "always_not_in_files" to change.'
             )
 
-fold_hi = f(_('Start folder(s).'
+fold_hi = _('Start folder(s).'
             '\nSpace-separated folders.'
             '\nDouble-quote folder, which needs space char.'
             '\n"~" is user home folder.'
-#           '\n$VAR or ${{VAR}} is environment variable.'
-            '\n{} or {{t}} to search in tabs.'
+           f'\n{Walker_ROOT_IS_TABS} or {{t}} to search in tabs.'
 #           '\n{} to search in project folders (in short <p>).'
-            ), Walker_ROOT_IS_TABS
             )
 dept_hi = _('How many folder levels to search.'
             '\nUse Ctrl+Up/Down to change this option.'
@@ -228,11 +226,11 @@ fage_ca = _('All a&ges')
 cntx_hi = _('Show result line with its adjacent lines (above/below).'
             '\n"-N+M" - N lines above and M lines below.'
             '\nTurn option on to show config dialog.')
-i4op_hi = f(_('{}. '
-            '\nUse popup menu to change.'), OTH4FND)
+i4op_hi = _(f'{OTH4FND}. '
+            '\nUse popup menu to change.')
 WHA__CA = '>*'+_('&Find:')
 INC__CA = '>*'+_('F&iles:')
-EXC__CA = '>'+_('E&x:')
+EXC__CA = '>'+_('Ex&:')
 FOL__CA = '>*'+_('F&rom:')
 what_hi = _('Pattern to find. '
             '\nIt can be multi-line. Newline is shown as "§".'
@@ -330,7 +328,11 @@ DHLP_KEYS_TABLE = _(r'''
 ''').strip()
 
 DHLP_TIPS_FIND  = f(_(r'''
-Some search options can be changed via menu.
+String to find (pattern) can be multi-line. Button "+" sets single-line or multi-line control.
+In single-line control the newlines are shown as §.
+ 
+———————————————————————————————————————————————————————————————————————————————————————————— 
+Some search options can be changed only via menu.
     · Sort collected files before reading text.
     · Age of files.
     · Skip hidden/binary files.
@@ -351,19 +353,21 @@ The infobar shows not trivial values of "{OTH4FND}".
     "?"         Search only inside literal strings.
     ?""?        Search only outside of literal strings.
     /*?*/ "?"   Search only inside comments or literal strings.
+Also infobar shows first step of "encoding plan".
 Right-click on the infobar shows local menu with "{OTH4FND}".
-Double-click on the infobar clears all values.
-
+Double-click on the infobar clears all values except encoding.
 Warning! 
-    Be careful when using "Syntax elements" filter in long search. 
+    Be careful with filtering "Syntax elements" in long search. 
     The filters significantly slow down the search.
 
-See also engine option "lexers_to_filter".
-
 ———————————————————————————————————————————————————————————————————————————————————————————— 
-String to find (pattern) can be multi-line. Button "+" sets single-line or multi-line control.
-In single-line control the newlines are shown as §.
- 
+Set special value "{tabs}" for field "{fold}" to search in tabs (opened documents).
+Fields "{incl}" and "{excl}" will be used to filter tab titles, in this case.
+To search in all tabs fill "{incl}" with "*".
+See also: 
+    Items of submenu "Scope".
+    Hotkey Ctrl+Shift+U.
+
 ———————————————————————————————————————————————————————————————————————————————————————————— 
 Values in fields "{incl}" and "{excl}" can contain
     ?       for any single char,
@@ -382,27 +386,35 @@ Example.
     Depth       : All
 Search will consider all *.txt files in folder c:/root and in all subfolders a* except ab*.
 
-Set special value "{tabs}" for field "{fold}" to search in tabs (opened documents).
-Fields "{incl}" and "{excl}" will be used to filter tab titles, in this case.
-To search in all tabs, use mask "*" in the field "{incl}".
-See also: 
-    Items of submenu "Scope".
-    Hotkey Ctrl+Shift+U.
-
-Value parts in fields "{incl}" and "{excl}" can filter lexer path if they are embraced
+Values in fields "{incl}" and "{excl}" can filter lexer path if they are embraced
 with "[:" and ":]".
-The filter for lexer path is path-like string with elements
+The filter is path-like string with elements
     >       path separator. Ex: "a>b>c" - node "c" is subnode of "b" and "b" is subnode of "a".
-    >>      recursive descent. Ex: "a>>c" - node "c" appears in branch "a"
-    word    name of a node
-    *word
-    word*   partial name of a node
+    >>      recursive descent. Ex: "a>>c" - node "c" appears in branch "a".
+    word    name of a node.
+    *word   partial name of a node.
+    word*   partial name of a node.
+    Blanks around all "<" are not important. So "a>>b>c" and "a > > b > c" are same.
+Lexer path is matched with a filter if some start segments of path are compatible 
+with all segments of the filter. Path "aa>bb>cc>dd" is matched with filters 
+    "aa"
+    "*a"
+    "*>b*"
+    ">>cc"
+    ">>cc>*d"
+and isnot matched with
+    "bb"
+    "*>b"
+    ">>c>dd"
 Example.
     {incl:12}: *.py [:def main:]
-    {excl:12}: [:def main..class*:]
+    {excl:12}: [:def main>>class*:]
     {fold:12}: <tabs>
-Search will consider all *.py open files and will search in module function "main"
-except searching in classes defined inside the function.
+Search will consider all "*.py" open files and will search in module function "main"
+except searching in all classes defined inside the function.
+Warning! 
+    Be careful with filtering lexer path in long search. 
+    The filters significantly slow down the search.
 
 ———————————————————————————————————————————————————————————————————————————————————————————— 
 ".*" - Option "Regular Expression". 
@@ -499,8 +511,9 @@ do not reduce the speed at all.
 
 4. Inappropriate "Encoding plan" can greatly reduce the speed if too many files need to be read.
 
-5. The slowest search (the slowdown in dozens of times) occurs if any of "Syntax elements"
-is turned on.
+5. The slowest search (the slowdown in dozens of times) occurs if 
+    any of "Syntax elements" is turned on,
+    lexer path filter includes in "{incl}" or "{excl}" fields.
 
 ———————————————————————————————————————————————————————————————————————————————————————————— 
 Special cases.
@@ -512,11 +525,18 @@ to detect which search is needed.
 Huge files can also be involved in the search. For optimal memory usage you need
 - Turn off the appending context lines ("-N+M").
 - Turn off the multi-line pattern ("+") and remove newline character "§".
-- Turn off all "Syntax elements".
+- Turn off all "Syntax elements"
+- Ensure that no lexer path filters.
 Also see engine options 
 - skip_file_size_more(Kb),
 - dont_show_file_size_more(Kb).
-'''), reex=reex_hi, case=case_hi, word=word_hi).strip()
+''')
+, reex=reex_hi
+, case=case_hi
+, word=word_hi
+, incl=INC__CA[2:].replace('&', '').replace(':', '')
+, excl=EXC__CA[1:].replace('&', '').replace(':', '')
+).strip()
 
 DHLP_TIPS_TRCK  = f(_(r'''
 If 
@@ -525,32 +545,39 @@ then
     the root folder(s) will be skipped.
 
 ———————————————————————————————————————————————————————————————————————————————————————————— 
-If 
-    search is finished and
-    you cannot close dialog in usual way ("Stop?" message appears) 
-then
-    hold Shift and click on "x" in titlebar. 
+The field "{fold}" can contain many folders to search.
+These folders should not be included in each other.
+The field also can contain folder(s) and {tabs} together.
 
 ———————————————————————————————————————————————————————————————————————————————————————————— 
 Use \§ to find the character §.
 
-You can use macros in any editable fields. For ex, "~ {{t}}" will be auto-replaced to "~ <tabs>". 
+You can use macros in any editable fields. For ex, "~ {{t}}" will be auto-replaced to "~ {tabs}". 
 To use the expression with brackets like "{{t}}", escape brackets with backslashes like "\{{t\}}" 
 (or like "\{{t}}", if field doesn't have the outer bracket pair).
 
 ———————————————————————————————————————————————————————————————————————————————————————————— 
 Engine option 
     "use_selection_on_start"
-    Use selected text from document for the field "Find what".
-can be replaced with using of macro var
+uses selected text from document for the field "Find what".
+It can be replaced with using of macro var
     {{ed:SelectedText}}.
 So you can use document selection many times but not only on start.
 
 The macro 
     {{ed:CurrentWord}}
-allows to use part of document text without selection.
+allows to use part of document text without selection at all.
+
+———————————————————————————————————————————————————————————————————————————————————————————— 
+If 
+    search is finished and
+    you cannot close dialog in usual way ("Stop?" message appears) 
+then
+    hold Shift and click on "x" in titlebar. 
 ''')
 , excl=EXC__CA[1:].replace('&', '').replace(':', '')
+, fold=FOL__CA[2:].replace('&', '').replace(':', '')
+, tabs=Walker_ROOT_IS_TABS
 ).strip()
 
 

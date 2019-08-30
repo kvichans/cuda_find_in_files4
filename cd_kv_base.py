@@ -29,16 +29,16 @@ C13,C10,C9  = chr(13),chr(10),chr(9)
 def f(     s_, *args, **kwargs): return       s_.format(*args, **kwargs)
 def printf(s_, *args, **kwargs): return print(s_.format(*args, **kwargs))
 
-odict       = collections.OrderedDict
-class odct(collections.OrderedDict):
-    def __init__(self, *args, **kwargs):
-        pass;                  #print('args=',args)
-        if     args: super().__init__( *args) \
-            if 1==len(args) else \
-                     super().__init__(  args)
-        elif kwargs: super().__init__(kwargs.items())
-    def __repr__(self):
-        return '{%s}' % (', '.join("'%s': %r" % (k,v) for k,v in self.items()))
+#odict       = collections.OrderedDict
+#class odct(collections.OrderedDict):
+#   def __init__(self, *args, **kwargs):
+#       pass;                  #print('args=',args)
+#       if     args: super().__init__( *args) \
+#           if 1==len(args) else \
+#                    super().__init__(  args)
+#       elif kwargs: super().__init__(kwargs.items())
+#   def __repr__(self):
+#       return '{%s}' % (', '.join("'%s': %r" % (k,v) for k,v in self.items()))
 
 class dcta(dict):
     def __getattr__(self, name):
@@ -426,7 +426,7 @@ def get_hist(key_or_path, default=None, module_name='_auto_detect', to_file=PLIN
     try:
         body_s  = open(to_file).read()
         body_s  = re.sub(r',\s+}', '}', body_s)
-        json_kw = json_kwargs if json_kwargs else dict(object_pairs_hook=odict)
+        json_kw = json_kwargs if json_kwargs else {}
         data    = json.loads(body_s, **json_kw)
         pass;                  #log__('data={}',(data)      ,__=(log4fun,_log4mod))
     except:
@@ -502,11 +502,11 @@ def set_hist(key_or_path, value=None, module_name='_auto_detect', kill=False, to
     pass;                       log4fun=0                       # Order log in the function
     pass;                      #log__('key,val,mod,kill,to_f={}',(key_or_path, value, module_name, kill, to_file)      ,__=(log4fun,_log4mod))
     to_file = to_file   if os.sep in to_file else   app.app_path(app.APP_DIR_SETTINGS)+os.sep+to_file
-    body    = odict()
+    body    = dict()
     if os.path.exists(to_file) and os.path.getsize(to_file) != 0:
         body_s  = open(to_file).read()
         body_s  = re.sub(r',\s+}', '}', body_s)
-        json_kw = json_kwargs if json_kwargs else dict(object_pairs_hook=odict)
+        json_kw = json_kwargs if json_kwargs else {}
         body    = json.loads(body_s, **json_kw)
 
     if module_name=='_auto_detect':
@@ -523,7 +523,7 @@ def set_hist(key_or_path, value=None, module_name='_auto_detect', kill=False, to
     for parent in parents:
         if kill and parent not in data:
             return None
-        data= data.setdefault(parent, odict())
+        data= data.setdefault(parent, dict())
         if not likesdict(data):
             raise KeyError()
     if kill:
@@ -543,7 +543,8 @@ class Command:
             return app.msg_status(_('Fail. Use only for python file.'))
         ed.save()
         app.app_log(app.LOG_CONSOLE_CLEAR, 'm')
-        cmd = f(r'exec(open(r"{}", encoding="UTF-8").read().lstrip("\uFEFF"))', fn)
+        cmd = r'exec(open(r"{fn}", encoding="UTF-8").read().lstrip("\uFEFF"))'
+#       cmd = f(r'exec(open(r"{}", encoding="UTF-8").read().lstrip("\uFEFF"))', fn)
         pass;                  #log('cmd={!r}',(cmd))
         ans     = app.app_proc(app.PROC_EXEC_PYTHON, cmd)
         print('>>> run {!r}'.format(fn))

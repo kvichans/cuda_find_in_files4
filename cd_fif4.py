@@ -2,7 +2,7 @@
 Authors:
     Andrey Kvichansky   (kvichans on github.com)
 Version:
-    '4.5.01 2019-08-26'
+    '4.6.02 2019-08-30'
 ToDo: (see end of file)
 '''
 import  re, os, traceback, locale, itertools, codecs, time, datetime as dt #, types, json, sys
@@ -25,7 +25,6 @@ from            .cd_kv_base     import *        # as part of this plugin
 from            .cd_kv_dlg      import *        # as part of this plugin
 from            .cd_fif4_cs     import *        # Public strings/struct
 from            .encodings      import *        # List of encoding data
-#from            .jsonpath       import *        # To test frag lex-path
 
 VERSION             = re.split('Version:', __doc__)[1].split("'")[1]
 VERSION_V,VERSION_D = VERSION.split(' ')
@@ -43,6 +42,7 @@ get_opt     = lambda opt, defv=None: \
                 apx.get_opt(opt, defv                ,user_json=CFG_FILE)
 
 pass;                          #Debug tools
+pass;                           import cudatext_keys
 pass;                          #import cgitb;cgitb.enable(logdir=os.path.dirname(__file__), display=1, context=7)
 pass;                          #import rpdb;rpdb.Rpdb().set_trace()    # telnet 127.0.0.1 4444
 pass;                           from pprint import pformat
@@ -54,16 +54,15 @@ pass;                           Tr.to_file = str(Path(get_opt('log_file', ''))) 
                                                 #NOTE: _log4mod
 pass;                           _log4mod                    = -1    # 0=False=LOG_FREE, 1=True=LOG_ALLOW, 2=LOG_NEED, -1=LOG_FORBID
 pass;                           _log4mod                    =  get_opt('_log4mod', _log4mod)
-pass;                           _log4cls_Fif4D              =  0
+pass;                           _log4cls_Fif4D              = -1
 pass;                           _log4fun_fifwork            = -1
-pass;                           _log4cls_TabsWalker         =  0
-pass;                           _log4cls_FSWalker           =  0
-pass;                               _log4fun_FSWalker_walk  =  1
+pass;                           _log4cls_TabsWalker         = -1
+pass;                           _log4cls_FSWalker           = -1
+pass;                               _log4fun_FSWalker_walk  = -1
 pass;                           _log4cls_Fragmer            = -1
-pass;                           _log4cls_Reporter           =  0
-pass;                           import cudatext_keys
-pass;                           log("start",('')) if _log4mod>=0 else 0
+pass;                           _log4cls_Reporter           = -1
 pass;                           _dev_kv                     =  get_opt('_dev_kv', False)
+pass;                           log("fif4 start",('')) if _log4mod>=0 or _dev_kv else 0
 
 # i18n
 try:    _   = get_translation(__file__)
@@ -216,7 +215,7 @@ TRFM_PLL    = 'PLL'
 TRFM_P_LL   = 'P_LL'
 TRFM_D_FLL  = 'D_FLL'
 #TRFM_D_F_LL = 'D_F_LL'
-TRFMD2V     = odict([
+TRFMD2V     = dict([
     (TRFM_PLL   ,_('<path:r>:line')                     )   # No tree, one row for one output line       
    ,(TRFM_P_LL  ,_('<path>#N/<r>:line')                 )   # Separated rows for full path for diff files
    ,(TRFM_D_FLL ,_('<dir>#N/<file:r>:line')             )   # Separated rows for diff folders
@@ -272,16 +271,15 @@ def dlg_fif4_help(fif):
     pags_its    = [_('Hotkeys'),_('Search'),_('Results'),_('Speed'),_('Tricks')]
     res,vals    = DlgAg(
           form  =dict(cap=_('"Find in Files4" help'), frame ='resize', w=850, h=600)
-        , ctrls = [((
-  )),('pags',d(tp='pags',x=5,y=5,r=-5,b=-35 ,a='b.r>'   ,val=page       ,items=pags_its
-  )),('keys',d(tp='memo',p='pags.0'         ,ali=ALI_CL ,val=KEYS_TABLE ,ro_mono_brd='1,1,1'
-  )),('tips',d(tp='memo',p='pags.1'         ,ali=ALI_CL ,val=TIPS_FIND  ,ro_mono_brd='1,1,1'
-  )),('tipr',d(tp='memo',p='pags.2'         ,ali=ALI_CL ,val=TIPS_RSLT  ,ro_mono_brd='1,1,1'
-  )),('tipo',d(tp='memo',p='pags.3'         ,ali=ALI_CL ,val=TIPS_FAST  ,ro_mono_brd='1,1,1'
-  )),('tipt',d(tp='memo',p='pags.4'         ,ali=ALI_CL ,val=TIPS_TRCK  ,ro_mono_brd='1,1,1'
-  )),('isus',d(tp='lilb',x=5,b=-25  ,r=-5   ,a='..'     ,cap=ISUES_C    ,url=GH_ISU_URL  
-                ))][1:]
-        , fid   = 'pags'
+        , ctrls = d(
+    pags=d(tp='pags',x=5,y=5 ,r=-5,b=-35,a='b.r>'   ,val=page       ,items=pags_its     ),
+    keys=d(tp='memo',p='pags.0'         ,ali=ALI_CL ,val=KEYS_TABLE ,ro_mono_brd='1,1,1'),
+    tips=d(tp='memo',p='pags.1'         ,ali=ALI_CL ,val=TIPS_FIND  ,ro_mono_brd='1,1,1'),
+    tipr=d(tp='memo',p='pags.2'         ,ali=ALI_CL ,val=TIPS_RSLT  ,ro_mono_brd='1,1,1'),
+    tipo=d(tp='memo',p='pags.3'         ,ali=ALI_CL ,val=TIPS_FAST  ,ro_mono_brd='1,1,1'),
+    tipt=d(tp='memo',p='pags.4'         ,ali=ALI_CL ,val=TIPS_TRCK  ,ro_mono_brd='1,1,1'),
+    isus=d(tp='lilb',x=5,y=-30  ,r=-5   ,a='..'     ,cap=ISUES_C    ,url=GH_ISU_URL     ),
+       ), fid   = 'pags'
         , opts  = d(negative_coords_reflect=True)
     ).show()    #NOTE: dlg_fif4_help
     fset_hist('help.page', vals['pags'])
@@ -343,7 +341,7 @@ class Fif4D:
                     end_tm  = ptime()
                     dur     = end_tm-bgn_tm
                     pass;      #log("dur={}",(dur))
-                    msg     = f('{:.2f}"', dur) \
+                    msg     = f'{dur:.2f}"' \
                                 if dur<60 else  \
                               f('{}\'{:.2f}"', int(dur/60), dur-60*int(dur/60))
                     self.stbr_act(msg, M.STBR_TIM)
@@ -479,6 +477,7 @@ class Fif4D:
             ,wk_agef=''                         # Skip files by datetime: \d+(h|d|w|m|y)
             ,wk_skip=''                         # Skip hidden/binary files
             ,wk_enco=WK_ENCO                    # List (3 items) to try reading with the encoding
+            ,wk_enco_ms={'*.ops':'cp1251'}      # Map file mask to encoding
             ,wk_sycm=''                         # In/Out syntax element "comment"
             ,wk_syst=''                         # In/Out syntax element "string"
             ,rp_cntx=False                      # Catch frag with extra lines
@@ -509,18 +508,6 @@ class Fif4D:
 
         # History of singlelined what
         m.sl_what_l      = [M.FIT_OPT4SL(h) for h in m.opts.vw.what_l]
-        
-#       if USE_SEL_ON_START and ed.get_text_sel():  # Set ed sel to pattern
-#           sel     = ed.get_text_sel()
-#           sel     = sel.replace('\r', '')
-#           m.opts.in_reex      = False
-#           if '\n' in sel:
-#               m.opts.vw.mlin  = True
-#               m.opts.us_focus = 'in_whaM' if m.opts.us_focus=='in_what' else m.opts.us_focus
-#           m.opts.in_what  = sel
-#           m.sl_what_l     = add_to_history(M.FIT_OPT4SL(
-#                                            m.opts.in_what),m.sl_what_l     , unicase=False)
-#           m.opts.vw.what_l= add_to_history(m.opts.in_what, m.opts.vw.what_l, unicase=False)
         
         # Form tools
         m.ag    = None
@@ -559,7 +546,7 @@ class Fif4D:
                                                                      ,'wk_sort'
                                                                      ,'wk_agef'
                                                                      ,'wk_skip'
-                                                                     ,'wk_enco'
+                                                                     ,'wk_enco','wk_enco_ms'
                                                                      ,'wk_sycm','wk_syst')]))
             m.opts.vw.mlin      = ag.val('vw_mlin')
             m.opts.rp_cntx      = ag.val('rp_cntx')
@@ -572,7 +559,7 @@ class Fif4D:
                                                                      ,'wk_sort'
                                                                      ,'wk_agef'
                                                                      ,'wk_skip'
-                                                                     ,'wk_enco'
+                                                                     ,'wk_enco','wk_enco_ms'
                                                                      ,'wk_sycm','wk_syst')}
                    ,'rp_cntx':m.opts.rp_cntx
                    ,'in_what':M.FIT_OPT4SL(
@@ -635,37 +622,38 @@ class Fif4D:
         fold_v  = ivals.wk_fold                 if nps or chcks[FOL] else ''
         dept_v  = M.DEPT_UL[ivals.wk_dept]      if nps or chcks[DEP] else ''
         ag      = DlgAg(
-                     ctrls  =[((
-      )),(RAW    ,d(tp='chck'   ,y=5        ,x=w_x-35   ,w= 40  ,cap='&1:'      ,val=chcks[RAW] ,en=nps
-      )),('_eex' ,d(tp='chbt'   ,tid=RAW    ,x=w_x+WRDW*0,w=WRDW,cap='.*'       ,val=reex_v     ,en=nps
-      )),('_ase' ,d(tp='chbt'   ,tid=RAW    ,x=w_x+WRDW*1,w=WRDW,cap='aA'       ,val=case_v     ,en=nps
-      )),('_ord' ,d(tp='chbt'   ,tid=RAW    ,x=w_x+WRDW*2,w=WRDW,cap='"w"'      ,val=word_v     ,en=nps
-                                   
-      )),(CNT    ,d(tp='chck'   ,tid=RAW    ,x=w_x+115  ,w= 40  ,cap='&2:'      ,val=chcks[CNT] ,en=nps
-      )),('_ntx' ,d(tp='edit'   ,tid=RAW    ,x=w_x+150  ,w= 50  ,en=False       ,val=cntx_v
-      )),(I4O    ,d(tp='chck'   ,tid=RAW    ,x=w_x+215  ,w= 40  ,cap='&3:'      ,val=chcks[I4O] ,en=nps
-      )),('_4op' ,d(tp='edit'   ,tid=RAW    ,x=w_x+250  ,w= 80  ,en=False       ,val=i4op_v             ,a='r>' 
-      )),(ENC    ,d(tp='chck'   ,tid=RAW    ,x=w_x+350  ,w= 40  ,cap='&4:'      ,val=chcks[ENC] ,en=nps ,a='>>' 
-      )),('_nco' ,d(tp='edit'   ,tid=RAW    ,x=w_x+385  ,r= -5  ,en=False       ,val=enco_v             ,a='>>' 
-                                   
-                                   
-      )),(WHA    ,d(tp='chck'   ,y=5+vgp*1  ,x=  5      ,w= 90  ,cap=WHA__CA[2:],val=chcks[WHA] ,en=nps
-      )),('_hat' ,d(tp='edit'   ,tid=WHA    ,x=w_x      ,r= -5  ,en=False       ,val=what_v             ,a='r>' 
-                                   
-      )),(INC    ,d(tp='chck'   ,y=5+vgp*2  ,x=  5      ,w= 90  ,cap=INC__CA[2:],val=chcks[INC] ,en=nps
-      )),('_ncl' ,d(tp='edit'   ,tid=INC    ,x=w_x      ,w=330  ,en=False       ,val=incl_v             ,a='r>' 
-      )),(EXC    ,d(tp='chck'   ,tid=INC    ,x=w_x+350  ,w= 40  ,cap='&5:'      ,val=chcks[EXC] ,en=nps ,a='>>' 
-      )),('_xcl' ,d(tp='edit'   ,tid=INC    ,x=w_x+385  ,r= -5  ,en=False       ,val=excl_v             ,a='>>' 
-                                   
-      )),(FOL    ,d(tp='chck'   ,y=5+vgp*3  ,x=  5      ,w= 90  ,cap=FOL__CA[2:],val=chcks[FOL] ,en=nps ,a='r>' 
-      )),('_old' ,d(tp='edit'   ,tid=FOL    ,x=w_x      ,w=330  ,en=False       ,val=fold_v             ,a='r>' 
-      )),(DEP    ,d(tp='chck'   ,tid=FOL    ,x=w_x+350  ,w= 40  ,cap='&6:'      ,val=chcks[DEP] ,en=nps ,a='>>' 
-      )),('_ept' ,d(tp='edit'   ,tid=FOL    ,x=w_x+385  ,r= -5  ,en=False       ,val=dept_v             ,a='>>' 
-                                
-      )),('nam_' ,d(tp='labl'   ,tid='save' ,x=5        ,w=w_x-10,cap=_('>Na&me:')
-      )),('name' ,d(tp='edit'   ,tid='save' ,x=w_x      ,w=205                  ,val=nm
-      )),('save' ,d(tp='bttn'   ,y=-vgp-5   ,x=-95      ,w= 90  ,cap=ok_c   ,def_bt=True,on=CB_HIDE     ,a='>>' 
-             ))][1:],form   =d(  h=hfm  ,h_max=hfm      ,w=645  ,cap=tit_c  ,frame='resize')
+                     ctrls  ={
+        RAW    :d(tp='chck' ,y=5        ,x=w_x-35   ,w= 40  ,cap='&1:'      ,val=chcks[RAW] ,en=nps         ),
+        '_eex' :d(tp='chbt' ,tid=RAW    ,x=w_x+WRDW*0,w=WRDW,cap='.*'       ,val=reex_v     ,en=nps         ),
+        '_ase' :d(tp='chbt' ,tid=RAW    ,x=w_x+WRDW*1,w=WRDW,cap='aA'       ,val=case_v     ,en=nps         ),
+        '_ord' :d(tp='chbt' ,tid=RAW    ,x=w_x+WRDW*2,w=WRDW,cap='"w"'      ,val=word_v     ,en=nps         ),
+                               
+        CNT    :d(tp='chck' ,tid=RAW    ,x=w_x+115  ,w= 40  ,cap='&2:'      ,val=chcks[CNT] ,en=nps         ),
+        '_ntx' :d(tp='edit' ,tid=RAW    ,x=w_x+150  ,w= 50  ,en=False       ,val=cntx_v                     ),
+        I4O    :d(tp='chck' ,tid=RAW    ,x=w_x+215  ,w= 40  ,cap='&3:'      ,val=chcks[I4O] ,en=nps         ),
+        '_4op' :d(tp='edit' ,tid=RAW    ,x=w_x+250  ,w= 80  ,en=False       ,val=i4op_v             ,a='r>' ),
+        ENC    :d(tp='chck' ,tid=RAW    ,x=w_x+350  ,w= 40  ,cap='&4:'      ,val=chcks[ENC] ,en=nps ,a='>>' ),
+        '_nco' :d(tp='edit' ,tid=RAW    ,x=w_x+385  ,r= -5  ,en=False       ,val=enco_v             ,a='>>' ),
+                               
+                               
+        WHA    :d(tp='chck' ,y=5+vgp*1  ,x=  5      ,w= 90  ,cap=WHA__CA[2:],val=chcks[WHA] ,en=nps         ),
+        '_hat' :d(tp='edit' ,tid=WHA    ,x=w_x      ,r= -5  ,en=False       ,val=what_v             ,a='r>' ),
+                              
+        INC    :d(tp='chck' ,y=5+vgp*2  ,x=  5      ,w= 90  ,cap=INC__CA[2:],val=chcks[INC] ,en=nps         ),
+        '_ncl' :d(tp='edit' ,tid=INC    ,x=w_x      ,w=330  ,en=False       ,val=incl_v             ,a='r>' ),
+        EXC    :d(tp='chck' ,tid=INC    ,x=w_x+350  ,w= 40  ,cap='&5:'      ,val=chcks[EXC] ,en=nps ,a='>>' ),
+        '_xcl' :d(tp='edit' ,tid=INC    ,x=w_x+385  ,r= -5  ,en=False       ,val=excl_v             ,a='>>' ),
+                              
+        FOL    :d(tp='chck' ,y=5+vgp*3  ,x=  5      ,w= 90  ,cap=FOL__CA[2:],val=chcks[FOL] ,en=nps ,a='r>' ),
+        '_old' :d(tp='edit' ,tid=FOL    ,x=w_x      ,w=330  ,en=False       ,val=fold_v             ,a='r>' ),
+        DEP    :d(tp='chck' ,tid=FOL    ,x=w_x+350  ,w= 40  ,cap='&6:'      ,val=chcks[DEP] ,en=nps ,a='>>' ),
+        '_ept' :d(tp='edit' ,tid=FOL    ,x=w_x+385  ,r= -5  ,en=False       ,val=dept_v             ,a='>>' ),
+                           
+        'nam_' :d(tp='labl' ,tid='save' ,x=5        ,w=w_x-10,cap=_('>Na&me:')                              ),
+        'name' :d(tp='edit' ,tid='save' ,x=w_x      ,w=205                  ,val=nm                         ),
+        'save' :d(tp='bttn' ,y=-vgp-5   ,x=-95      ,w= 90  ,cap=ok_c   ,def_bt=True,on=CB_HIDE     ,a='>>' ),
+                            }
+                ,form   =d(  h=hfm  ,h_max=hfm      ,w=645  ,cap=tit_c  ,frame='resize')
                     ,fid    ='name'
                     ,opts   =d(negative_coords_reflect=True))
         ag.update(form=m.ag.fattrs(['x', 'y', 'w']))
@@ -676,7 +664,7 @@ class Fif4D:
             fset_hist(['dlg','preset'], pre_chcks)
         if ret!='save':return None
         if nps:
-            ps  = {}
+            ps  = dcta()
             if vals[RAW]:
                 ps['in_reex']   = m.opts.in_reex
                 ps['in_case']   = m.opts.in_case
@@ -708,8 +696,8 @@ class Fif4D:
        #def dlg_preset
 
 
-    @Dcrs.clear_st_msg(  1, 'help', 'wk_clea', 'di_menu', 'nf_frag')   # aid in the list
-    @Dcrs.timing_to_stbr(1, 'di_fnd!', 'up_rslt')           # aid in the list
+    @Dcrs.clear_st_msg(  1, 'help', 'wk_clea', 'di_menu', 'nf_frag', 'nf_frlp')   # aid in the list
+    @Dcrs.timing_to_stbr(1, 'di_find', 'up_rslt')           # aid in the list
     def do_acts(self, ag, aid, data='', ops={}):        #NOTE: do_acts
         # help xopts call-find call-repl
         # in_reex in_case in_word
@@ -717,8 +705,8 @@ class Fif4D:
         # addEOL hist vw_mlin wk_agef wk_enco_d rp_cntx
         # di_menu ps_prev ps_next ps_save ps_menu ps_remv_N ps_load_N
         # ac_usec di_brow
-        # nf_frag 
-        # up_rslt di_fnd! vi_fldi
+        # nf_frag nf_frlp 
+        # up_rslt di_find vi_fldi
         # on_rslt_crt go-next go-prev nav-to
         pass;                   log4fun= 1
         M,m     = self.__class__,self
@@ -878,13 +866,14 @@ class Fif4D:
             agef_u  = age_u.split('/')
             agef_ui = {U[0]:i for i,U in enumerate(M.AGEF_L1)}[agef_u]
             ret,vals= DlgAg(
-                 ctrls  =[
-    ('age_',d(tp='labl'     ,tid='agef' ,x=  5  ,w= 50  ,cap='>'+_('Age:')                      )),
-    ('agef',d(tp='edit'     ,y= 5       ,x= 60  ,w= 75                              ,val=agef_n )),
-    ('ageu',d(tp='cmbr'     ,tid='agef' ,x=140  ,w=120  ,items=M.AGEF_UL            ,val=agef_ui)),
-    ('okok',d(tp='bttn'     ,y=35       ,x= 60  ,w= 75  ,cap='OK'   ,def_bt=True    ,on=CB_HIDE )),
-    ('nono',d(tp='bttn'     ,y=35       ,x=140  ,w=120  ,cap='&All ages'            ,on=CB_HIDE )),
-               ],form   =d(  h=65       ,w=265          ,cap=_('Search in files with the age (0 - in all)'))
+                 ctrls  =d(
+            age_=d(tp='labl',tid='agef' ,x=  5  ,w= 50  ,cap='>'+_('Age:')                  ),
+            agef=d(tp='edit',y= 5       ,x= 60  ,w= 75                          ,val=agef_n ),
+            ageu=d(tp='cmbr',tid='agef' ,x=140  ,w=120  ,items=M.AGEF_UL        ,val=agef_ui),
+            okok=d(tp='bttn',y=35       ,x= 60  ,w= 75  ,cap='OK'   ,def_bt=True,on=CB_HIDE ),
+            nono=d(tp='bttn',y=35       ,x=140  ,w=120  ,cap='&All ages'        ,on=CB_HIDE ),
+                       )
+                ,form   =d(  h=65       ,w=265          ,cap=_('Search in files with the age (0 - in all)'))
                 ,fid    ='agef').show()
             if not ret:             return d(fid=self.cid_what())
             age             = vals['agef'].strip()
@@ -895,6 +884,68 @@ class Fif4D:
             return d(fid=self.cid_what()
                     ,ctrls=d(di_i4op=d(cap=m.i4op_ca())))
         
+        if aid=='wk_enco_ms':                   # Change enco masks
+            ms      = m.opts.wk_enco_ms.copy()
+            ms      = {'': DEF_LOC_ENCO} if not ms else ms
+            def on_chs(ag, cid, data):
+                msk     = list(ms.keys())[int(cid[1:])]
+                enc     = ms[msk]
+                enc_ind = [n for n,(nm,al,cm) in enumerate(ENCODINGS)
+                            if enc==nm or enc in al.split(', ')][0] if enc else 0
+                enc_ind = app.dlg_menu(app.MENU_LIST
+                        ,   '\n'.join([f('{}\t{}', nm+(f' ({al}) ' if al!='' else ''),  cm)  
+                                        for nm,al,cm in ENCODINGS])
+                        ,   focused=enc_ind
+                        ,   caption=_(f'Encoding for files "{msk}"'))
+                if enc_ind is None: return []
+                ms[msk] = ENCODINGS[enc_ind][0]
+                return d(ctrls={'e'+cid[1:]:d(val=ms[msk])},fid='m'+cid[1:])
+            def on_add(ag, cid, data):
+                if '' in ms:    return d(fid=f'm{list(ms.keys()).index("")}')
+                ms['']  = DEF_LOC_ENCO
+                return [d(ctrls=cts(), form=d(h=len(ms)*30+40)), d(fid=f'm{len(ms)-1}')]
+            def on_del(ag, cid, data):
+                nonlocal ms
+                if len(ms)==1:
+                    if app.ID_OK!=msg_box(_('Remove all and save?')):    return []
+                    ms  = {}
+                    return None                 # Close
+                del ms[list(ms.keys())[-1]]
+                return [d(ctrls=cts(), form=d(h=len(ms)*30+40)), d(fid=f'm0')]
+            def on_ok(ag, cid, data):
+                nonlocal ms
+                ms_ok   = {}
+                for n in range(len(ms)):
+                    msk = ag.val(f'm{n}').strip()
+                    if not msk:                             return d(fid=f'm{n}')
+                    ms_ok[msk]  = ag.val(f'e{n}')
+                    if n!=list(ms_ok.keys()).index(msk):    return d(fid=f'm{n}')
+                ms  = ms_ok
+            def cts():
+                rsp = {}
+                for n,(m,e) in enumerate(ms.items()):
+                    rsp[f'm{n}']=   d(tp='edit' ,y  =5+n*30 ,x=  5  ,w=165  ,val=m              ,vis=True)
+                    rsp[f'e{n}']=   d(tp='edit' ,tid=f'm{n}',r=-45  ,w= 85  ,val=e  ,ex0=True   ,vis=True)
+                    rsp[f'c{n}']=   d(tp='bttn' ,tid=f'm{n}',r= -5  ,w= 35  ,cap=f'&{1+n}{DDD}' ,vis=True   ,on=on_chs  )
+                for n in range(len(ms), 20):
+                    rsp[f'm{n}']=   d(tp='edit' ,y=0,x=0,w=0,vis=False)            
+                    rsp[f'e{n}']=   d(tp='edit' ,y=0,r=0,w=0,vis=False)
+                    rsp[f'c{n}']=   d(tp='bttn' ,y=0,r=0,w=0,vis=False)
+                return {**rsp, **d(
+                        addm=       d(tp='bttn' ,tid='okok' ,x=  5  ,w= 80  ,cap='&Add'                     ,on=on_add  ),
+                        remv=       d(tp='bttn' ,tid='okok' ,x= 90  ,w= 80  ,cap='&Remove'                  ,on=on_del  ),
+                        okok=       d(tp='bttn' ,y=-30      ,r= -5  ,w=125  ,cap='Save' ,def_bt=True        ,on=on_ok   ),
+                )}
+            ret,vals= DlgAg(
+                 ctrls  =cts()
+                ,form   =d(  h=len(ms)*30+40                        ,w=310  ,cap=_('File mask and encodings'))
+                ,opts   =d(negative_coords_reflect=True)
+                ).show()
+            if ret not in ('okok', 'remv'): return []
+            m.opts.wk_enco_ms.clear()
+            m.opts.wk_enco_ms.update(ms)
+            return []
+
         if aid=='wk_enco_d':                    # Change enco steps
             m.opts.wk_enco = WK_ENCO
             return []
@@ -906,11 +957,11 @@ class Fif4D:
                         if enc==nm or enc in al.split(', ')]
             enc_ind = encN[0]   if encN else    len(encsNAC)
             enc_ind = app.dlg_menu(app.MENU_LIST
-                    ,   '\n'.join([f('{}\t{}', nm+(f(' ({}) ', al) if al!='' else ''),  cm)  
+                    ,   '\n'.join([f('{}\t{}', nm+(f' ({al}) ' if al!='' else ''),  cm)  
                                     for nm,al,cm in encsNAC] 
                                  +[DETECT_ENCO+' '+_('(analyze file content)')+'\t???'])
                     ,   focused=enc_ind
-                    ,   caption=f(_('Source encoding for step #{}'), 1+step))
+                    ,   caption=_(f'Source encoding for step #{1+step}'))
             if enc_ind is None: return []
             enc     = encsNAC[enc_ind][0]   if enc_ind<len(encsNAC) else    DETECT_ENCO
             m.opts.wk_enco[step]    = enc
@@ -924,13 +975,14 @@ class Fif4D:
                 return d(fid=self.cid_what()
                         ,ctrls=d(rp_cntx=d(cap=m.cntx_ca())))     # Turn off
             ret,vals= DlgAg(
-                 ctrls  =[
-    ('cn_b',d(tp='labl'     ,tid='cntb' ,x= 5   ,w=70   ,cap='>'+_('&Before:')                      )),
-    ('cntb',d(tp='sped'     ,y=5        ,x=80   ,w=70   ,min_max_inc='0,9,1'    ,val=m.opts.rp_cntb )),
-    ('cn_a',d(tp='labl'     ,tid='cnta' ,x= 5   ,w=70   ,cap='>'+_('A&fter:')                       )),
-    ('cnta',d(tp='sped'     ,y=33       ,x=80   ,w=70   ,min_max_inc='0,9,1'    ,val=m.opts.rp_cnta )),
-    ('okok',d(tp='bttn'     ,y=61       ,x=80   ,w=70   ,cap='OK'   ,def_bt=True    ,on=CB_HIDE     )),
-               ],form   =d(  h=90       ,w=175          ,cap=_('Extra context lines'))
+                 ctrls  =d(
+            cn_b=d(tp='labl',tid='cntb' ,x= 5   ,w=70   ,cap='>'+_('&Before:')                      ),
+            cntb=d(tp='sped',y=5        ,x=80   ,w=70   ,min_max_inc='0,9,1'    ,val=m.opts.rp_cntb ),
+            cn_a=d(tp='labl',tid='cnta' ,x= 5   ,w=70   ,cap='>'+_('A&fter:')                       ),
+            cnta=d(tp='sped',y=33       ,x=80   ,w=70   ,min_max_inc='0,9,1'    ,val=m.opts.rp_cnta ),
+            okok=d(tp='bttn',y=61       ,x=80   ,w=70   ,cap='OK'   ,def_bt=True    ,on=CB_HIDE     ),
+                       )
+                ,form   =d(  h=90       ,w=175          ,cap=_('Extra context lines'))
                 ,fid    ='cntb').show()
             if ret!='okok':
                 m.opts.rp_cntx  = False
@@ -950,11 +1002,11 @@ class Fif4D:
                 M.done_finds_pos= len(M.done_finds)-1 \
                                     if aid=='ps_prev' and M.done_finds_pos is None else \
                                   M.done_finds_pos + (-1 if aid=='ps_prev' else 1)
-                if not (0<=M.done_finds_pos<len(M.done_finds)): return m.stbr_act(f(_('No more executed searches ({})'),len(M.done_finds)))
+                if not (0<=M.done_finds_pos<len(M.done_finds)): return m.stbr_act(_(f'No more executed searches ({len(M.done_finds)})'))
                 ps  = M.done_finds[M.done_finds_pos]
                 for k in ps:
                     m.opts[k]   = ps[k]
-                m.stbr_act(f(_('Load executed search params ({}/{})'), 1+M.done_finds_pos, len(M.done_finds)))
+                m.stbr_act(_(f'Load executed search params ({1+M.done_finds_pos}/{len(M.done_finds)})'))
                 return d(vals=m.vals_opts('o2v')
                         ,ctrls=d(di_i4op=d(cap=m.i4op_ca())
                                 ,rp_cntx=d(cap=m.cntx_ca())))
@@ -968,9 +1020,9 @@ class Fif4D:
                 ps  = m.dlg_preset()
                 if not ps:  return []
                 m.opts.ps_pset += [ps]
-                return m.stbr_act(f(_('Save preset: {}'), M.ZIP_PS4MENU(ps)))
+                return m.stbr_act(_(f'Save preset: {M.ZIP_PS4MENU(ps)}'))
             ps_num  = int(aid.split('_')[2])
-            if ps_num>=len(m.opts.ps_pset): return m.stbr_act(f(_('No preset #{}'), 1+ps_num))
+            if ps_num>=len(m.opts.ps_pset): return m.stbr_act(_(f'No preset #{1+ps_num}'))
             ps      = m.opts.ps_pset[ps_num]
             if aid[:7]=='ps_edit':
                 ps_new  = m.dlg_preset(ps)
@@ -978,15 +1030,15 @@ class Fif4D:
                 ps['nm']= ps_new['nm']
                 return []
             if aid[:7]=='ps_remv':
-                if app.ID_OK==msg_box(f(_('Remove preset\n"{}"?'), M.ZIP_PS4MENU(ps))):
+                if app.ID_OK==msg_box(_(f'Remove preset\n"{M.ZIP_PS4MENU(ps)}"?')):
                     del m.opts.ps_pset[ps_num]
-                    m.stbr_act(f(_('Remove preset {}'), M.ZIP_PS4MENU(ps)))
+                    m.stbr_act(_(f'Remove preset {M.ZIP_PS4MENU(ps)}'))
                 return []
             if aid[:7]=='ps_load':
                 for k in ps:
                     if k=='nm': continue
                     m.opts[k]   = ps[k]
-                m.stbr_act(f(_('Load preset: {}'), M.ZIP_PS4MENU(ps)))
+                m.stbr_act(_(f'Load preset: {M.ZIP_PS4MENU(ps)}'))
                 return d(vals=m.vals_opts('o2v')
                         ,ctrls=d(di_i4op=d(cap=m.i4op_ca())
                                 ,rp_cntx=d(cap=m.cntx_ca())))
@@ -1046,7 +1098,7 @@ class Fif4D:
             )   if m.reporter else 0
             return []
 
-        if aid=='di_fnd!':                      # Start new search
+        if aid=='di_find':                      # Start new search
             m.stbr_act('')
             upd = self.work(ag)
             if not upd and GOTO_FIRST_FR: m.do_acts(ag, 'go-next-fr')
@@ -1062,12 +1114,29 @@ class Fif4D:
             sel         = m.rslt.get_text_sel()
             crt         = m.rslt.get_carets()[0]
             frg_file    = m.reporter.get_fragment_location_by_caret(crt[1], crt[0])[0]
-            if frg_file.startswith('tab:'): return []   ##?? Why?
-            upd         = set_fn(frg_file)
+            if frg_file.startswith('tab:'):
+                upd     = d(fid=self.cid_what()
+                            ,vals=d(wk_incl=frg_file.split('/')[1]
+                                   ,wk_fold=Walker.ROOT_IS_TABS
+                                   ,wk_excl=''
+                                   ,wk_dept=1))
+            else:
+                upd     = set_fn(frg_file)
             upd         = upd if not sel or '\n' in sel else \
                          [upd, d(ctrls=d(in_what=d(val=sel)
                                         ,in_whaM=d(val=sel)))]
             return upd
+
+        if aid=='nf_frlp':                      # Prepare to find in current source and lex path
+            if not m.rslt or not m.reporter:return []
+            upd         = m.do_acts(ag, 'nf_frag')
+            ag.update(upd)
+            crt         = m.rslt.get_carets()[0]
+            frg_file,rc = m.reporter.get_fragment_location_by_caret(crt[1], crt[0])[:2]
+            lx_path= LexFilter.get_lx_path(m.srcf.fif_tid, rc).strip(SEP4LEXPATH)
+            if not lx_path: return []
+            incl    = ag.val('wk_incl')
+            return d(vals=d(wk_incl=f'{incl} [:{lx_path}:]'))
 
         if aid in ('call-find', 'call-repl'):   # Move to core dlg
             ag.opts['on_exit_focus_to_ed'] = None
@@ -1103,7 +1172,7 @@ class Fif4D:
         if aid=='vr-add':                       # Append var
             cid     = ag.focused()
             cid     = self.cid_what() if cid=='di_menu' else cid
-            vr_sgn  = m.var_acts('ask')
+            vr_sgn  = m.var_acts('ask', m.caps.get(cid, ''))
             if not vr_sgn:  return []
             cval    = ag.val(cid)+vr_sgn
             return d(ctrls={cid:d(val=cval)}
@@ -1173,9 +1242,11 @@ class Fif4D:
                   )
         pass;                  #m.opts.ps_pset  = [dcta(nm='n1'),dcta(nm='n2'),]
         
+        enc_plan=((f'masks (#{len(m.opts.wk_enco_ms)}), ' if m.opts.wk_enco_ms else '')
+                + ', '.join(m.opts.wk_enco))
         cap_val = lambda cap, val: cap+': '+val.strip()+DDD if val.strip() else cap+DDD
         mn_i4op = [(
-    ),d(                 cap=f('=== {} ===', OTH4FND) ,en=False
+    ),d(                 cap=f'=== {OTH4FND} ==='   ,en=False
     ),d(tag='wk_sort'   ,cap=cap_val(M.SORT_CP, m.sort_ca()).strip('.').strip(DDD)
                                                     ,ch=bool(m.opts.wk_sort)            ,sub=[
       d(tag='wk_sort:'+l,cap=u                      ,ch=    (m.opts.wk_sort==l))   for l,u in zip(M.SORT_LS,M.SORT_UL)
@@ -1194,15 +1265,20 @@ class Fif4D:
     ),d(tag='sy_inst'       ,cap=M.INSTR_CP         ,ch=(m.opts.wk_syst=='in')
     ),d(tag='sy_otst'       ,cap=M.OTSTR_CP         ,ch=(m.opts.wk_syst=='ot')
                                                                                             )]),(
-    ),d(tag='wk_clea'   ,cap=f(_('C&lear all "{}"'), OTH4FND)
+    ),d(tag='wk_clea'   ,cap=_(f'C&lear all "{OTH4FND}"')
     ),d(                 cap='-'
-    ),d(                 cap=f(_('En&codings plan: {}'), ', '.join(m.opts.wk_enco))        ,sub=[(
+    ),d(                 cap=_(f'En&codings plan: {enc_plan}')                              ,sub=[(
+    ),d(tag='a:wk_enco_ms'  ,cap=_('Set masks')+DDD
+    ),d(                     cap='-'
+    )]+[d(                   cap=f'{msk} : {enc}'  ,en=False)
+        for msk,enc in m.opts.wk_enco_ms.items()
+    ]+[(
+    ),d(                     cap='-'
     ),d(tag='a:wk_enco_0'   ,cap=f(_('Step &1: {}')+DDD, m.opts.wk_enco[0])
     ),d(tag='a:wk_enco_1'   ,cap=f(_('Step &2: {}')+DDD, m.opts.wk_enco[1])  ,en=bool(m.opts.wk_enco[1])
     ),d(tag='a:wk_enco_2'   ,cap=f(_('Step &3: {}')    , m.opts.wk_enco[2])  ,en=False
-#   ),d(tag='a:wk_enco_2'   ,cap=f(_('Step &3: {}')+DDD, m.opts.wk_enco[2])  ,en=bool(m.opts.wk_enco[2])
     ),d(                     cap='-'
-    ),d(tag='a:wk_enco_d'   ,cap=f(_('Use &default plan: {}'), ', '.join(WK_ENCO))   , en=(WK_ENCO!=m.opts.wk_enco)
+    ),d(tag='a:wk_enco_d'   ,cap=f(_('Use &default steps: {}'), ', '.join(WK_ENCO))   , en=(WK_ENCO!=m.opts.wk_enco)
                                                                                             )]),(
                   )]
 
@@ -1210,7 +1286,7 @@ class Fif4D:
             return ag.show_menu(mn_i4op, aid, where, dx+25, dy-5, cmd4all=self.wnen_menu)
 
         mn_rslt   = [(
-    ),d(                 cap=f('=== {} ===', OTH4RPT) ,en=False
+    ),d(                 cap=f'=== {OTH4RPT} ==='   ,en=False
 #   ),d(tag='rp_lexa'   ,cap=_('Show le&xer path for all fragments (slowdown)')
 #       ,ch=m.opts.rp_lexa
     ),d(tag='rp_relp'   ,cap=_('Show relati&ve paths')
@@ -1220,7 +1296,7 @@ class Fif4D:
 #   ),d(tag='rp_shcw'   ,cap=_('Show ":col&umn:width" for fragments')
 #       ,ch=m.opts.rp_shcw
     ),d(                 cap=_('Results &tree: ')+TRFMD2V[m.opts.rp_trfm]   ,sub=[
-      d(tag='trfm:'+tfm     ,cap=f('&{} {}', n1, TRFMD2V[tfm])     ,ch=m.opts.rp_trfm==tfm)
+      d(tag='trfm:'+tfm     ,cap=f'&{n1} {TRFMD2V[tfm]}'        ,ch=m.opts.rp_trfm==tfm)
         for n1, tfm in enumerate(TRFMD2V.keys(), 1)
                   ]),(
     ),d(                 cap='-'
@@ -1238,6 +1314,7 @@ class Fif4D:
     ),d(tag='a:nav-to'      ,cap=_('Open found fragment')               ,key='Enter'
     ),d(                     cap='-'
     ),d(tag='a:nf_frag'     ,cap=_('Prepare to find in the so&urce')    ,key='F11'
+    ),d(tag='a:nf_frlp'     ,cap=_('Prepare to find in the sou&rce and lexer path'),key='Shift+F11'
                         )]
                 , aid, where, dx+5, dy+10, cmd4all=self.wnen_menu)
             return []
@@ -1253,6 +1330,7 @@ class Fif4D:
     ),d(tag='a:nav-to'      ,cap=_('Open found fragment')               ,key='Enter'
     ),d(                     cap='-'
     ),d(tag='a:nf_frag'     ,cap=_('Prepare to find in the so&urce')    ,key='F11'
+    ),d(tag='a:nf_frlp'     ,cap=_('Prepare to find in the sou&rce and lexer path'),key='Shift+F11'
     ),d(                     cap='-'
                 )]+ mn_rslt
                 , aid, where, dx+5, dy+10, cmd4all=self.wnen_menu)
@@ -1329,10 +1407,10 @@ class Fif4D:
         # Horz
         WRDW    = W_WORD_BTTN   #get_gui_autosize_width((('tp','chbt'),('cap','"w"')  ))
         MENW    = W_MENU_BTTN   #get_gui_autosize_width((('tp','bttn'),('cap','=')    ))
-        LBSW    = get_gui_autosize_width((('tp','labl'),('cap',WHA__CA)))
-        EXSW    = get_gui_autosize_width((('tp','labl'),('cap',EXC__CA)))
-        FNDW    = get_gui_autosize_width((('tp','bttn'),('cap',find_ca)))
-        CTXW    = get_gui_autosize_width((('tp','chbt'),('cap','-7+7')))
+        LBSW    = get_gui_autosize_width(d(tp='labl',cap=WHA__CA))
+        EXSW    = get_gui_autosize_width(d(tp='labl',cap=EXC__CA))
+        FNDW    = get_gui_autosize_width(d(tp='bttn',cap=find_ca))
+        CTXW    = get_gui_autosize_width(d(tp='chbt',cap='-7+7' ))
         pass;                  #log("WRDW,MENW,LBSW,FNDW,CTXW={}",(WRDW,MENW,LBSW,FNDW,CTXW))
         EXSW    = max(MENW+5, EXSW)
         what_x  = LBSW +5
@@ -1353,51 +1431,52 @@ class Fif4D:
         form_h0 = form_pth + M.RSLT_H + M.SRCF_H + STBR_H +5
         
         bttn_h  = get_gui_height('bttn')
-        ctrls   = [((                            #NOTE: Fif4D layout
-  )),('pt'     ,d(tp='panl'                                 ,w=form_w   ,h=form_pth                     ,ali=ALI_TP
-  )),('di_menu',d(tp='bttn' ,y  = 3         ,x=5            ,w=MENW     ,cap='&='       ,hint=_('Menu')             ,p='pt' ,sto=False      # &=
 
-  )),('vw_mlin',d(tp='chbt' ,tid='di_menu'  ,x=what_x       ,w=MENW     ,cap='&+'       ,hint=mlin_hi               ,p='pt' ,sto=False      # &+
-  )),('in_reex',d(tp='chbt' ,tid='di_menu'  ,x=reex_x+WRDW*0,w=WRDW     ,cap='&.*'      ,hint=reex_hi               ,p='pt'                 # &.
-  )),('in_case',d(tp='chbt' ,tid='di_menu'  ,x=reex_x+WRDW*1,w=WRDW     ,cap='&aA'      ,hint=case_hi               ,p='pt'                 # &a
-  )),('in_word',d(tp='chbt' ,tid='di_menu'  ,x=reex_x+WRDW*2,w=WRDW     ,cap='"&w"'     ,hint=word_hi               ,p='pt'                 # &w
-  )),('rp_cntx',d(tp='chbt' ,tid='di_menu'  ,x=cntx_x       ,w=CTXW     ,cap=m.cntx_ca(),hint=cntx_hi               ,p='pt'                 # &-
-  )),('di_i4o_',d(tp='bvel' ,y  = 3         ,x=i4op_x       ,r=-5-FNDW-5,h=bttn_h                       ,a='r>'     ,p='pt' ,props='1'
-  )),('di_i4op',d(tp='labl' ,tid='di_menu'  ,x=i4op_x+4     ,r=-5-FNDW-9,cap=m.i4op_ca(),hint=i4op_hi   ,a='r>'     ,p='pt'
-  )),('di_fnd!',d(tp='bttn' ,tid='di_menu'  ,x=-5-FNDW      ,r=-5       ,cap=find_ca    ,hint=find_hi   ,a='>>'     ,p='pt' ,def_bt=True    # &d Enter
-                                                                                                                            
-  )),('in_wh_t',d(tp='labl' ,tid='in_what'  ,x=what_x-LBSW  ,r=what_x-5 ,cap=WHA__CA    ,hint=what_hi               ,p='pt' ,vis=not mlin   # &f
-  )),('in_what',d(tp='cmbx' ,y  = what_y    ,x=what_x       ,r=-5       ,items=m.sl_what_l              ,a='r>'     ,p='pt' ,vis=not mlin 
-  )),('in_wh_M',d(tp='labl' ,tid='in_what'  ,x=what_x-LBSW  ,r=what_x-5 ,cap=WHA__CA                                ,p='pt' ,vis=    mlin   # &f
-  )),('in_whaM',d(tp='memo' ,y  = what_y    ,x=what_x       ,r=-5       ,h=mlin_h       ,thint=DF_WHM   ,a='r>'     ,p='pt' ,vis=    mlin 
-                                                                                                                            
-  )),('wk_inc_',d(tp='labl' ,tid='wk_incl'  ,x=what_x-LBSW  ,r=what_x-5 ,cap=INC__CA    ,hint=mask_hi               ,p='pt'                 # &i
-  )),('wk_incl',d(tp='cmbx' ,y  =incl_y     ,x=what_x       ,w=fold_w   ,items=m.opts.vw.incl_l         ,a='r>'     ,p='pt'
-  )),('wk_exc_',d(tp='labl' ,tid='wk_incl'  ,x=excl_x-EXSW-5,w=EXSW     ,cap=EXC__CA    ,hint=excl_hi   ,a='>>'     ,p='pt'                 # &x &:
-  )),('wk_excl',d(tp='cmbx' ,y  =incl_y     ,x=excl_x       ,r=-5       ,items=m.opts.vw.excl_l         ,a='>>'     ,p='pt' ,sto=False
-  )),('wk_fol_',d(tp='labl' ,tid='wk_fold'  ,x=what_x-LBSW  ,r=what_x-5 ,cap=FOL__CA    ,hint=fold_hi               ,p='pt'                 # &n
-  )),('wk_fold',d(tp='cmbx' ,y  =fold_y     ,x=what_x       ,w=fold_w   ,items=m.opts.vw.fold_l         ,a='r>'     ,p='pt'
-  )),('di_brow',d(tp='bttn' ,tid='wk_fold'  ,x=brow_x-5     ,w=   MENW  ,cap=DDD        ,hint=brow_hi   ,a='>>'     ,p='pt'
-  )),('wk_dept',d(tp='cmbr' ,tid='wk_fold'  ,x=dept_x       ,r=-5       ,items=M.DEPT_UL,hint=dept_hi   ,a='>>'     ,p='pt'
-                                                                                                                            
-  )),('pb'     ,d(tp='panl'                                                                             ,ali=ALI_CL
-  )),('di_rslt',d(tp='edtr'                 ,w=form_w       ,h=rslt_h   ,h_min=M.RSLT_H ,border='1'     ,ali=ALI_TP ,p='pb' ,_en=False
-                                                                        ,thint=DEF_RSLT_BODY
-  )),('di_sptr',d(tp='splt'                                 ,y=rslt_h+5                                 ,ali=ALI_TP ,p='pb'
-  )),('di_srcf',d(tp='edtr'                 ,w=form_w       ,h=srcf_h   ,h_min=M.SRCF_H ,border='1'     ,ali=ALI_CL ,p='pb' ,_en=False
-                                                                        ,thint=DEF_SRCF_BODY
-                                                                                                                            
-  )),('di_stbr',d(tp='stbr'                                 ,h=STBR_H                                   ,ali=ALI_BT
-    
-  )),('tl_edtr',d(tp='edtr' ,y=0,h=0,x=0,w=0,sto=False
-  )),('tl_trvw',d(tp='trvw' ,y=0,h=0,x=0,w=0,sto=False
-                  ))][1:]
-        m.caps  =     {cid:cnt['cap']   for cid,cnt in ctrls
+        ctrls   = dict(                         #NOTE: Fif4D layout
+    pt     =d(tp='panl'                                 ,w=form_w   ,h=form_pth                     ,ali=ALI_TP
+  ),di_menu=d(tp='bttn' ,y  = 3         ,x=5            ,w=MENW     ,cap='&='       ,hint=_('Menu')             ,p='pt' ,sto=False      # &=
+                                                                                                                                             
+  ),vw_mlin=d(tp='chbt' ,tid='di_menu'  ,x=what_x       ,w=MENW     ,cap='&+'       ,hint=mlin_hi               ,p='pt' ,sto=False      # &+
+  ),in_reex=d(tp='chbt' ,tid='di_menu'  ,x=reex_x+WRDW*0,w=WRDW     ,cap='&.*'      ,hint=reex_hi               ,p='pt'                 # &.
+  ),in_case=d(tp='chbt' ,tid='di_menu'  ,x=reex_x+WRDW*1,w=WRDW     ,cap='&aA'      ,hint=case_hi               ,p='pt'                 # &a
+  ),in_word=d(tp='chbt' ,tid='di_menu'  ,x=reex_x+WRDW*2,w=WRDW     ,cap='"&w"'     ,hint=word_hi               ,p='pt'                 # &w
+  ),rp_cntx=d(tp='chbt' ,tid='di_menu'  ,x=cntx_x       ,w=CTXW     ,cap=m.cntx_ca(),hint=cntx_hi               ,p='pt'                 # &-
+  ),di_i4o_=d(tp='bvel' ,y  = 3         ,x=i4op_x       ,r=-5-FNDW-5,h=bttn_h                       ,a='r>'     ,p='pt' ,props='1'
+  ),di_i4op=d(tp='labl' ,tid='di_menu'  ,x=i4op_x+4     ,r=-5-FNDW-9,cap=m.i4op_ca(),hint=i4op_hi   ,a='r>'     ,p='pt'
+  ),di_find=d(tp='bttn' ,tid='di_menu'  ,x=-5-FNDW      ,r=-5       ,cap=find_ca    ,hint=find_hi   ,a='>>'     ,p='pt' ,def_bt=True    # &d Enter
+                                                                                                                         
+  ),in_wh_t=d(tp='labl' ,tid='in_what'  ,x=what_x-LBSW  ,r=what_x-5 ,cap=WHA__CA    ,hint=what_hi               ,p='pt' ,vis=not mlin   # &f
+  ),in_what=d(tp='cmbx' ,y  = what_y    ,x=what_x       ,r=-5       ,items=m.sl_what_l              ,a='r>'     ,p='pt' ,vis=not mlin 
+  ),in_wh_M=d(tp='labl' ,tid='in_what'  ,x=what_x-LBSW  ,r=what_x-5 ,cap=WHA__CA                                ,p='pt' ,vis=    mlin   # &f
+  ),in_whaM=d(tp='memo' ,y  = what_y    ,x=what_x       ,r=-5       ,h=mlin_h       ,thint=DF_WHM   ,a='r>'     ,p='pt' ,vis=    mlin 
+                                                                                                                         
+  ),wk_inc_=d(tp='labl' ,tid='wk_incl'  ,x=what_x-LBSW  ,r=what_x-5 ,cap=INC__CA    ,hint=mask_hi               ,p='pt'                 # &i
+  ),wk_incl=d(tp='cmbx' ,y  =incl_y     ,x=what_x       ,w=fold_w   ,items=m.opts.vw.incl_l         ,a='r>'     ,p='pt'
+  ),wk_exc_=d(tp='labl' ,tid='wk_incl'  ,x=excl_x-EXSW-5,w=EXSW     ,cap=EXC__CA    ,hint=excl_hi   ,a='>>'     ,p='pt'                 # &x
+  ),wk_excl=d(tp='cmbx' ,y  =incl_y     ,x=excl_x       ,r=-5       ,items=m.opts.vw.excl_l         ,a='>>'     ,p='pt' ,sto=False
+  ),wk_fol_=d(tp='labl' ,tid='wk_fold'  ,x=what_x-LBSW  ,r=what_x-5 ,cap=FOL__CA    ,hint=fold_hi               ,p='pt'                 # &n
+  ),wk_fold=d(tp='cmbx' ,y  =fold_y     ,x=what_x       ,w=fold_w   ,items=m.opts.vw.fold_l         ,a='r>'     ,p='pt'
+  ),di_brow=d(tp='bttn' ,tid='wk_fold'  ,x=brow_x-5     ,w=   MENW  ,cap=DDD        ,hint=brow_hi   ,a='>>'     ,p='pt'
+  ),wk_dept=d(tp='cmbr' ,tid='wk_fold'  ,x=dept_x       ,r=-5       ,items=M.DEPT_UL,hint=dept_hi   ,a='>>'     ,p='pt'
+                                                                                                                         
+  ),pb     =d(tp='panl'                                                                             ,ali=ALI_CL
+  ),di_rslt=d(tp='edtr'                 ,w=form_w       ,h=rslt_h   ,h_min=M.RSLT_H ,border='1'     ,ali=ALI_TP ,p='pb' ,_en=False
+                                                                     ,thint=DEF_RSLT_BODY
+  ),di_sptr=d(tp='splt'                                 ,y=rslt_h+5                                 ,ali=ALI_TP ,p='pb'
+  ),di_srcf=d(tp='edtr'                 ,w=form_w       ,h=srcf_h   ,h_min=M.SRCF_H ,border='1'     ,ali=ALI_CL ,p='pb' ,_en=False
+                                                                     ,thint=DEF_SRCF_BODY
+                                                                                                                         
+  ),di_stbr=d(tp='stbr'                                 ,h=STBR_H                                   ,ali=ALI_BT
+      
+  ),tl_edtr=d(tp='edtr' ,y=0,h=0,x=0,w=0,sto=False
+  ),tl_trvw=d(tp='trvw' ,y=0,h=0,x=0,w=0,sto=False
+                  ))
+        m.caps  =     {cid:cnt['cap']   for cid,cnt in ctrls.items()
                         if cnt['tp'] in ('bttn', 'chbt')    and 'cap' in cnt}
-        m.caps.update({cid:ctrls[icnt-1][1]['cap'] for (icnt,(cid,cnt)) in enumerate(ctrls)
-                        if cnt['tp'] in ('cmbx', 'cmbr')    and 'cap' in ctrls[icnt-1][1]})
+        icids   = {icnt:cid for icnt,cid in enumerate(ctrls)}
+        m.caps.update({cid:ctrls[icids[icnt-1]]['cap'] for (icnt,(cid,cnt)) in enumerate(ctrls.items())
+                        if cnt['tp'] in ('cmbx', 'cmbr')    and 'cap' in ctrls[icids[icnt-1]]})
         m.caps  = {k:v.strip(' :*|\\/>*').replace('&', '') for (k,v) in m.caps.items()}
-        ctrls   = odict(ctrls)
         for ctrl in ctrls.values():
             if  ctrl['tp'] in ('chbt', 'bttn'):
                 ctrl['on']  = m.do_acts
@@ -1414,7 +1493,7 @@ class Fif4D:
         ctrls['di_i4op']['on_click_dbl']    = lambda ag, aid, data='': \
             m.do_acts(ag, 'wk_clea')
         # To save last focus useful place
-        def save_fid(cid):m.last_fid  = cid; return []
+        def save_fid(cid):  m.last_fid  = cid; return []
         ctrls['in_what']['on_focus_enter']  = lambda ag, aid, data='':save_fid(aid)
         ctrls['in_whaM']['on_focus_enter']  = lambda ag, aid, data='':save_fid(aid)
         ctrls['wk_incl']['on_focus_enter']  = lambda ag, aid, data='':save_fid(aid)
@@ -1427,7 +1506,7 @@ class Fif4D:
         
         m.last_fid  = m.opts.us_focus
         m.ag = DlgAg(
-            form    =dict(cap=f(_('Find in Files 4 ({})'), VERSION_V)
+            form    =dict(cap=_(f'Find in Files 4 ({VERSION_V})')
                          ,h=form_h,w=form_w             ,h_min0=form_h0,w_min0=form_w
                          ,frame='resize'
                          ,on_key_down=m.do_key_down
@@ -1516,7 +1595,7 @@ class Fif4D:
             m.opts.wk_excl  = ''
             m.opts.wk_fold  = Walker.ROOT_IS_TABS
             m.ag.update(vals=m.vals_opts('o2v'))
-            app.timer_proc(app.TIMER_START_ONE, m.on_timer, M.TIMER_DELAY, tag='di_fnd!')
+            app.timer_proc(app.TIMER_START_ONE, m.on_timer, M.TIMER_DELAY, tag='di_find')
 
         m.ag.show(on_exit=m.on_exit, onetime=False)
        #def show
@@ -1532,6 +1611,7 @@ class Fif4D:
         M,m     = self.__class__,self
         scam    = data if data else ag.scam()
         fid     = ag.focused()
+        pass;                  #log("fid,scam,key,key_name={}",(fid,scam,key,get_const_name(key, module=cudatext_keys)))
         pass;                   log__("fid,scam,key,key_name={}",(fid,scam,key,get_const_name(key, module=cudatext_keys))         ,__=(log4fun,M.log4cls)) if _log4mod>=0 else 0
         pass;                  #return []
 
@@ -1565,6 +1645,8 @@ class Fif4D:
         elif skef==(''  ,VK_TAB, 'di_srcf'):            upd=d(fid=self.cid_what(True))          #       Tab in srcf
         elif skef==('s' ,VK_TAB, 'in_what'):            upd=d(fid='di_srcf')                    # Shift+Tab in slined what
         elif skef==('s' ,VK_TAB, 'in_whaM'):            upd=d(fid='di_srcf')                    # Shift+Tab in Mlined what
+        elif skey==('sa',186):                          upd=d(fid='wk_excl')                    # Alt+:
+        elif skey==('sa', 54):                          upd=d(fid='wk_excl')                    # Alt+:
         
         # Form size/layout
         elif skey==('ca' ,VK_DOWN)  and fid!='in_whaM': upd=m.do_acts(ag, 'more-r')             # Ctrl+Alt+DN
@@ -1590,20 +1672,21 @@ class Fif4D:
         elif skey==( 'a',VK_LEFT):                      upd=m.do_acts(ag, 'ps_prev')            # Alt+LF
         elif skey==( 'a',VK_RIGHT):                     upd=m.do_acts(ag, 'ps_next')            # Alt+RT
         elif ('c',ord('1'))<=skey<=('c',ord('9')):      upd=m.do_acts(ag, 'ps_load_'+ckey1)     # Ctrl+1..9
-        elif skey==( 'c',ord('A')):                     upd=m.do_acts(ag, 'vr-add')             # Ctrl+A
+        elif skey==( 'c',ord('A')):                     upd=m.do_acts(ag, 'vr-add')             # Ctrl+      A
         elif skey==('sc',ord('A')):                     upd=m.do_acts(ag, 'vr-sub')             # Ctrl+Shift+A
         
         # Find/Results/Source
-        elif skey==(  '',VK_F2):                        upd=m.do_acts(ag, 'di_fnd!')            # F2
+        elif skey==(  '',VK_F2):                        upd=m.do_acts(ag, 'di_find')            # F2
         elif skef==('sc',187, 'di_rslt'):               upd=m.do_acts(ag, 'vi_fldi_ta')         # Ctrl+Shift+=  in rslt
-        elif skef==( 'c',187, 'di_rslt'):               upd=m.do_acts(ag, 'vi_fldi_tb')         # Ctrl+=        in rslt
-        elif skey==(  '',VK_F3):                        upd=m.do_acts(ag, 'go-next-fr')         # F3
-        elif skey==( 's',VK_F3):                        upd=m.do_acts(ag, 'go-prev-fr')         # Shift+F3
-        elif skey==( 'c',VK_F3):                        upd=m.do_acts(ag, 'go-next-fi')         # Ctrl+F3
+        elif skef==( 'c',187, 'di_rslt'):               upd=m.do_acts(ag, 'vi_fldi_tb')         # Ctrl+      =  in rslt
+        elif skey==(  '',VK_F3):                        upd=m.do_acts(ag, 'go-next-fr')         #            F3
+        elif skey==( 's',VK_F3):                        upd=m.do_acts(ag, 'go-prev-fr')         #      Shift+F3
+        elif skey==( 'c',VK_F3):                        upd=m.do_acts(ag, 'go-next-fi')         # Ctrl+      F3
         elif skey==('sc',VK_F3):                        upd=m.do_acts(ag, 'go-prev-fi')         # Ctrl+Shift+F3
-        elif skey==(  '',VK_F11):                       upd=m.do_acts(ag, 'nf_frag')            # F11
-        elif skef==(  '',VK_ENTER, 'di_rslt'):          upd=m.do_acts(ag, 'nav-to')             # Enter       in rslt
-        elif skef==(  '',VK_ENTER, 'di_srcf'):          upd=m.do_acts(ag, 'nav-to')             # Enter       in srcf
+        elif skey==(  '',VK_F11):                       upd=m.do_acts(ag, 'nf_frag')            #       F11
+        elif skey==( 's',VK_F11):                       upd=m.do_acts(ag, 'nf_frlp')            # Shift+F11
+        elif skef==(  '',VK_ENTER, 'di_rslt'):          upd=m.do_acts(ag, 'nav-to')             #       Enter in rslt
+        elif skef==(  '',VK_ENTER, 'di_srcf'):          upd=m.do_acts(ag, 'nav-to')             #       Enter in srcf
         elif skef==( 's',VK_ENTER, 'di_rslt'):              m.do_acts(ag, 'nav-to'); upd=None   # Shift+Enter in rslt
         elif skef==( 's',VK_ENTER, 'di_srcf'):              m.do_acts(ag, 'nav-to'); upd=None   # Shift+Enter in srcf
         else:                                               return []
@@ -1635,16 +1718,17 @@ class Fif4D:
                     msg_box(f(_('Name "{}" is already used'), ag.val('name')))
                     return []
             ret,vals= DlgAg(
-                 ctrls  =[
-    ('nam_',d(tp='labl' ,tid='name' ,x=  5  ,w=60   ,cap='>'+_('&Name:')            )),
-    ('name',d(tp='edit' ,y=5        ,x= 70  ,r=-5   ,val=var.nm             ,a='r>' )),
-    ('bod_',d(tp='labl' ,tid='body' ,x=  5  ,w=60   ,cap='>'+_('Val&ue:')           )),
-    ('body',d(tp='edit' ,y=33       ,x= 70  ,r=-5   ,val=var.bd             ,a='r>' )),
-    ('addv',d(tp='bttn' ,tid='okok' ,x= 70  ,w=90   ,cap=_('Add &var')+DDD          ,on=addv)),
-    ('addp',d(tp='bttn' ,tid='okok' ,x=165  ,w=90   ,cap=_('Add &path')+DDD         ,on=addp)),
-    ('remv',d(tp='bttn' ,tid='okok' ,x=-150 ,r=-80  ,cap=_('Remove')        ,a='>>' ,on=CB_HIDE ,vis=(act=='edit'))),
-    ('okok',d(tp='bttn' ,y=61       ,x=-75  ,r=-5   ,cap=oks                ,a='>>' ,on=okok    ,def_bt=True)),
-               ],form   =d(  h=90,h_max=90  ,w=450  ,cap=fcap               ,frame='resize')
+                 ctrls  = d(
+            nam_=d(tp='labl',tid='name' ,x=  5  ,w=60   ,cap='>'+_('&Name:')            ),
+            name=d(tp='edit',y=5        ,x= 70  ,r=-5   ,val=var.nm             ,a='r>' ),
+            bod_=d(tp='labl',tid='body' ,x=  5  ,w=60   ,cap='>'+_('Val&ue:')           ),
+            body=d(tp='edit',y=33       ,x= 70  ,r=-5   ,val=var.bd             ,a='r>' ),
+            addv=d(tp='bttn',tid='okok' ,x= 70  ,w=90   ,cap=_('Add &var')+DDD          ,on=addv                        ),
+            addp=d(tp='bttn',tid='okok' ,x=165  ,w=90   ,cap=_('Add &path')+DDD         ,on=addp                        ),
+            remv=d(tp='bttn',tid='okok' ,x=-150 ,r=-80  ,cap=_('Remove')        ,a='>>' ,on=CB_HIDE ,vis=(act=='edit')  ),
+            okok=d(tp='bttn',y=61       ,x=-75  ,r=-5   ,cap=oks                ,a='>>' ,on=okok    ,def_bt=True        ),
+                        )
+                ,form   =d(  h=90,h_max=90  ,w=450  ,cap=fcap               ,frame='resize')
                 ,fid    =fid
                 ,opts   =d(negative_coords_reflect=True)).show()
             if ret=='remv':
@@ -1657,10 +1741,12 @@ class Fif4D:
             return var
 
         if act=='ask':
+            to_fld  = par
             vars_l  = [v['nm']+'\t'+v['bd'] for v in m.opts.vs_defs]
             vars_l += [vnm    +'\t'+vcm     for vnm,vev,vcm in STD_VARS]
             var_i   = app.dlg_menu(app.MENU_LIST_ALT+app.MENU_NO_FULLFILTER # Filter only names
-                        , '\n'.join(vars_l), caption=_('Macro vars'))
+                        , '\n'.join(vars_l)
+                        , caption=_('Append macro vars'+(f' to "{to_fld}"' if to_fld else '')))
             if var_i is None:   return None
             return vars_l[var_i].split('\t')[0]
             
@@ -1935,7 +2021,7 @@ class Fif4D:
                 ag.update(ctrls={cid:d(en=False) for cid in self._locked_cids})
             elif how=='unlock'   and self._locked_cids:
                 ag.update([ d(ctrls={cid:d(en=True)  for cid in self._locked_cids})
-                           ,d(ctrls={'di_fnd!':d(def_bt=True)}) ])
+                           ,d(ctrls={'di_find':d(def_bt=True)}) ])
                 self._locked_cids.clear()
            #def lock_act
 
@@ -2024,7 +2110,7 @@ class Fif4D:
             try:
                 fifwork(m.observer, m.rslt, walkers, fragmer, frgfilters, m.reporter)
             except Exception as ex:
-                msg_box(f(_('Internal Error:\n{}'), ex))
+                msg_box(_(f'Internal Error:\n{ex}'))
                 log(traceback.format_exc()) 
             finally:
                 lock_act('unlock')
@@ -2117,6 +2203,7 @@ class LexFilter:
         
         
         def suit(self, fn, frgs):
+            pass;               log4fun=0
             pass;              #log("fn, frgs={}",(fn, frgs))
             ed4lx,lex   = LexFilter._prep(fn, self.ed4lx, self.wk_enco, need_tree=True)
             if not ed4lx:
@@ -2125,12 +2212,16 @@ class LexFilter:
             for frg in frgs:
                 if 0==frg.w:    continue
                 lx_path= LexFilter.get_lx_path(ed4lx.fif_tid, (frg.r,frg.c)).strip(SEP4LEXPATH)
-                pass;           log("lx_path={}",(lx_path))
+                pass;           log(f"{self.how} lx_path={lx_path}") if log4fun else 0
                 for cond in self.conds:
-                    if LexFilter.LxPath.match(cond, lx_path, dbg=True):
-                        if  self.how=='excl':    return False
+                    if LexFilter.LxPath.match(cond, lx_path):
+                        if  self.how=='excl':
+                            pass;log(f"excl FAIL cond='{cond}' lx_path='{lx_path}'") if log4fun else 0
+                            return False
                     else:
-                        if  self.how=='incl':    return False
+                        if  self.how=='incl':
+                            pass;log(f"incl FAIL cond='{cond}' lx_path='{lx_path}'") if log4fun else 0
+                            return False
                    #for cond
                #for frg
             return True
@@ -2142,29 +2233,33 @@ class LexFilter:
             """ cond        a>b*>>c>*d
                 path        smth1 > smth2 > ... > smthN
             """
-            if len(g)>100:  return 
-            pass;               log(g+"cond=",(cond)) if dbg else 0
-            pass;               log(g+"path=",(path)) if dbg else 0
+            pass;               log4fun=0
+            if len(g)>100:  return False    # Break infinite loop
+            pass;              #return True
+            pass;               log(g+f"cond='{cond}'") if log4fun else 0
+            pass;               log(g+f"path='{path}'") if log4fun else 0
             if path.startswith(cond):
-                pass;           log(g+'ok startswith') if dbg else 0
+                pass;           log(g+f'ok startswith') if log4fun else 0
                 return True
             if _start:
-                pass;          #log('cond, path, _start, dbg=', (cond, path, _start, dbg))
-#               pass;           log('cond, path, _start, dbg={}', (cond, path, _start, dbg))
+                pass;          #log('cond, path, _start=', (cond, path, _start))
+#               pass;           log('cond, path, _start={}', (cond, path, _start))
                 cond    = re.sub(r'\s+>', '>', cond);   cond    = re.sub(r'>\s+', '>', cond)
                 path    = re.sub(r'\s+>', '>', path);   path    = re.sub(r'>\s+', '>', path)
                 cond    = re.escape(cond).replace('\\>', '>').replace('\\*', '[^>]*')
                 path    = path + '>'
                 return LexFilter.LxPath.match(cond, path, _start=False, dbg=dbg, g=g+'  ')
+            if cond.startswith(    '[^>]*>>'):
+                cond    = cond[len('[^>]*'):]
             if cond[:2]=='>>':
                 # ">>cit>ctail"
                 cond        = cond.replace('^>', '^^')
                 cit,t,ctail = cond[2:].partition('>')
                 ctail       = ctail.replace('^^', '^>')
-                pass;           log(g+'cit=',cit,' ctail=',ctail) if dbg else 0
+                pass;           log(g+f"cit='{cit}' ctail='{ctail}'") if log4fun else 0
                 mt          = re.search(cit+'>', path)
                 if not mt:
-                    pass;       log(g+'no cit=',cit,' in path=',path) if dbg else 0
+                    pass;       log(g+f"NOT cit='{cit}' in path='{path}'") if log4fun else 0
                     return False
                 ptail       = path[mt.end():]
                 return LexFilter.LxPath.match(ctail, ptail, _start=False, dbg=dbg, g=g+'  ')
@@ -2172,27 +2267,30 @@ class LexFilter:
             cond        = cond.replace('^>', '^^')
             cit,t,ctail = cond.partition('>')
             cit         =   cit.replace('^^', '^>')
-            ctail       = ctail.replace('^^', '^>') if ctail else ''
-            pass;               log(g+'cit=',cit,' ctail=',ctail) if dbg else 0
+            ctail       = ctail.replace('^^', '^>') #if ctail else ''
+            pass;               log(g+f"cit='{cit}' ctail='{ctail}'") if log4fun else 0
             pit,t,ptail = path.partition('>')
-            pass;               log(g+'pit=',pit,' ptail=',ptail) if dbg else 0
-            mt          = re.search(cit+'$', pit)
+            pass;               log(g+f"pit='{pit}' ptail='{ptail}'") if log4fun else 0
+            mt          = lru_search(cit+'$', pit)
+#           mt          = re.search(cit+'$', pit)
             if not mt:
-                pass;           log(g+'cit<>pit') if dbg else 0
+                pass;           log(g+'NOT cit<>pit') if log4fun else 0
                 return False
             return LexFilter.LxPath.match(ctail, ptail, _start=False, dbg=dbg, g=g+'  ')
            #match
+           
+           
        #class LxPath:
     
+
     lex_infs    = {}                            # {lex:{cm_styles:[], st_styles:[], }}
-
-
     @staticmethod
     def lex_inf(lex):
         infs        = LexFilter.lex_infs
         inf         = infs.setdefault(lex, {})
         if not inf:
             lex_prs= app.lexer_proc(app.LEXER_GET_PROP, lex)
+            pass;              #log("lex,lex_prs={}",(lex,lex_prs))
             inf['cm_styles']= lex_prs['st_c']
             inf['st_styles']= lex_prs['st_s']
         return inf
@@ -2211,16 +2309,30 @@ class LexFilter:
            #def __init__
 
         def suit(self, fn, frgs):
-            pass;               log4fun=0
-            pass;               log__('(cm,st), fn, frgs={}',((self.sycm, self.syst), fn, frgs)         ,__=(log4fun,)) if _log4mod>=0 else 0
+            pass;               log4fun=1
+            pass;              #log__('(cm,st), fn, frgs={}',((self.sycm, self.syst), fn, frgs)         ,__=(log4fun,)) if _log4mod>=0 else 0
             ed4lx,lex   = LexFilter._prep(fn, self.ed4lx, self.wk_enco)
-            if not ed4lx:
+            pass;              #log(f'log lex={lex}')
+            pass;               log__(f'lex={lex}'    ,__=(log4fun,)) if _log4mod>=0 else 0
+            if not ed4lx or not lex:
+                pass;           log(f'not ed4lx or not lex')
                 return True                         # Nothing to filter
-        
+            pass;              #log(f'ed4lx={ed4lx}')
+
             lex_inf = LexFilter.lex_inf(lex)
-            cm_sts  = lex_inf['cm_styles']
-            st_sts  = lex_inf['st_styles']
-            pass;               log__('cm_sts={} st_sts={}',cm_sts,st_sts         ,__=(log4fun,)) if _log4mod>=0 else 0
+            cm_sts_f= lex_inf['cm_styles']
+            st_sts_f= lex_inf['st_styles']
+            pass;               log__(f'cm_sts_f={cm_sts_f} st_sts_f={st_sts_f}'    ,__=(log4fun,)) if _log4mod>=0 else 0
+            sublexs = ed4lx.get_sublexer_ranges()   # [(nm, c_bgn, r_bgn, c_end, r_end)]    ##?? one call for a file?
+            pass;              #log(f'sublexs={sublexs}')
+            if sublexs:
+                cm_sts4lex  = {lex:cm_sts_f}
+                st_sts4lex  = {lex:st_sts_f}
+                for sublex,*t in sublexs:
+                    lex_inf = LexFilter.lex_inf(sublex)
+                    cm_sts4lex[sublex]  = lex_inf['cm_styles']
+                    st_sts4lex[sublex]  = lex_inf['st_styles']
+                pass;          #log(f'cm_sts4lex={cm_sts4lex} st_sts4lex={st_sts4lex}')
 
             iscross     = lambda br,bc,er,ec, qr,qc,qw: not (   # [(br,bc),(er,ec)] has cross with [(qr,qc),(qr,qc+qw)]
                             br >qr
@@ -2231,6 +2343,14 @@ class LexFilter:
             ftk_sts = []
             for frg in frgs:
                 if 0==frg.w:    continue
+                cm_sts      = cm_sts_f
+                st_sts      = st_sts_f
+                if sublexs:
+                    frglex  = ed4lx.get_prop(app.PROP_LEXER_POS, f'{frg.c},{frg.r}')
+                    pass;      #log(f'frglex={frglex}')
+                    cm_sts  = cm_sts4lex[frglex]
+                    st_sts  = st_sts4lex[frglex]
+                
                 pass;           log__('frg={}',(frg)         ,__=(log4fun,)) if _log4mod>=0 else 0
                 tkns    = ed4lx.get_token(app.TOKEN_LIST_SUB, frg.r, frg.r)
                 pass;          #log__('tkns=\n{}',pfw(tkns)         ,__=(log4fun,)) if _log4mod>=0 else 0
@@ -2238,7 +2358,7 @@ class LexFilter:
                             if iscross(tkn['y1'],tkn['x1'],tkn['y2'],tkn['x2'], frg.r,frg.c,frg.w)]
                 pass;           log__('ftk_sts={}',(ftk_sts)         ,__=(log4fun,)) if _log4mod>=0 else 0
 
-                c_s    = 'c'+self.sycm+'_s'+self.syst
+                c_s    = f'c{self.sycm}_s{self.syst}'
                 pass;           log__('c_s={}',(c_s)         ,__=(log4fun,)) if _log4mod>=0 else 0
                 if False:pass
                 elif c_s=='cot_s' and \
@@ -2273,8 +2393,7 @@ class LexFilter:
                                 ftk_st in st_sts]:      # need outside comm&str  but has other cross
                     pass;       log__('has cross with comm|str',()         ,__=(log4fun,)) if _log4mod>=0 else 0
                     return False
-                   #for tkn
-    #       sublexs = ed4lx.get_sublexer_ranges()
+               #for tkn
             pass;               log__('other',()         ,__=(log4fun,)) if _log4mod>=0 else 0
             return True
            #def suit
@@ -2289,6 +2408,7 @@ class LexFilter:
             edtab   = apx.get_tab_by_id(tab_id)
             lex     = edtab.get_prop(app.PROP_LEXER_FILE)
             if not (lex and (not ADV_LEXERS or lex in ADV_LEXERS)):
+                pass;          #log("lex={}",(lex))
                 return (None, lex)
             pass;              #log__('fn body=\n{}',(FSWalker.get_filebody(fn, wk_enco))         ,__=(log4fun,)) if _log4mod>=0 else 0
             if ed4lx.loaded_file != fn:
@@ -2373,7 +2493,7 @@ def fifwork(observer, ed4rpt, walkers, fragmer, frgfilters, reporter):
                         reporter.add_frg(fn, frgs)
                        #for frgs
                 except UnicodeError as ex:
-                    print(f(_('Cannot read "{}": ({}) {}'), fn, enco, ex))  if enco_n==len(enco_l)-1 else 0
+                    print(_(f'Cannot read "{fn}": ({enco}) {ex}'))  if enco_n==len(enco_l)-1 else 0
                     reporter.remove_last_frgs(fn)
                     continue
                 break
@@ -2572,7 +2692,7 @@ class Reporter:
             root    = []
             node_dr = None
             node_fr = None
-            dirs    = odict()                   # {dir:node_dr}
+            dirs    = dict()                    # {dir:node_dr}
             pre_f   = ''
             for fr in self.rfrgs:
                 dp,fnm          = os.path.split(fr.f)
@@ -2599,8 +2719,8 @@ class Reporter:
         if not natorder and \
            trfm == TRFM_D_FLL:  # <dirpath> #N/<dir/filename(r:c:w)>: line
            # Step 1. Find common dirs
-#           fn2dir      = odict()
-            dirs_d      = odict()
+#           fn2dir      = dict()
+            dirs_d      = dict()
             dirs_l      = []
             pre_fn      = ''
             for fr in self.rfrgs:
@@ -2625,7 +2745,7 @@ class Reporter:
             root    = []
             node_dr = None
             node_fr = None
-            dirs    = odict()                   # {dir:node_dr}
+            dirs    = dict()                    # {dir:node_dr}
             pre_f   = ''
 #           newFR   = lambda fn, fr: RFrg(f=fn, r=fr.r, cws=fr.cws, s=fr.s)
             for fr in self.rfrgs:
@@ -2811,7 +2931,7 @@ class Reporter:
     
 def split_dirs_for_stat(dirs:list, g:str='')->list:
     pass;                       log4fun=0
-    nums    = odict()
+    nums    = dict()
     ns      = [nums.setdefault(d, 1+len(nums)) for d in dirs]
     pass;                      #print(g+'ns=\n'+pfwg(list(enumerate(ns)),20,g)) if log4fun else 0
     if len(nums)==len(ns):                      # no conflicts
@@ -3026,7 +3146,7 @@ class TabsWalker:
             # Skip the tab?
             if not       any(map(lambda cl:fnmatch(title, cl), incls)):   continue#for
             if excls and any(map(lambda cl:fnmatch(title, cl), excls)):   continue#for
-            path    = f('tab:{}/{}', tab_id, title)
+            path    = f'tab:{tab_id}/{title}'
             
             # Use!
             self.stats[Walker.WKST_UFNS]   += 1
@@ -3229,7 +3349,7 @@ class FSWalker:
             except Exception as ex:
                 pass;          #log__('ex="{}" on enco_s="{}"',(ex),enco_s         ,__=(log4fun,FSWalker.log4cls))
                 if enco_n == len(enco_l)-1:
-                    print(f(_('Cannot read "{}" (encodings={}): {}'), fp, enco_l, ex))
+                    print(_(f'Cannot read "{fp}" (encodings={enco_l}): {ex}'))
            #for encd_n
         return body
        #def get_filebody
@@ -3375,7 +3495,7 @@ class Fragmer:
     
         def walk_in_body(self, body):
             pass;               log4fun=1
-            pass;               log__("body=\n{}",('\n'.join(f('{:>3}|{}',n,l) for n,l in enumerate(body.splitlines())))       ,__=(log4fun,Fragmer.log4cls)) if _log4mod>=0 else 0
+            pass;               log__("body=\n{}",('\n'.join(f'{n:>3}|{l}' for n,l in enumerate(body.splitlines())))       ,__=(log4fun,Fragmer.log4cls)) if _log4mod>=0 else 0
             cntb        = self.rp_opts['rp_cntb'] if self.rp_opts['rp_cntx'] else 0
             cnta        = self.rp_opts['rp_cnta'] if self.rp_opts['rp_cntx'] else 0
             lines       = body.splitlines()
@@ -3417,7 +3537,7 @@ class Fragmer:
             pass;               log4fun=1
             pass;               log__("len(body)={}",(len(body))       ,__=(log4fun,Fragmer.log4cls)) if _log4mod>=0 else 0
             pass;              #log__("body=\n{}",(body)       ,__=(log4fun,Fragmer.log4cls))
-            pass;              #log__("body=\n{}",('\n'.join(f('{:>3} {}',n,l) for n,l in enumerate(body.splitlines())))       ,__=(log4fun,Fragmer.log4cls))
+            pass;              #log__("body=\n{}",('\n'.join(f'{n:>3} {l}' for n,l in enumerate(body.splitlines())))       ,__=(log4fun,Fragmer.log4cls))
         
             mlined  = '\n' in self.in_opts['in_what'] \
                         or \
@@ -3488,6 +3608,17 @@ def update_tree(trg_d, src_d):
             trg_d[k] = v
     return trg_d
    #def update_tree
+
+
+_pttn2re  = {}
+def lru_search(pttn, src, flags=0):
+    global _pttn2re
+    re_  = _pttn2re.get(pttn)
+    if not re_:
+        re_  = re.compile(pttn, flags)
+        _pttn2re[pttn]   = re_
+    return re_.search(src)
+   #def lru_search
 
 
 if os.name == 'nt':
@@ -3585,4 +3716,6 @@ ToDo
 [+][kv-kv][20aug19] Store (in mem) some last search param sets. Alt+Lf/Rt to load
 [ ][kv-kv][20aug19] ? Show speed of search: files/sec or frags/sec
 [+][kv-kv][21aug19] Check: all roots are not included each others
+[ ][kv-kv][30aug19] Map {ext:encoding}
+[ ][kv-kv][30aug19] Lexer path for all frags - as src line
 '''
