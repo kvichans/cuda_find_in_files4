@@ -1,11 +1,11 @@
 [info]
-version=4.4.07
+version=4.6.03
 title=Find in Files 4
 desc=Gives dialog to search for multiple files containing some string/regex, like in file managers.
 type=cudatext-plugin
 subdir=cuda_find_in_files4
 homepage=https://github.com/kvichans/cuda_find_in_files4
-api=1.0.298
+api=1.0.299
 
 ;[item400]
 ;section=events

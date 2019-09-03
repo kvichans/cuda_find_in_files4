@@ -35,6 +35,12 @@ FIF4_META_OPTS=[
         'frm': 'str',
         'chp': _('Search'),
     },
+    {   'cmt': _('Separate search stage, which collects all suitable files first.'),
+        'opt': 'file_picking_stage',
+        'def': True,
+        'frm': 'bool',
+        'chp': _('Search'),
+    },
     {   'cmt': _('Start file picking from the deepest folders.'),
         'opt': 'from_deepest',
         'def': False,
@@ -118,7 +124,32 @@ FIF4_META_OPTS=[
         'frm': 'json',
         'chp': _('Results'),
     },
-    {   'cmt': _('Auto select first found fragment'),
+    {   'cmt': re.sub(r'  +', r'', _(
+               """Style to mark lexer path.
+                Full form:
+                   "lex_path_style":{
+                     "color_back":"", 
+                     "color_font":"",
+                     "font_bold":false, 
+                     "font_italic":false,
+                     "color_border":"", 
+                     "borders":{"left":"","right":"","bottom":"","top":""}
+                   },
+                Color values: "" - skip, "#RRGGBB" - hex-digits
+                Values for border sides: "solid", "dash", "2px", "dotted", "rounded", "wave" """)),  #! Shift uses chr(160)
+        'opt': 'lex_path_style',
+        'def': {'color_font': '#909090'},
+        'frm': 'json',
+        'chp': _('Results'),
+    },
+    {   'cmt': _('Show first N fragments while search is in progress (min 10).'),
+        'opt': 'show_progress_fragments',
+        'def': 100,
+        'min': 10,
+        'frm': 'int',
+        'chp': _('Results'),
+    },
+    {   'cmt': _('Auto select first found fragment.'),
         'opt': 'goto_first_fragment',
         'def': True,
         'frm': 'bool',
@@ -131,42 +162,42 @@ FIF4_META_OPTS=[
         'chp': _('Results'),
     },
 
-    {   'cmt': _('Height of dialog grid cell (min 25)'),
+    {   'cmt': _('Height of dialog grid cell (min 25).'),
         'opt': 'vertical_gap',
         'def': 28,
         'min': 25,
         'frm': 'int',
         'chp': _('Dialog layout'),
     },
-    {   'cmt': _('Width of button "=" (min 15)'),
+    {   'cmt': _('Width of button "=" (min 15).'),
         'opt': 'width_menu_button',
         'def': 35,
         'min': 15,
         'frm': 'int',
         'chp': _('Dialog layout'),
     },
-    {   'cmt': _('Width of button to switch regex/case/words (min 30)'),
+    {   'cmt': _('Width of button to switch regex/case/words (min 30).'),
         'opt': 'width_word_button',
         'def': 38,
         'min': 30,
         'frm': 'int',
         'chp': _('Dialog layout'),
     },
-    {   'cmt': _('Minimal width of fields to set files/folders (min 150)'),
+    {   'cmt': _('Minimal width of fields to set files/folders (min 150).'),
         'opt': 'width_excl_edit',
         'def': 150,
         'min': 150,
         'frm': 'int',
         'chp': _('Dialog layout'),
     },
-    {   'cmt': _('Width of statusbar fields'),
+    {   'cmt': _('Width of statusbar fields.'),
         'opt': 'statusbar_field_widths',
         'def': [70,100,60,0,50],
         'frm': 'json',
         'chp': _('Dialog layout'),
     },
 
-    {   'cmt': 'Full file path of log file (requires app restart)',
+    {   'cmt': 'Full file path of log file (requires app restart).',
         'def': '',
         'frm': 'file',
         'opt': 'log_file',
@@ -438,8 +469,9 @@ Long-term searches can be interrupted by ESC.
 ).strip()
 
 DHLP_TIPS_RSLT  = _(r'''
-Only the option 
+Only the options 
     "-N+M" (with lines above/below)
+    "Show lexer path for all fragments"
 needs to be set before start of search.
 All other options immediately change the Results view.
  
@@ -472,18 +504,30 @@ Results options:
 │ Format for Result tree             │ Separate line per each file.                     │
 │   <path>#N/<r>:line                │ Example                                          │
 │                                    │   <dir1/dir2/filename1.ext>: #1                  │
-│                                    │    <12>: fragment line                           │
-│                                    │   <dir1/dir3/filename2.ext>: #2                  │
-│                                    │    <21>: fragment line                           │
+│                                    │     <12>: fragment line                          │
+│                                    │   <dir1/dir3/filename2.ext>: #1                  │
+│                                    │     <21>: fragment line                          │
 ├────────────────────────────────────┼──────────────────────────────────────────────────┤
 │ Format for Result tree             │ Separate line per each folder with files.        │
 │   <dir>#N/<file:r>:line            │ Example                                          │
 │                                    │   <dir1/dir2>: #1                                │
-│                                    │    <filename1.ext:12>: fragment line             │
-│                                    │   <dir1/dir3>: #2                                │
-│                                    │    <filename2.ext:21>: fragment line             │
+│                                    │     <filename1.ext:12>: fragment line            │
+│                                    │   <dir1/dir3>: #1                                │
+│                                    │     <filename2.ext:21>: fragment line            │
+├────────────────────────────────────┼──────────────────────────────────────────────────┤
+│ Show lexer path for all fragments  │ Results include lines with lexer path.           │
+│                                    │ Example                                          │
+│                                    │   <filename.ext>: #1                             │
+│                                    │     <  >: path > to > fragment                   │
+│                                    │     <12>: fragment line                          │
+├────────────────────────────────────┼──────────────────────────────────────────────────┤
+│ Add lexer path to the statusbar    │ When you move caret in Results, or use commands  │
+│                                    │ "Go to next/prev found fragment", statusbar      │
+│                                    │ shows the path to current fragment’s file.       │
+│                                    │ If the option is on, then statusbar shows also   │
+│                                    │ the path in the document.                        │
 └────────────────────────────────────┴──────────────────────────────────────────────────┘
-    
+
 To set the mark style of found fragmets, use the engine options dialog (Ctrl+E).
 See "mark_style" in section "Results".
 
@@ -513,6 +557,7 @@ do not reduce the speed at all.
 
 5. The slowest search (the slowdown in dozens of times) occurs if 
     any of "Syntax elements" is turned on,
+    option "Show lexer path for all fragments" is turned on,
     lexer path filter includes in "{incl}" or "{excl}" fields.
 
 ———————————————————————————————————————————————————————————————————————————————————————————— 
@@ -525,7 +570,8 @@ to detect which search is needed.
 Huge files can also be involved in the search. For optimal memory usage you need
 - Turn off the appending context lines ("-N+M").
 - Turn off the multi-line pattern ("+") and remove newline character "§".
-- Turn off all "Syntax elements"
+- Turn off all "Syntax elements".
+- Turn off "Show lexer path for all fragments".
 - Ensure that no lexer path filters.
 Also see engine options 
 - skip_file_size_more(Kb),

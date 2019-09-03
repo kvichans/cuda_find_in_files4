@@ -2,10 +2,10 @@
 Authors:
     Andrey Kvichansky   (kvichans on github.com)
 Version:
-    '4.6.02 2019-08-30'
+    '4.6.03 2019-09-03'
 ToDo: (see end of file)
 '''
-import  re, os, traceback, locale, itertools, codecs, time, datetime as dt #, types, json, sys
+import  re, os, traceback, locale, itertools, codecs, time, datetime as dt, gc #, types, json, sys
 from            pathlib         import Path
 from            fnmatch         import fnmatch
 from            collections     import namedtuple
@@ -126,6 +126,7 @@ def prefix_for_opts(def_prefix=''):
 
 
 # Take (cache) some of current settings
+WALK_F_PICKING  = True
 WALK_DOWNTOP    = False
 ALWAYS_EXCL     = ''
 RE_VERBOSE      = False
@@ -134,17 +135,20 @@ SKIP_FILE_SIZE  = 0
 ADV_LEXERS      = []
 FIF_LEXER       = []
 MARK_FIND_STYLE = {}
+LPTH_FIND_STYLE = {}
 USE_SEL_ON_START= True
 VERT_GAP        = 0
 W_MENU_BTTN     = 0
 W_WORD_BTTN     = 0
 W_EXCL_EDIT     = 150
 STBR_SZS        = []
+DOING_FRAGS     = 100
 GOTO_FIRST_FR   = False
 NSHOW_BIGGER    = 0
 def reload_opts():                              #NOTE: reload_opts
     global          \
-    WALK_DOWNTOP    \
+    WALK_F_PICKING  \
+   ,WALK_DOWNTOP    \
    ,ALWAYS_EXCL     \
    ,RE_VERBOSE      \
    ,BINBLOCKSIZE    \
@@ -152,15 +156,18 @@ def reload_opts():                              #NOTE: reload_opts
    ,ADV_LEXERS      \
    ,FIF_LEXER       \
    ,MARK_FIND_STYLE \
+   ,LPTH_FIND_STYLE \
    ,USE_SEL_ON_START\
    ,VERT_GAP        \
    ,W_MENU_BTTN     \
    ,W_WORD_BTTN     \
    ,W_EXCL_EDIT     \
    ,STBR_SZS        \
+   ,DOING_FRAGS     \
    ,GOTO_FIRST_FR   \
    ,NSHOW_BIGGER
     
+    WALK_F_PICKING  = get_opt('file_picking_stage'          , meta_def('file_picking_stage'))
     WALK_DOWNTOP    = get_opt('from_deepest'                , meta_def('from_deepest'))
     ALWAYS_EXCL     = get_opt('always_not_in_files'         , meta_def('always_not_in_files'))
     RE_VERBOSE      = get_opt('re_verbose'                  , meta_def('re_verbose'))
@@ -170,6 +177,7 @@ def reload_opts():                              #NOTE: reload_opts
     FIF_LEXER       = apx.choose_avail_lexer(lexers_l)
     ADV_LEXERS      = get_opt('lexers_to_filter'            , meta_def('lexers_to_filter'))
     MARK_FIND_STYLE = get_opt('mark_style'                  , meta_def('mark_style'))
+    LPTH_FIND_STYLE = get_opt('lex_path_style'              , meta_def('lex_path_style'))
     USE_SEL_ON_START= get_opt('use_selection_on_start'      , meta_def('use_selection_on_start'))
     VERT_GAP        = get_opt('vertical_gap'                , meta_def('vertical_gap'))
     VERT_GAP        = max(VERT_GAP                          , meta_min('vertical_gap'))
@@ -180,6 +188,8 @@ def reload_opts():                              #NOTE: reload_opts
     W_EXCL_EDIT     = get_opt('width_excl_edit'             , meta_def('width_excl_edit'))
     W_EXCL_EDIT     = max(W_EXCL_EDIT                       , meta_min('width_excl_edit'))
     STBR_SZS        = get_opt('statusbar_field_widths'      , meta_def('statusbar_field_widths'))
+    DOING_FRAGS     = get_opt('show_progress_fragments'     , meta_def('show_progress_fragments'))
+    DOING_FRAGS     = max(DOING_FRAGS                       , meta_min('show_progress_fragments'))
     GOTO_FIRST_FR   = get_opt('goto_first_fragment'         , meta_def('goto_first_fragment'))
     NSHOW_BIGGER    = get_opt('dont_show_file_size_more(Kb)', meta_def('dont_show_file_size_more(Kb)'))
     def fit_mark_style_for_attr(js:dict)->dict:
@@ -207,6 +217,7 @@ def reload_opts():                              #NOTE: reload_opts
         return kwargs
        #def fit_mark_style_for_attr
     MARK_FIND_STYLE = fit_mark_style_for_attr(MARK_FIND_STYLE)
+    LPTH_FIND_STYLE = fit_mark_style_for_attr(LPTH_FIND_STYLE)
 reload_opts()
 
 
@@ -307,7 +318,7 @@ excl_hi = f(excl_hi_, ALWAYS_EXCL)
 
 DEF_LOC_ENCO= 'cp1252' if sys.platform=='linux' else locale.getpreferredencoding() # cp1251 for ru
 DETECT_ENCO = _('detect')
-WK_ENCO     = [DEF_LOC_ENCO, 'utf8', DETECT_ENCO]
+WK_ENCO_DPLN= [DEF_LOC_ENCO, 'utf8', DETECT_ENCO]
 
 
 
@@ -339,12 +350,13 @@ class Fif4D:
                     bgn_tm  = ptime()
                     res     = mth(self, *args, **kwargs)
                     end_tm  = ptime()
-                    dur     = end_tm-bgn_tm
-                    pass;      #log("dur={}",(dur))
-                    msg     = f'{dur:.2f}"' \
-                                if dur<60 else  \
-                              f('{}\'{:.2f}"', int(dur/60), dur-60*int(dur/60))
-                    self.stbr_act(msg, M.STBR_TIM)
+                    self.stbr_act(M.dur2msg(end_tm-bgn_tm), M.STBR_TIM)
+#                   dur     = end_tm-bgn_tm
+#                   pass;      #log("dur={}",(dur))
+#                   msg     = f'{dur:.2f}"' \
+#                               if dur<60 else  \
+#                             f('{}\'{:5.2f}"', int(dur/60), dur-60*int(dur/60))
+#                   self.stbr_act(msg, M.STBR_TIM)
                     return res
                 return timing_if
             return todecor
@@ -420,10 +432,10 @@ class Fif4D:
         '?""?'          if  opts.wk_syst=='ot' else ''
     syst_ca     = lambda self: Fif4D.SYST_CA(self.opts)
     
-    ENCO_CA     = lambda opts: '' if opts.wk_enco is None else \
-                        opts.wk_enco[0] if opts.wk_enco else ''
-#                       opts.wk_enco[0] if opts.wk_enco and opts.wk_enco[0]!=DEF_LOC_ENCO else ''
-    enco_ca     = lambda self: Fif4D.ENCO_CA(self.opts)
+    ENCO_CA     = lambda opts,fsts=False: '' if opts.wk_enco is None else \
+                        (f'({len(opts.wk_enco_ms)}),' if opts.wk_enco_ms else '') \
+                        +((','.join(opts.wk_enco) if fsts else opts.wk_enco[0]) if opts.wk_enco else '')
+    enco_ca     = lambda self,fsts=False: Fif4D.ENCO_CA(self.opts, fsts)
     
     I4OP_CA     = lambda opts,wo_enco=False: ' '.join(
                     [   Fif4D.SORT_CA(opts) 
@@ -452,6 +464,11 @@ class Fif4D:
                             +( Fif4D.I4OP_CA(ps)                                                              )
                             ).replace('  ',' ').strip()
     
+    dur2msg     = lambda dur: f'{dur:.2f}"' \
+                                if dur<60 else  \
+                              f('{}\'{:02.0f}"', int(dur/60), dur-60*int(dur/60))
+
+    
     TIMER_DELAY = 300   # msec
     on_timer    = lambda self, tag: self.do_acts(self.ag, tag)
     
@@ -476,8 +493,8 @@ class Fif4D:
             ,wk_sort=''                         # Sort before use: new|old
             ,wk_agef=''                         # Skip files by datetime: \d+(h|d|w|m|y)
             ,wk_skip=''                         # Skip hidden/binary files
-            ,wk_enco=WK_ENCO                    # List (3 items) to try reading with the encoding
-            ,wk_enco_ms={'*.ops':'cp1251'}      # Map file mask to encoding
+            ,wk_enco=WK_ENCO_DPLN               # List (3 items) to try reading with the encoding
+            ,wk_enco_ms={}                      # Map file mask to encoding
             ,wk_sycm=''                         # In/Out syntax element "comment"
             ,wk_syst=''                         # In/Out syntax element "string"
             ,rp_cntx=False                      # Catch frag with extra lines
@@ -505,6 +522,10 @@ class Fif4D:
         pref    = prefix_for_opts()
         hi_opts = fget_hist([pref, 'opts'] if pref else 'opts', {})
         m.opts  = update_tree(m.opts, hi_opts)
+        
+        # Upgrade
+        for ps in m.opts.ps_pset:
+            ps.setdefault('wk_enco_ms', {})
 
         # History of singlelined what
         m.sl_what_l      = [M.FIT_OPT4SL(h) for h in m.opts.vw.what_l]
@@ -616,7 +637,8 @@ class Fif4D:
         cntx_v  = M.CNTX_CA(ivals)[1:]          if nps or chcks[CNT] else ''
         i4op_v  = M.I4OP_CA(ivals,True)         if nps or chcks[I4O] else ''
         what_v  = M.FIT_OPT4SL(ivals.in_what)   if nps or chcks[WHA] else ''
-        enco_v  = ivals.wk_enco                 if nps or chcks[ENC] else ''
+        enco_v  = M.ENCO_CA(ivals,True)         if nps or chcks[ENC] else ''
+#       enco_v  = ivals.wk_enco                 if nps or chcks[ENC] else ''
         incl_v  = ivals.wk_incl                 if nps or chcks[INC] else ''
         excl_v  = ivals.wk_excl                 if nps or chcks[EXC] else ''
         fold_v  = ivals.wk_fold                 if nps or chcks[FOL] else ''
@@ -681,6 +703,7 @@ class Fif4D:
                 ps['wk_syst']   = m.opts.wk_syst
             if vals[ENC]:
                 ps['wk_enco']   = m.opts.wk_enco
+                ps['wk_enco_ms']= m.opts.wk_enco_ms
             if vals[WHA]:
                 ps['in_what']   = m.opts.in_what
             if vals[INC]:
@@ -819,15 +842,15 @@ class Fif4D:
             fold_y  = ag.cattr('wk_fold', 'y')
             pt_h    = ag.cattr('pt'     , 'h')
             form_h  = ag.fattr('h')
-            ctrls   = [((
-                  )),('in_whaM',d(h=newM_h
-                  )),('wk_inc_',d(tid='wk_incl'))   ,('wk_incl',d(y=incl_y+diff
-                  )),('wk_exc_',d(tid='wk_incl'))   ,('wk_excl',d(y=incl_y+diff
-                  )),('wk_fol_',d(tid='wk_fold'))   ,('wk_fold',d(y=fold_y+diff
-                  )),('di_brow',d(tid='wk_fold'
-                  )),('wk_dept',d(tid='wk_fold'
-                  ))                                ,('pt'     ,d(h=pt_h  +diff
-                  ))][1:]
+            ctrls   = d(
+             in_whaM= d(h=newM_h),
+             wk_inc_= d(tid='wk_incl'), wk_incl=d(y=incl_y+diff),
+             wk_exc_= d(tid='wk_incl'), wk_excl=d(y=incl_y+diff),
+             wk_fol_= d(tid='wk_fold'), wk_fold=d(y=fold_y+diff),
+             di_brow= d(tid='wk_fold'),
+             wk_dept= d(tid='wk_fold'),
+                                            pt     =d(h=pt_h  +diff),
+                    )
             return d(ctrls=ctrls,form=d(h=form_h+diff))
 
         if aid=='vw_mlin':                      # Switch single/multi-lines for FindWhat
@@ -840,16 +863,16 @@ class Fif4D:
             pt_h    = fold_y + VERT_GAP
             form_h  = ag.fattr('h')                 + diff_h
             form_hm = ag.fattr('h_min', live=False) + diff_h
-            ctrls   = [((
-                  )),('in_wh_t',d(vis=not m.opts.vw.mlin)),('in_what',d(vis=not m.opts.vw.mlin
-                  )),('in_wh_M',d(vis=    m.opts.vw.mlin)),('in_whaM',d(vis=    m.opts.vw.mlin
-                  )),('wk_inc_',d(tid='wk_incl'))         ,('wk_incl',d(y  =incl_y
-                  )),('wk_exc_',d(tid='wk_incl'))         ,('wk_excl',d(y  =incl_y
-                  )),('wk_fol_',d(tid='wk_fold'))         ,('wk_fold',d(y  =fold_y
-                  )),('di_brow',d(tid='wk_fold'
-                  )),('wk_dept',d(tid='wk_fold'
-                  )),('pt'     ,d(h=pt_h
-                  ))][1:]
+            ctrls   = d(
+             in_wh_t= d(vis=not m.opts.vw.mlin), in_what=d(vis=not m.opts.vw.mlin),
+             in_wh_M= d(vis=    m.opts.vw.mlin), in_whaM=d(vis=    m.opts.vw.mlin),
+             wk_inc_= d(tid='wk_incl'),          wk_incl=d(y  =incl_y),
+             wk_exc_= d(tid='wk_incl'),          wk_excl=d(y  =incl_y),
+             wk_fol_= d(tid='wk_fold'),          wk_fold=d(y  =fold_y),
+             di_brow= d(tid='wk_fold'),
+             wk_dept= d(tid='wk_fold'),
+             pt     = d(h=pt_h),
+                    )
             pass;              #log__("m.opts.in_what={}",(m.opts.in_what)         ,__=(log4fun,M.log4cls)) if _log4mod>=0 else 0
             vals    = d(in_whaM=             m.opts.in_what) \
                         if m.opts.vw.mlin else \
@@ -944,10 +967,11 @@ class Fif4D:
             if ret not in ('okok', 'remv'): return []
             m.opts.wk_enco_ms.clear()
             m.opts.wk_enco_ms.update(ms)
-            return []
+            return d(fid=self.cid_what()
+                    ,ctrls=d(di_i4op=d(cap=m.i4op_ca())))
 
         if aid=='wk_enco_d':                    # Change enco steps
-            m.opts.wk_enco = WK_ENCO
+            m.opts.wk_enco = WK_ENCO_DPLN
             return []
         if aid[:8]=='wk_enco_':                 # Change enco 0/1/2 step
             step    = int(aid[-1])
@@ -1278,7 +1302,8 @@ class Fif4D:
     ),d(tag='a:wk_enco_1'   ,cap=f(_('Step &2: {}')+DDD, m.opts.wk_enco[1])  ,en=bool(m.opts.wk_enco[1])
     ),d(tag='a:wk_enco_2'   ,cap=f(_('Step &3: {}')    , m.opts.wk_enco[2])  ,en=False
     ),d(                     cap='-'
-    ),d(tag='a:wk_enco_d'   ,cap=f(_('Use &default steps: {}'), ', '.join(WK_ENCO))   , en=(WK_ENCO!=m.opts.wk_enco)
+    ),d(tag='a:wk_enco_d'   ,cap=f(_('Use &default steps: {}'), ', '.join(WK_ENCO_DPLN))
+        , en=(WK_ENCO_DPLN!=m.opts.wk_enco)
                                                                                             )]),(
                   )]
 
@@ -1287,8 +1312,6 @@ class Fif4D:
 
         mn_rslt   = [(
     ),d(                 cap=f'=== {OTH4RPT} ==='   ,en=False
-#   ),d(tag='rp_lexa'   ,cap=_('Show le&xer path for all fragments (slowdown)')
-#       ,ch=m.opts.rp_lexa
     ),d(tag='rp_relp'   ,cap=_('Show relati&ve paths')
         ,ch=m.opts.rp_relp
     ),d(tag='rp_time'   ,cap=_('Show &modification time') 
@@ -1300,7 +1323,9 @@ class Fif4D:
         for n1, tfm in enumerate(TRFMD2V.keys(), 1)
                   ]),(
     ),d(                 cap='-'
-    ),d(tag='rp_lexp'   ,cap=_('Append le&xer path to fragment status')
+    ),d(tag='rp_lexa'   ,cap=_('Show le&xer path for all fragments (slowdown)')
+        ,ch=m.opts.rp_lexa
+    ),d(tag='rp_lexp'   ,cap=_('Add le&xer path to the statusbar')
         ,ch=m.opts.rp_lexp
                   )]
    
@@ -1433,43 +1458,43 @@ class Fif4D:
         bttn_h  = get_gui_height('bttn')
 
         ctrls   = dict(                         #NOTE: Fif4D layout
-    pt     =d(tp='panl'                                 ,w=form_w   ,h=form_pth                     ,ali=ALI_TP
-  ),di_menu=d(tp='bttn' ,y  = 3         ,x=5            ,w=MENW     ,cap='&='       ,hint=_('Menu')             ,p='pt' ,sto=False      # &=
+        pt     =d(tp='panl'                                 ,w=form_w   ,h=form_pth                     ,ali=ALI_TP
+      ),di_menu=d(tp='bttn' ,y  = 3         ,x=5            ,w=MENW     ,cap='&='       ,hint=_('Menu')             ,p='pt' ,sto=False      # &=
                                                                                                                                              
-  ),vw_mlin=d(tp='chbt' ,tid='di_menu'  ,x=what_x       ,w=MENW     ,cap='&+'       ,hint=mlin_hi               ,p='pt' ,sto=False      # &+
-  ),in_reex=d(tp='chbt' ,tid='di_menu'  ,x=reex_x+WRDW*0,w=WRDW     ,cap='&.*'      ,hint=reex_hi               ,p='pt'                 # &.
-  ),in_case=d(tp='chbt' ,tid='di_menu'  ,x=reex_x+WRDW*1,w=WRDW     ,cap='&aA'      ,hint=case_hi               ,p='pt'                 # &a
-  ),in_word=d(tp='chbt' ,tid='di_menu'  ,x=reex_x+WRDW*2,w=WRDW     ,cap='"&w"'     ,hint=word_hi               ,p='pt'                 # &w
-  ),rp_cntx=d(tp='chbt' ,tid='di_menu'  ,x=cntx_x       ,w=CTXW     ,cap=m.cntx_ca(),hint=cntx_hi               ,p='pt'                 # &-
-  ),di_i4o_=d(tp='bvel' ,y  = 3         ,x=i4op_x       ,r=-5-FNDW-5,h=bttn_h                       ,a='r>'     ,p='pt' ,props='1'
-  ),di_i4op=d(tp='labl' ,tid='di_menu'  ,x=i4op_x+4     ,r=-5-FNDW-9,cap=m.i4op_ca(),hint=i4op_hi   ,a='r>'     ,p='pt'
-  ),di_find=d(tp='bttn' ,tid='di_menu'  ,x=-5-FNDW      ,r=-5       ,cap=find_ca    ,hint=find_hi   ,a='>>'     ,p='pt' ,def_bt=True    # &d Enter
+      ),vw_mlin=d(tp='chbt' ,tid='di_menu'  ,x=what_x       ,w=MENW     ,cap='&+'       ,hint=mlin_hi               ,p='pt' ,sto=False      # &+
+      ),in_reex=d(tp='chbt' ,tid='di_menu'  ,x=reex_x+WRDW*0,w=WRDW     ,cap='&.*'      ,hint=reex_hi               ,p='pt'                 # &.
+      ),in_case=d(tp='chbt' ,tid='di_menu'  ,x=reex_x+WRDW*1,w=WRDW     ,cap='&aA'      ,hint=case_hi               ,p='pt'                 # &a
+      ),in_word=d(tp='chbt' ,tid='di_menu'  ,x=reex_x+WRDW*2,w=WRDW     ,cap='"&w"'     ,hint=word_hi               ,p='pt'                 # &w
+      ),rp_cntx=d(tp='chbt' ,tid='di_menu'  ,x=cntx_x       ,w=CTXW     ,cap=m.cntx_ca(),hint=cntx_hi               ,p='pt'                 # &-
+      ),di_i4o_=d(tp='bvel' ,y  = 3         ,x=i4op_x       ,r=-5-FNDW-5,h=bttn_h                       ,a='r>'     ,p='pt' ,props='1'
+      ),di_i4op=d(tp='labl' ,tid='di_menu'  ,x=i4op_x+4     ,r=-5-FNDW-9,cap=m.i4op_ca(),hint=i4op_hi   ,a='r>'     ,p='pt'
+      ),di_find=d(tp='bttn' ,tid='di_menu'  ,x=-5-FNDW      ,r=-5       ,cap=find_ca    ,hint=find_hi   ,a='>>'     ,p='pt' ,def_bt=True    # &d Enter
                                                                                                                          
-  ),in_wh_t=d(tp='labl' ,tid='in_what'  ,x=what_x-LBSW  ,r=what_x-5 ,cap=WHA__CA    ,hint=what_hi               ,p='pt' ,vis=not mlin   # &f
-  ),in_what=d(tp='cmbx' ,y  = what_y    ,x=what_x       ,r=-5       ,items=m.sl_what_l              ,a='r>'     ,p='pt' ,vis=not mlin 
-  ),in_wh_M=d(tp='labl' ,tid='in_what'  ,x=what_x-LBSW  ,r=what_x-5 ,cap=WHA__CA                                ,p='pt' ,vis=    mlin   # &f
-  ),in_whaM=d(tp='memo' ,y  = what_y    ,x=what_x       ,r=-5       ,h=mlin_h       ,thint=DF_WHM   ,a='r>'     ,p='pt' ,vis=    mlin 
+      ),in_wh_t=d(tp='labl' ,tid='in_what'  ,x=what_x-LBSW  ,r=what_x-5 ,cap=WHA__CA    ,hint=what_hi               ,p='pt' ,vis=not mlin   # &f
+      ),in_what=d(tp='cmbx' ,y  = what_y    ,x=what_x       ,r=-5       ,items=m.sl_what_l              ,a='r>'     ,p='pt' ,vis=not mlin 
+      ),in_wh_M=d(tp='labl' ,tid='in_what'  ,x=what_x-LBSW  ,r=what_x-5 ,cap=WHA__CA                                ,p='pt' ,vis=    mlin   # &f
+      ),in_whaM=d(tp='memo' ,y  = what_y    ,x=what_x       ,r=-5       ,h=mlin_h       ,thint=DF_WHM   ,a='r>'     ,p='pt' ,vis=    mlin 
                                                                                                                          
-  ),wk_inc_=d(tp='labl' ,tid='wk_incl'  ,x=what_x-LBSW  ,r=what_x-5 ,cap=INC__CA    ,hint=mask_hi               ,p='pt'                 # &i
-  ),wk_incl=d(tp='cmbx' ,y  =incl_y     ,x=what_x       ,w=fold_w   ,items=m.opts.vw.incl_l         ,a='r>'     ,p='pt'
-  ),wk_exc_=d(tp='labl' ,tid='wk_incl'  ,x=excl_x-EXSW-5,w=EXSW     ,cap=EXC__CA    ,hint=excl_hi   ,a='>>'     ,p='pt'                 # &x
-  ),wk_excl=d(tp='cmbx' ,y  =incl_y     ,x=excl_x       ,r=-5       ,items=m.opts.vw.excl_l         ,a='>>'     ,p='pt' ,sto=False
-  ),wk_fol_=d(tp='labl' ,tid='wk_fold'  ,x=what_x-LBSW  ,r=what_x-5 ,cap=FOL__CA    ,hint=fold_hi               ,p='pt'                 # &n
-  ),wk_fold=d(tp='cmbx' ,y  =fold_y     ,x=what_x       ,w=fold_w   ,items=m.opts.vw.fold_l         ,a='r>'     ,p='pt'
-  ),di_brow=d(tp='bttn' ,tid='wk_fold'  ,x=brow_x-5     ,w=   MENW  ,cap=DDD        ,hint=brow_hi   ,a='>>'     ,p='pt'
-  ),wk_dept=d(tp='cmbr' ,tid='wk_fold'  ,x=dept_x       ,r=-5       ,items=M.DEPT_UL,hint=dept_hi   ,a='>>'     ,p='pt'
+      ),wk_inc_=d(tp='labl' ,tid='wk_incl'  ,x=what_x-LBSW  ,r=what_x-5 ,cap=INC__CA    ,hint=mask_hi               ,p='pt'                 # &i
+      ),wk_incl=d(tp='cmbx' ,y  =incl_y     ,x=what_x       ,w=fold_w   ,items=m.opts.vw.incl_l         ,a='r>'     ,p='pt'
+      ),wk_exc_=d(tp='labl' ,tid='wk_incl'  ,x=excl_x-EXSW-5,w=EXSW     ,cap=EXC__CA    ,hint=excl_hi   ,a='>>'     ,p='pt'                 # &x
+      ),wk_excl=d(tp='cmbx' ,y  =incl_y     ,x=excl_x       ,r=-5       ,items=m.opts.vw.excl_l         ,a='>>'     ,p='pt' ,sto=False
+      ),wk_fol_=d(tp='labl' ,tid='wk_fold'  ,x=what_x-LBSW  ,r=what_x-5 ,cap=FOL__CA    ,hint=fold_hi               ,p='pt'                 # &n
+      ),wk_fold=d(tp='cmbx' ,y  =fold_y     ,x=what_x       ,w=fold_w   ,items=m.opts.vw.fold_l         ,a='r>'     ,p='pt'
+      ),di_brow=d(tp='bttn' ,tid='wk_fold'  ,x=brow_x-5     ,w=   MENW  ,cap=DDD        ,hint=brow_hi   ,a='>>'     ,p='pt'
+      ),wk_dept=d(tp='cmbr' ,tid='wk_fold'  ,x=dept_x       ,r=-5       ,items=M.DEPT_UL,hint=dept_hi   ,a='>>'     ,p='pt'
                                                                                                                          
-  ),pb     =d(tp='panl'                                                                             ,ali=ALI_CL
-  ),di_rslt=d(tp='edtr'                 ,w=form_w       ,h=rslt_h   ,h_min=M.RSLT_H ,border='1'     ,ali=ALI_TP ,p='pb' ,_en=False
-                                                                     ,thint=DEF_RSLT_BODY
-  ),di_sptr=d(tp='splt'                                 ,y=rslt_h+5                                 ,ali=ALI_TP ,p='pb'
-  ),di_srcf=d(tp='edtr'                 ,w=form_w       ,h=srcf_h   ,h_min=M.SRCF_H ,border='1'     ,ali=ALI_CL ,p='pb' ,_en=False
-                                                                     ,thint=DEF_SRCF_BODY
+      ),pb     =d(tp='panl'                                                                             ,ali=ALI_CL
+      ),di_rslt=d(tp='edtr'                 ,w=form_w       ,h=rslt_h   ,h_min=M.RSLT_H ,border='1'     ,ali=ALI_TP ,p='pb' ,_en=False
+                                                                         ,thint=DEF_RSLT_BODY
+      ),di_sptr=d(tp='splt'                                 ,y=rslt_h+5                                 ,ali=ALI_TP ,p='pb'
+      ),di_srcf=d(tp='edtr'                 ,w=form_w       ,h=srcf_h   ,h_min=M.SRCF_H ,border='1'     ,ali=ALI_CL ,p='pb' ,_en=False
+                                                                         ,thint=DEF_SRCF_BODY
                                                                                                                          
-  ),di_stbr=d(tp='stbr'                                 ,h=STBR_H                                   ,ali=ALI_BT
+      ),di_stbr=d(tp='stbr'                                 ,h=STBR_H                                   ,ali=ALI_BT
       
-  ),tl_edtr=d(tp='edtr' ,y=0,h=0,x=0,w=0,sto=False
-  ),tl_trvw=d(tp='trvw' ,y=0,h=0,x=0,w=0,sto=False
+      ),tl_edtr=d(tp='edtr' ,y=0,h=0,x=0,w=0,sto=False
+      ),tl_trvw=d(tp='trvw' ,y=0,h=0,x=0,w=0,sto=False
                   ))
         m.caps  =     {cid:cnt['cap']   for cid,cnt in ctrls.items()
                         if cnt['tp'] in ('bttn', 'chbt')    and 'cap' in cnt}
@@ -1853,7 +1878,7 @@ class Fif4D:
                 text    = tab_ed.get_text_all()
                 lexer   = tab_ed.get_prop(app.PROP_LEXER_FILE)
             elif os.path.isfile(path):
-                text    = FSWalker.get_filebody(path, m.opts.wk_enco)
+                text    = FSWalker.get_filebody(path, m.opts.wk_enco, m.opts.wk_enco_ms)
                 lexer   = app.lexer_proc(app.LEXER_DETECT, path)
             m.srcf.set_prop(app.PROP_LEXER_FILE, '')
             m.srcf.set_prop(app.PROP_RO, False)
@@ -2059,6 +2084,7 @@ class Fif4D:
         M.done_finds    = append_to_history(m.vals_opts('as_ps'), M.done_finds)
 
         m.rslt_srcf_acts('set-no-src')
+        gc.disable()
         m.working   = True
         # Prepare actors
         pass;                  #log__("?? Prepare actors",()         ,__=(log4fun,M.log4cls)) if _log4mod>=0 else 0
@@ -2072,6 +2098,7 @@ class Fif4D:
                        )
         m.reporter  = Reporter(
                         rp_opts ={k:wopts[k] for k in m.opts if k[:3] in ('rp_',)}
+                       ,ed4lx   =m.tl_edtr
                        ,observer=m.observer
                        )
         frgfilters  = LexFilter.filters(
@@ -2082,6 +2109,7 @@ class Fif4D:
         wopts.wk_incl = re.sub(r'\[:([^:]+):\]', '', wopts.wk_incl)
         wopts.wk_excl = re.sub(r'\[:([^:]+):\]', '', wopts.wk_excl)
         need_body   = need_body or     frgfilters
+        Walker.start_stat()
         walkers     = Walker.walkers(
                         wk_opts ={k:wopts[k] for k in m.opts if k[:3] in ('wk_',)}
                        ,observer=m.observer
@@ -2093,12 +2121,15 @@ class Fif4D:
                        ,observer=m.observer
                        ,need_body=need_body
                        )
+        FSWalker.enco_l = m.opts.wk_enco
+        FSWalker.enco_ms= m.opts.wk_enco_ms
+
         pass;                   log__("ok Prepare actors",()         ,__=(log4fun,M.log4cls)) if _log4mod>=0 else 0
 
 #       pass;                   m.srcf.set_prop(app.PROP_RO, False)
 #       pass;                  #m.srcf.set_text_all('abc')
 #       pass;                   fn=r'C:\Programs\CudaText\py\cuda_find_in_files4\tmp\t.py'
-#       pass;                   m.srcf.set_text_all(FSWalker.get_filebody(fn, m.opts.wk_enco))
+#       pass;                   m.srcf.set_text_all(FSWalker.get_filebody(fn))
 #       pass;                   return 
         
         # Main work
@@ -2121,6 +2152,8 @@ class Fif4D:
         walkers     = None
         frgfilters  = None
         fragmer     = None
+
+        gc.enable()
         
         return []
        #def work
@@ -2192,9 +2225,9 @@ class LexFilter:
         def __init__(self, how, fullopt, wk_opts, ed4lx, observer):
             self.observer   = observer
             self.ed4lx      = ed4lx
-            self.ed4lx.loaded_file = ''
-            self.ed4lx.fif_ready_scan = False
-            self.ed4lx.fif_ready_tree = False
+            self.ed4lx.loaded_file      = ''
+            self.ed4lx.fif_ready_scan   = False
+            self.ed4lx.fif_ready_tree   = False
             self.wk_enco    = wk_opts['wk_enco']
             self.how        = how
             self.conds      = [mtch.group(1) for mtch in re.finditer(r'\[:([^:]+):\]', fullopt)]
@@ -2205,7 +2238,7 @@ class LexFilter:
         def suit(self, fn, frgs):
             pass;               log4fun=0
             pass;              #log("fn, frgs={}",(fn, frgs))
-            ed4lx,lex   = LexFilter._prep(fn, self.ed4lx, self.wk_enco, need_tree=True)
+            ed4lx,lex   = LexFilter._prep(fn, self.ed4lx, need_tree=True)
             if not ed4lx:
                 return True                         # Nothing to filter
             
@@ -2301,8 +2334,8 @@ class LexFilter:
         def __init__(self, wk_opts, ed4lx, observer):
             self.observer   = observer
             self.ed4lx      = ed4lx
-            self.ed4lx.loaded_file = ''
-            self.ed4lx.fif_ready_scan = False
+            self.ed4lx.loaded_file      = ''
+            self.ed4lx.fif_ready_scan   = False
             self.wk_enco    = wk_opts['wk_enco']
             self.sycm       = wk_opts['wk_sycm']
             self.syst       = wk_opts['wk_syst']
@@ -2311,7 +2344,7 @@ class LexFilter:
         def suit(self, fn, frgs):
             pass;               log4fun=1
             pass;              #log__('(cm,st), fn, frgs={}',((self.sycm, self.syst), fn, frgs)         ,__=(log4fun,)) if _log4mod>=0 else 0
-            ed4lx,lex   = LexFilter._prep(fn, self.ed4lx, self.wk_enco)
+            ed4lx,lex   = LexFilter._prep(fn, self.ed4lx)
             pass;              #log(f'log lex={lex}')
             pass;               log__(f'lex={lex}'    ,__=(log4fun,)) if _log4mod>=0 else 0
             if not ed4lx or not lex:
@@ -2401,7 +2434,8 @@ class LexFilter:
     
 
     @staticmethod
-    def _prep(fn, ed4lx, wk_enco, need_tree=False)->(app.Editor,str):
+    def _prep(fn, ed4lx, need_tree=False)->(app.Editor,str):
+        pass;                  #log("fn, ed4lx.loaded_file, need_tree={}",(fn, ed4lx.loaded_file, need_tree))
         lex         = ''
         if fn[:4]=='tab:':
             tab_id  = int(fn.split('/')[0].split(':')[1])
@@ -2410,7 +2444,7 @@ class LexFilter:
             if not (lex and (not ADV_LEXERS or lex in ADV_LEXERS)):
                 pass;          #log("lex={}",(lex))
                 return (None, lex)
-            pass;              #log__('fn body=\n{}',(FSWalker.get_filebody(fn, wk_enco))         ,__=(log4fun,)) if _log4mod>=0 else 0
+            pass;              #log__('fn body=\n{}',(FSWalker.get_filebody(fn))         ,__=(log4fun,)) if _log4mod>=0 else 0
             if ed4lx.loaded_file != fn:
                 ed4lx.set_text_all(edtab.get_text_all())
                 ed4lx.loaded_file = fn
@@ -2419,10 +2453,12 @@ class LexFilter:
             pass;               log__('lex={}',(lex)         ,__=(log4fun,)) if _log4mod>=0 else 0
             if not (lex and (not ADV_LEXERS or lex in ADV_LEXERS)):
                 return (None, lex)
-            pass;              #log__('fn body=\n{}',(FSWalker.get_filebody(fn, wk_enco))         ,__=(log4fun,)) if _log4mod>=0 else 0
+            pass;              #log__('fn body=\n{}',(FSWalker.get_filebody(fn))         ,__=(log4fun,)) if _log4mod>=0 else 0
             if ed4lx.loaded_file != fn:
-                ed4lx.set_text_all(FSWalker.get_filebody(fn, wk_enco))
-                ed4lx.loaded_file = fn
+                ed4lx.set_text_all(FSWalker.get_filebody(fn))
+                ed4lx.loaded_file       = fn
+                ed4lx.fif_ready_scan    = False
+                ed4lx.fif_ready_tree    = False
                 pass;          #log__('ed4lx.get_text_all=\n{}',(ed4lx.get_text_all())         ,__=(log4fun,)) if _log4mod>=0 else 0
 
         if not lex:
@@ -2435,6 +2471,7 @@ class LexFilter:
         if need_tree and not ed4lx.fif_ready_tree:
             ed4lx.action(app.EDACTION_CODETREE_FILL, ed4lx.fif_tid)
             ed4lx.fif_ready_tree = True
+        pass;                  #log("ok ed4lx.loaded_file={}",(ed4lx.loaded_file))
         return (ed4lx, lex)
        #def _prep
    #class LexFilter
@@ -2444,39 +2481,64 @@ class LexFilter:
 ############################################
 #NOTE: non GUI main tools
 
+def fit_enco(fn, enco_l, enco_ms):
+    if enco_ms:
+        fname   = os.path.basename(fn)
+        for msk in enco_ms:
+            if fnmatch(fname, msk):
+                enco_l  = [enco_ms[msk]]+enco_l
+    return enco_l
+   #def fit_enco
+    
 def fifwork(observer, ed4rpt, walkers, fragmer, frgfilters, reporter):
     pass;                       log4fun=1
     pass;                      #log4fun=_log4fun_fifwork
     pass;                      #log__('observer,walkers,fragmer,reporter={}',(observer,walkers,fragmer,reporter)         ,__=(log4fun,)) if _log4mod>=0 else 0
-    enco_l  = observer.opts.wk_enco
+
+
+    observer.dlg_status('msg', '')
+    observer.dlg_status('dirs', [DDD])
+    observer.dlg_status('fils', [DDD])
+    observer.dlg_status('frgs', [DDD])
+    ed4rpt.set_prop(app.PROP_RO, False)
+    ed4rpt.set_text_all('')
+    ed4rpt.set_prop(app.PROP_RO, True)
+#   ed4rpt.action(app.EDACTION_LEXER_SCAN, 0)
+    app.app_idle()
     
     work_start_t= ptime()
     prev_stat_t = ptime()
     prev_show_t = ptime()
-    reporter.show_results(ed4rpt)
+#   reporter.show_results(ed4rpt)
     for walker in walkers:
-#       for fn,body in walker.provide_path():
         for fn     in walker.provide_path():
             pass;               log__("fn={}",(fn)         ,__=(log4fun,)) if _log4mod>=0 else 0
             if fn is None:
                 break#for fn
-            if  prev_stat_t+0.1 < ptime():
+            if  prev_stat_t+0.3 < ptime():
                 prev_stat_t     = ptime()
                 observer.dlg_status('msg', fn)
                 observer.dlg_status('dirs', [reporter.stat(Reporter.FRST_DIRS)
-                                            ,walker.stats[   Walker.WKST_DIRS]])
+                                            ,Walker.stats[   Walker.WKST_DIRS]])
                 observer.dlg_status('fils', [reporter.stat(Reporter.FRST_FILS)
-                                            ,walker.stats[   Walker.WKST_UFNS]
-                                            ,walker.stats[   Walker.WKST_AFNS]])
+                                            ,Walker.stats[   Walker.WKST_UFNS]
+                                            ,Walker.stats[   Walker.WKST_AFNS]])
                 observer.dlg_status('frgs', [reporter.stat(Reporter.FRST_FRGS)
-                                            ,fragmer.stats[ Fragmer.WKST_FRGS]])
-                observer.dlg_status('tim',  f('({:.2f})', ptime()-work_start_t))
+                                            ,fragmer.stats[ Fragmer.WKST_FRGS]] if frgfilters else
+                                            [reporter.stat(Reporter.FRST_FRGS)])
+                observer.dlg_status('tim',  f('({})', Fif4D.dur2msg(ptime()-work_start_t)))
+                app.app_idle()
             if observer.need_break:
                 break#for fn
-            if  prev_show_t+2 < ptime():
+            if  prev_show_t+1 < ptime():
+#           if  prev_show_t+10 < ptime():
                 prev_show_t   = ptime()
-                reporter.show_results(ed4rpt)
+                reporter.show_results(ed4rpt) \
+                    if reporter.stat(Reporter.FRST_FRGS) < DOING_FRAGS or \
+                       reporter.stat(Reporter.FRST_OUTS) < DOING_FRAGS      else 0
                 app.app_idle()
+
+            enco_l  = fit_enco(fn, observer.opts.wk_enco, observer.opts.wk_enco_ms)
             for enco_n,enco in enumerate(enco_l):
                 try:
                     pass;      #log("enco={}",(enco))
@@ -2490,22 +2552,25 @@ def fifwork(observer, ed4rpt, walkers, fragmer, frgfilters, reporter):
                                 filter_ok   = False
                                 break#for flt
                         if not filter_ok:   continue#for frg
+
                         reporter.add_frg(fn, frgs)
                        #for frgs
                 except UnicodeError as ex:
                     print(_(f'Cannot read "{fn}": ({enco}) {ex}'))  if enco_n==len(enco_l)-1 else 0
+                    pass;      #print(_(f'Cannot read "{fn}": ({enco}) {ex}'))
                     reporter.remove_last_frgs(fn)
                     continue
                 break
                #for enco
            #for fn
         observer.dlg_status('dirs', [reporter.stat(Reporter.FRST_DIRS)
-                                    ,walker.stats[   Walker.WKST_DIRS]])
+                                    ,Walker.stats[   Walker.WKST_DIRS]])
         observer.dlg_status('fils', [reporter.stat(Reporter.FRST_FILS)
-                                    ,walker.stats[   Walker.WKST_UFNS]
-                                    ,walker.stats[   Walker.WKST_AFNS]])
+                                    ,Walker.stats[   Walker.WKST_UFNS]
+                                    ,Walker.stats[   Walker.WKST_AFNS]])
         observer.dlg_status('frgs', [reporter.stat(Reporter.FRST_FRGS)
-                                    ,fragmer.stats[ Fragmer.WKST_FRGS]])
+                                    ,fragmer.stats[ Fragmer.WKST_FRGS]] if frgfilters else
+                                    [reporter.stat(Reporter.FRST_FRGS)])
         if observer.need_break:
             break#for walk
        #for walker
@@ -2543,17 +2608,23 @@ class Reporter:
     FRST_FRGS   = 0
     FRST_DIRS   = 1
     FRST_FILS   = 2
+    FRST_OUTS   = 3
     def stat(self, what):
-        if what==Reporter.FRST_FRGS: return self.stats[Reporter.FRST_FRGS]
+        if what in (Reporter.FRST_FRGS, Reporter.FRST_OUTS):
+            return self.stats[Reporter.FRST_FRGS]
         return len(self.stats[what])
     
     
-    def __init__(self, rp_opts, observer):
+    def __init__(self, rp_opts, ed4lx, observer):
         pass;                  #log__("rp_opts={}",(rp_opts)        ,__=(_log4cls_Reporter,))
         
-        self.stats      = [0, set(), set()]
+        self.stats      = [0, set(), set(), 0]
         
         self.rp_opts    = rp_opts               # How to show Results
+        self.ed4lx      = ed4lx
+        self.ed4lx.loaded_file      = ''
+        self.ed4lx.fif_ready_scan   = False
+        self.ed4lx.fif_ready_tree   = False
         self.observer   = observer              # To get global Results info
         self.rfrgs      = []                    # All fragments data
                                                 #   [RFrg(fn, r, [(c,w)], s, e)]
@@ -2571,6 +2642,7 @@ class Reporter:
     def remove_last_frgs(self, fn):
         pass;                  #log("fn={!r}",(fn))
         pass;                  #log("self.rfrgs[-3:]={}",pfw(self.rfrgs[-3:]))
+        self.stats[Reporter.FRST_FILS].remove(fn)
         pos_to_rm   = len(self.rfrgs)
         rm_cnt      = 0
         for pos in range(len(self.rfrgs)-1, -1, -1):
@@ -2604,12 +2676,35 @@ class Reporter:
             self.stats[Reporter.FRST_DIRS].add(os.path.dirname(fn))
         
         newRF   = lambda fn, wfrg: RFrg(f=fn, r=wfrg.r, cws=[(wfrg.c, wfrg.w)] if wfrg.w else [], s=wfrg.s, e=wfrg.e)
+
+        if self.observer.opts.rp_lexa:          # Lexer path for each frg
+            pass;              #log('frgs={}',pfw(frgs))
+            for frg in frgs:
+                if 0==frg.w:    continue
+                ed4lx,lex   = LexFilter._prep(fn, self.ed4lx, need_tree=True)
+                lx_path     = LexFilter.get_lx_path(ed4lx.fif_tid, (frg.r,frg.c)).strip(SEP4LEXPATH)
+                pass;          #log('lx_path={}',lx_path)
+                # Skip if prev frg has the same path 
+                for negpos, rfrg in  enumerate(reversed(self.rfrgs)):
+                    if  fn     != rfrg.f:
+                        frgs= [WFrg(r=-1, s=lx_path)]+frgs
+                        break#for negpos
+                    if  -1     == rfrg.r:
+                        if        rfrg.s !=     lx_path:
+                            frgs= [WFrg(r=-1, s=lx_path)]+frgs
+                        break#for negpos
+                if not self.rfrgs:
+                    frgs= [WFrg(r=-1, s=lx_path)]+frgs
+                break#for frg
+            pass;              #log('frgs={}',pfw(frgs))
+
         # 1. Only one series for each fn
         for frg in frgs:
             pass;               log__('frg, self.rfrgs[-1]={}',(frg, self.rfrgs[-1] if self.rfrgs else None)         ,__=(log4fun,Reporter.log4cls)) if _log4mod>=0 else 0
-            if not   self.rfrgs         or \
-               fn != self.rfrgs[-1].f   or \
-               frg.r>self.rfrgs[-1].r:          # New fn/row
+            if (not  self.rfrgs         or      # First
+               fn != self.rfrgs[-1].f   or      # New fn
+               frg.r==-1                or      # Spec frg
+               frg.r>self.rfrgs[-1].r   ):      # New row
                 self.rfrgs.append(          newRF(fn, frg))
                 continue
             # Old fn
@@ -2835,6 +2930,7 @@ class Reporter:
         pass;                  #return 
 
         marks       = []
+        lpths       = []
 #       body        = [f(_('+Search "{what}" in "{incl}" from "{fold}" ({mtcs} matches in {mfls}({afls}) files)')
 #                       , **self.observer.get_gstat())]
 #       body        = [f(_('+Search #{mtcs}')
@@ -2842,7 +2938,8 @@ class Reporter:
 #       body        = [f(_('+Search #{mtcs}'), mtcs=self.stat(Reporter.FRST_FRGS))]
         body        = [_('+Search')]
         fit_ftim    = lambda f: ':'.join(str(mtime(f)).split(':')[:2]) # 2019-07-19 18:05:14.90 -> "2019-07-19 18:05"
-        def node2body(kids, body, marks, locs, dpth=1):
+        def node2body(kids, body, locs, dpth=1):
+#       def node2body(kids, body, marks, locs, dpth=1):
             for kid in kids:
                 if kid.tp=='ff':
                     locs[len(body)] = [kid.p, []]
@@ -2852,7 +2949,8 @@ class Reporter:
                                 , fil=os.path.relpath(kid.p, root) if relp else kid.p
                                 , tim=tim
                                 , cnt=kid.cnt)]
-                    node2body(kid.subs, body, marks, locs, 1+dpth)
+                    node2body(kid.subs, body, locs, 1+dpth)
+#                   node2body(kid.subs, body, marks, locs, 1+dpth)
                     continue
                 for rfrg in kid.frs:
                     loc_cw_rcs      = [] if rfrg.cws else \
@@ -2866,21 +2964,26 @@ class Reporter:
                                       )]
                         marks.append(   (len(body), dpth+pfx_wth+c, w) )
 
-                    fmt_vs  = dict(g=TAB*dpth, r=1+rfrg.r, s=rfrg.s)
+                    fmt_vs  = dict(g=TAB*dpth, r=(1+rfrg.r if rfrg.r>=0 else ''), s=rfrg.s)
+#                   fmt_vs  = dict(g=TAB*dpth, r=1+rfrg.r, s=rfrg.s)
                     if finl:
                         fmt_vs['p'] = os.path.relpath(rfrg.f, root) if relp and os.path.isfile(rfrg.f) else rfrg.f
                     if shcw:
                         fmt_vs['c'] = str(1+rfrg.cws[0][0]) if rfrg.cws else ''
                         fmt_vs['w'] = str(  rfrg.cws[0][1]) if rfrg.cws else ''
                     body.append(        f(pfx_frm, **fmt_vs))
+                    lpths.append((len(body)-1, dpth+pfx_wth  , len(body[-1])-dpth-pfx_wth) ) if rfrg.r==-1 else 0
                    #for rfrg
                #for kid
            #def node2body
         self.locs   = {}
-        node2body(tree, body, marks, self.locs)
+        node2body(tree, body, self.locs)
+#       node2body(tree, body, marks, self.locs)
         pass;                  #log__('body=\n{}','\n'.join(body)         ,__=(log4fun,Reporter.log4cls))
         pass;                  #log__('marks=\n{}',(marks)         ,__=(log4fun,Reporter.log4cls))
         pass;                   log__('self.locs=\n{}',pfw(self.locs)         ,__=(log4fun,Reporter.log4cls)) if _log4mod>=0 else 0
+        
+        self.stats[Reporter.FRST_OUTS] += len(self.locs)
            
         # Put text to ed and set live marks
         ed_.attr(app.MARKERS_DELETE_ALL)
@@ -2889,6 +2992,8 @@ class Reporter:
         ed_.set_prop(app.PROP_RO         ,True)
         for rw, cl, ln in marks:
             ed_.attr(app.MARKERS_ADD, x=cl, y=rw, len=ln, **MARK_FIND_STYLE)
+        for rw, cl, ln in lpths:
+            ed_.attr(app.MARKERS_ADD, x=cl, y=rw, len=ln, **LPTH_FIND_STYLE)
        #def show_results
        
     
@@ -3040,7 +3145,12 @@ class Walker:
                         , Walker.WKST_AFNS:0
                         , Walker.WKST_UFNS:0
                         }
+    stats       = {}
 
+    @staticmethod
+    def start_stat():
+        Walker.stats    = Walker.new_stats()
+    
     @staticmethod
     def prep_filename_masks(mask:str)->(list,list):
         """ Parse file/folder quotes_mask to two lists (file_pure_masks, folder_pure_masks).
@@ -3121,15 +3231,15 @@ class TabsWalker:
         self.observer   = observer
         pass;                   log__('wk_opts={}',(wk_opts)         ,__=(log4fun,TabsWalker.log4cls)) if _log4mod>=0 else 0
 
-        self.stats      = Walker.new_stats()
+#       self.stats      = Walker.new_stats()
        #def __init__
 
 
     def provide_path(self):                    
         " Create generator to yield tabs's title/body "
         pass;                   log4fun=0
-        self.stats      = Walker.new_stats()
-        self.stats[Walker.WKST_DIRS]   += 1
+#       self.stats      = Walker.new_stats()
+        Walker.stats[Walker.WKST_DIRS]  += 1
         
         incls,  \
         incls_fo= Walker.prep_filename_masks(self.wk_opts.get('wk_incl', ''))
@@ -3142,14 +3252,14 @@ class TabsWalker:
             title   = try_ed.get_prop(app.PROP_TAB_TITLE).lstrip('*')
             tab_id  = try_ed.get_prop(app.PROP_TAB_ID)
             
-            self.stats[Walker.WKST_AFNS]   += 1
+            Walker.stats[Walker.WKST_AFNS]  += 1
             # Skip the tab?
             if not       any(map(lambda cl:fnmatch(title, cl), incls)):   continue#for
             if excls and any(map(lambda cl:fnmatch(title, cl), excls)):   continue#for
             path    = f'tab:{tab_id}/{title}'
             
             # Use!
-            self.stats[Walker.WKST_UFNS]   += 1
+            Walker.stats[Walker.WKST_UFNS]  += 1
             fp      = path
             yield fp
            #for h_tab
@@ -3170,7 +3280,8 @@ class FSWalker:
     pass;                      #log4cls=-1
     pass;                       log4cls=_log4cls_FSWalker
     
-#   detector   = UniversalDetector()
+    enco_l  = []
+    enco_ms = {}
     
     def __init__(self, root, wk_opts, observer, need_body):
         pass;                   log4fun=1
@@ -3180,10 +3291,10 @@ class FSWalker:
         self.need_body  = need_body
         pass;                   log__('wk_opts={}',(wk_opts)         ,__=(log4fun,FSWalker.log4cls)) if _log4mod>=0 else 0
 
-        self.enco_l     = self.wk_opts.get('wk_enco', WK_ENCO)
-#       FSWalker.detector   = UniversalDetector() if Walker.ENCO_DETD in self.enco_l else None
+        FSWalker.enco_l = self.wk_opts.get('wk_enco', WK_ENCO_DPLN)
+        FSWalker.enco_ms= self.wk_opts.get('wk_enco_ms', {})
 
-        self.stats      = Walker.new_stats()
+#       self.stats      = Walker.new_stats()
        #def __init__
        
     
@@ -3216,8 +3327,8 @@ class FSWalker:
         " Create generator to yield file's path "
         pass;                  #log4fun= 1
         pass;                   log4fun=_log4fun_FSWalker_walk
-        self.stats      = Walker.new_stats()
-        pass;                   log__('self.stats={}',(self.stats)         ,__=(log4fun,FSWalker.log4cls)) if _log4mod>=0 else 0
+#       self.stats      = Walker.new_stats()
+        pass;                   log__('Walker.stats={}',(Walker.stats)         ,__=(log4fun,FSWalker.log4cls)) if _log4mod>=0 else 0
         
         depth   = self.wk_opts.get('wk_dept', 0) - 1           # -1==all, 0,1,2...=levels
         incls,  \
@@ -3234,13 +3345,14 @@ class FSWalker:
         sort    = self.wk_opts.get('wk_sort', '')   # ''/'new'/'old'
 
         age_d   = FSWalker.fit_age(age_s) 
-        mtfps   = [] if sort else None
+        mtfps   = [] if sort or WALK_F_PICKING else None
+        pass;                   picking_start   = ptime()
         
         for dirpath, dirnames, filenames in os.walk(self.root, topdown=not WALK_DOWNTOP):
             pass;               log__('dirpath={}',(dirpath)         ,__=(log4fun,FSWalker.log4cls)) if _log4mod>=0 else 0
             if self.observer.time_to_stop():    return      ##?? Not at every loop
 
-            self.stats[Walker.WKST_DIRS]   += 1
+            Walker.stats[Walker.WKST_DIRS]  += 1
 
             walk_depth  = 0 \
                             if os.path.samefile(dirpath, self.root) else \
@@ -3274,7 +3386,7 @@ class FSWalker:
             # Trick: /. in excl to skip root
             if walk_depth==0 and '.' in excls_fo:    continue
             
-            self.stats[Walker.WKST_AFNS]   += len(filenames)
+            Walker.stats[Walker.WKST_AFNS]  += len(filenames)
             for filename in filenames:
                 # Skip the file if...
                 if not       any(map(lambda cl:fnmatch(filename, cl), incls)):  continue#for filename
@@ -3291,25 +3403,30 @@ class FSWalker:
                     not FSWalker.with_age(age_d, os.path.getmtime(path)):       continue#for filename
                 
                 # Use!
-                self.stats[Walker.WKST_UFNS]   += 1
+                Walker.stats[Walker.WKST_UFNS]  += 1
                 
                 if sort:
                     mtfps.append( (os.path.getmtime(path), path) )
+                elif WALK_F_PICKING:
+                    mtfps.append(                          path )
                 else:
                     yield path
            #for dirpath
-        if sort:
-            pass;              #log__('mtfps={}',pfw(mtfps,100)             ,__=(log4fun,FSWalker.log4cls))
-            paths   = [tp[1] for tp in sorted(mtfps, reverse=(sort=='new'))]
-#           yield from paths
-            for path in paths:
-                yield path
+        if not (sort or WALK_F_PICKING):
+            return 
+        pass;                   
+        pass;                   print(f('pickin done: {:.2f} secs', ptime()-picking_start)) if _dev_kv else 0
+        paths   = [tp[1] for tp in sorted(mtfps, reverse=(sort=='new'))] \
+                    if sort else \
+                  mtfps
+        pass;                  #log("#paths={}",len(paths))
+        yield from paths
        #def provide_path
     
     
     def path2body(self, path, ops=None):
         if self.need_body:
-            return FSWalker.get_filebody(path, self.enco_l)
+            return FSWalker.get_filebody(path)
 
         if open(path, mode='rb').read(4).startswith(codecs.BOM_UTF8):
             ofile   = open(path, 'rt', encoding='utf-8-sig')
@@ -3325,8 +3442,13 @@ class FSWalker:
     
     
     @staticmethod
-    def get_filebody(fp, enco_l):
+    def get_filebody(fp, enco_l=None, enco_ms=None):
         pass;                   log4fun= 1
+        enco_l  = FSWalker.enco_l   if enco_l  is None else enco_l  
+        enco_ms = FSWalker.enco_ms  if enco_ms is None else enco_ms 
+        
+        enco_l  = fit_enco(fp, enco_l, enco_ms)
+        
         body    = ''
         
         if open(fp, mode='rb').read(4).startswith(codecs.BOM_UTF8):
@@ -3334,6 +3456,7 @@ class FSWalker:
             return body
         enco_l  = [enc for enc in enco_l if enc]
         pass;                  #log__('enco_l={}',(enco_l)         ,__=(log4fun,FSWalker.log4cls)) if _log4mod>=0 else 0
+        pass;                  #log('enco_l={}',(enco_l))
         for enco_n, enco_s in enumerate(enco_l):
             pass;              #log__('?? enco_s={}',(enco_s)         ,__=(log4fun,FSWalker.log4cls)) if _log4mod>=0 else 0
             if enco_s==Walker.ENCO_DETD:
@@ -3716,6 +3839,7 @@ ToDo
 [+][kv-kv][20aug19] Store (in mem) some last search param sets. Alt+Lf/Rt to load
 [ ][kv-kv][20aug19] ? Show speed of search: files/sec or frags/sec
 [+][kv-kv][21aug19] Check: all roots are not included each others
-[ ][kv-kv][30aug19] Map {ext:encoding}
-[ ][kv-kv][30aug19] Lexer path for all frags - as src line
+[+][kv-kv][30aug19] Map {ext:encoding}
+[+][kv-kv][30aug19] Lexer path for all frags - as src line
+[+][kv-kv][03sep19] Separate stage to collect files
 '''

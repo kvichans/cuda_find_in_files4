@@ -1,4 +1,12 @@
+4.6.02 2019-09-03
+added: Option "Show lexer path for all fragments" (see menu and "lex_path_style")
+added: Map {mask:encoding} to encoding plan
+added: Engine option "lex_path_style"
+added: Engine option "file_picking_stage"
+added: Engine option "show_progress_fragments"
+
 4.6.02 2019-08-30
+added: Option (see menu) to show lex path for all found fragments
 added: Source encoding by file mask (by extension)
 added: Filter syntax elements in sublexer parts
 added: Prepare new search with lexer path filter by selected Source (Shift+F11)
