@@ -100,8 +100,8 @@ FIF4_META_OPTS=[
                   First available lexer is used.""")),
         'opt': 'lexers_for_results',
         'def': [
+            'FiF',
             'Search results',
-            'FiF'
         ],
         'frm': 'json',
         'chp': _('Results'),
@@ -323,8 +323,7 @@ DHLP_KEYS_TABLE = _(r'''
 │ Move focus: Results << Source << Find │            Shift+Tab │                                   │
 ├───────────────────────────────────────┼──────────────────────┼───────────────────────────────────┤
 │ Show history of search patterns       │               Alt+Dn │ If focus in "Find"                │
-│ Depth: All << Only << +1 <<...<< All  │              Ctrl+Up │                                   │
-│ Depth: All >> Only >> +1 >>...>> All  │              Ctrl+Dn │                                   │
+│ Closed loop over all Depth values     │           Ctrl+Dn/Up │                                   │
 │ Choose folder                         │               Ctrl+B │                                   │
 │ Choose file                           │         Ctrl+Shift+B │                                   │
 │ Use folder of the current file        │               Ctrl+U │                                   │
@@ -335,13 +334,12 @@ DHLP_KEYS_TABLE = _(r'''
 │ Fold/Unfold the caret branch          │               Ctrl+= │ If focus in Results               │
 │ Fold/Unfold all branches              │         Ctrl+Shift+= │ By state of the caret branch      │
 ├───────────────────────────────────────┼──────────────────────┼───────────────────────────────────┤
-│ Load preset #1/#2/../#9               │        Ctrl+1/2/../9 │ More presets via menu             │
+│ Load preset #1/#2/../#9               │        Ctrl+1/2/../9 │ All presets via menu              │
 │ Create new preset                     │               Ctrl+S │                                   │
 │ Choose preset to apply                │                Alt+S │                                   │
 │ Load prev/next executed search params │            Alt+Lf/Rt │                                   │
 ├───────────────────────────────────────┼──────────────────────┼───────────────────────────────────┤
-│ Append macro var to carrent field     │               Ctrl+A │ To pattern if focus               │
-│                                       │                      │  in Results/Source                │
+│ Append macro var to current field     │               Ctrl+A │ If focus in editable field        │
 │ Show fields after macros substitution │         Ctrl+Shift+A │                                   │
 ├───────────────────────────────────────┼──────────────────────┼───────────────────────────────────┤
 │ Expand/Shrink Results height          │       Ctrl+Alt+Dn/Up │                                   │
@@ -368,6 +366,7 @@ Some search options can be changed only via menu.
     · Age of files.
     · Skip hidden/binary files.
     · Filter by "Syntax elements" (comments or literal strings).
+    · Encoding plan
 
 There is infobar to the left of "Find" button.
 The infobar shows not trivial values of "{OTH4FND}".
@@ -383,8 +382,9 @@ The infobar shows not trivial values of "{OTH4FND}".
     ?/**/?      Search only outside of comments.
     "?"         Search only inside literal strings.
     ?""?        Search only outside of literal strings.
-    /*?*/ "?"   Search only inside comments or literal strings.
-Also infobar shows first step of "encoding plan".
+    /*?*/ "?"   Search only inside comments OR literal strings.
+    ?/**/? ?""? Search only outside of comments AND literal strings.
+Also infobar shows mask encodings and first step encoding from "Encoding plan".
 Right-click on the infobar shows local menu with "{OTH4FND}".
 Double-click on the infobar clears all values except encoding.
 Warning! 
@@ -405,27 +405,27 @@ Values in fields "{incl}" and "{excl}" can contain
     *       for any substring (may be empty),
     [seq]   any character in seq,
     [!seq]  any character not in seq. 
+Double-quote value, which needs space char.
 Note: 
     *       matches all names, 
     *.*     doesn't match all.
- 
-Values in fields "{incl}" and "{excl}" can filter subfolder names if they start with "/".
+
+Also the values can filter subfolder names if they start with "/".
 Example.
     {incl:12}: /a*  *.txt
     {excl:12}: /ab*
     {fold:12}: c:/root
     Depth       : All
-Search will consider all *.txt files in folder c:/root and in all subfolders a* except ab*.
+    Search will consider all *.txt files in folder c:/root and in all subfolders a* except ab*.
 
-Values in fields "{incl}" and "{excl}" can filter lexer path if they are embraced
-with "[:" and ":]".
+Also the values can filter lexer path if they are embraced with "[:" and ":]".
 The filter is path-like string with elements
     >       path separator. Ex: "a>b>c" - node "c" is subnode of "b" and "b" is subnode of "a".
     >>      recursive descent. Ex: "a>>c" - node "c" appears in branch "a".
     word    name of a node.
     *word   partial name of a node.
     word*   partial name of a node.
-    Blanks around all "<" are not important. So "a>>b>c" and "a > > b > c" are same.
+Blanks around all "<" are not important. So "a>>b>c" and "a > > b > c" are same.
 Lexer path is matched with a filter if some start segments of path are compatible 
 with all segments of the filter. Path "aa>bb>cc>dd" is matched with filters 
     "aa"
@@ -549,7 +549,10 @@ To perform optimal search, you need to consider these notes.
     "w"  {word}
 do not reduce the speed at all. 
 
-2. Appending context lines to Results ("-?+?") slightly decrease the speed.
+2. Using not trivial setttings of "Sort collected files" or "Age of files"
+practicaly do not reduce the speed.
+
+3. Appending context lines to Results ("-?+?") slightly decrease the speed.
 
 3. Multi-line pattern ("+") markedly decrease the speed.
 
@@ -597,12 +600,14 @@ The field also can contain folder(s) and {tabs} together.
 
 ———————————————————————————————————————————————————————————————————————————————————————————— 
 Use \§ to find the character §.
+Multi-line control shows a pattern with extra newline (known bug). So if pattern ends with 
+a newline, this newline will be stripped from actual search string.
 
+———————————————————————————————————————————————————————————————————————————————————————————— 
 You can use macros in any editable fields. For ex, "~ {{t}}" will be auto-replaced to "~ {tabs}". 
 To use the expression with brackets like "{{t}}", escape brackets with backslashes like "\{{t\}}" 
 (or like "\{{t}}", if field doesn't have the outer bracket pair).
 
-———————————————————————————————————————————————————————————————————————————————————————————— 
 Engine option 
     "use_selection_on_start"
 uses selected text from document for the field "Find what".

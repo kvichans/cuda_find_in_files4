@@ -1,4 +1,8 @@
-4.6.02 2019-09-03
+4.6.04 2019-09-04
+added: Command to copy Results to new tab (see local Results menu)
+added: Show in infobar which encodings are in masks
+
+4.6.03 2019-09-03
 added: Option "Show lexer path for all fragments" (see menu and "lex_path_style")
 added: Map {mask:encoding} to encoding plan
 added: Engine option "lex_path_style"

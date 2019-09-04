@@ -2,14 +2,15 @@
 Authors:
     Andrey Kvichansky   (kvichans on github.com)
 Version:
-    '4.6.03 2019-09-03'
+    '4.6.04 2019-09-04'
 ToDo: (see end of file)
 '''
-import  re, os, traceback, locale, itertools, codecs, time, datetime as dt, gc #, types, json, sys
+import  re, os, traceback, locale, itertools, codecs, time, datetime as dt #, gc, types, json, sys
 from            pathlib         import Path
 from            fnmatch         import fnmatch
 from            collections     import namedtuple
 from            collections     import defaultdict
+from            collections     import Counter
 
 import          cudatext            as app
 from            cudatext        import ed
@@ -320,6 +321,7 @@ DEF_LOC_ENCO= 'cp1252' if sys.platform=='linux' else locale.getpreferredencoding
 DETECT_ENCO = _('detect')
 WK_ENCO_DPLN= [DEF_LOC_ENCO, 'utf8', DETECT_ENCO]
 
+dict2hist   = lambda dct: ','.join(f'{n}:{v}' for v,n in Counter(v for v in dct.values()).items())
 
 
 class Fif4D:
@@ -433,7 +435,7 @@ class Fif4D:
     syst_ca     = lambda self: Fif4D.SYST_CA(self.opts)
     
     ENCO_CA     = lambda opts,fsts=False: '' if opts.wk_enco is None else \
-                        (f'({len(opts.wk_enco_ms)}),' if opts.wk_enco_ms else '') \
+                        ('('+dict2hist(opts.wk_enco_ms)+')' if opts.wk_enco_ms else '') \
                         +((','.join(opts.wk_enco) if fsts else opts.wk_enco[0]) if opts.wk_enco else '')
     enco_ca     = lambda self,fsts=False: Fif4D.ENCO_CA(self.opts, fsts)
     
@@ -758,6 +760,7 @@ class Fif4D:
         # Dispatch act
         if aid in ('on_rslt_crt'
                   ,'go-next-fr', 'go-prev-fr', 'go-next-fi', 'go-prev-fi'
+                  ,'rslt-to-tab'
                   ,'nav-to'):   return m.rslt_srcf_acts(aid, data, ag)
 
         if aid == 'xopts':
@@ -1357,6 +1360,8 @@ class Fif4D:
     ),d(tag='a:nf_frag'     ,cap=_('Prepare to find in the so&urce')    ,key='F11'
     ),d(tag='a:nf_frlp'     ,cap=_('Prepare to find in the sou&rce and lexer path'),key='Shift+F11'
     ),d(                     cap='-'
+    ),d(tag='a:rslt-to-tab' ,cap=_('Copy Results to new tab')
+    ),d(                     cap='-'
                 )]+ mn_rslt
                 , aid, where, dx+5, dy+10, cmd4all=self.wnen_menu)
             return []
@@ -1563,19 +1568,21 @@ class Fif4D:
             return ded
         
         m.rslt = fit_editor(m.ag, 'di_rslt', FIF_LEXER
-                    ,   {app.PROP_GUTTER_ALL :True
-                        ,app.PROP_GUTTER_FOLD:True
-                        ,app.PROP_RO         :True
-                        ,app.PROP_MARGIN     :2000
-                        ,app.PROP_TAB_SIZE   :1
+                    ,   {app.PROP_GUTTER_ALL        :True
+                        ,app.PROP_GUTTER_FOLD       :True
+                        ,app.PROP_RO                :True
+                        ,app.PROP_MARGIN            :2000
+                        ,app.PROP_TAB_SIZE          :1
+                        ,app.PROP_MODERN_SCROLLBAR  :True
                         })
         m.rslt.igno_sel = False
         
         m.srcf = fit_editor(m.ag, 'di_srcf', None
-                    ,   {app.PROP_GUTTER_ALL :True
-                        ,app.PROP_GUTTER_NUM :True
-                        ,app.PROP_RO         :True
-                        ,app.PROP_MARGIN     :2000
+                    ,   {app.PROP_GUTTER_ALL        :True
+                        ,app.PROP_GUTTER_NUM        :True
+                        ,app.PROP_RO                :True
+                        ,app.PROP_MARGIN            :2000
+                        ,app.PROP_MODERN_SCROLLBAR  :True
                         })
         m.srcf.fif_ready_tree   = False
         m.srcf.fif_lexer        = ''
@@ -1651,6 +1658,7 @@ class Fif4D:
         skey    = (scam,key)
         skef    = (scam,key,fid)
         pass;                   log__("fid,skey,skef={}",(fid,skey,skef)         ,__=(log4fun,M.log4cls)) if _log4mod>=0 else 0
+        in_edct = fid in ('in_what', 'in_whaM', 'wk_incl', 'wk_excl', 'wk_fold')
         
         upd     = {}
         if 0:pass           #NOTE: do_key_down
@@ -1697,7 +1705,7 @@ class Fif4D:
         elif skey==( 'a',VK_LEFT):                      upd=m.do_acts(ag, 'ps_prev')            # Alt+LF
         elif skey==( 'a',VK_RIGHT):                     upd=m.do_acts(ag, 'ps_next')            # Alt+RT
         elif ('c',ord('1'))<=skey<=('c',ord('9')):      upd=m.do_acts(ag, 'ps_load_'+ckey1)     # Ctrl+1..9
-        elif skey==( 'c',ord('A')):                     upd=m.do_acts(ag, 'vr-add')             # Ctrl+      A
+        elif skey==( 'c',ord('A')) and in_edct:         upd=m.do_acts(ag, 'vr-add')             # Ctrl+      A
         elif skey==('sc',ord('A')):                     upd=m.do_acts(ag, 'vr-sub')             # Ctrl+Shift+A
         
         # Find/Results/Source
@@ -1952,6 +1960,18 @@ class Fif4D:
                     m.rslt_srcf_acts('src-lex-path', (frg_info,rfi))
             return []
 
+        if act in ('rslt-to-tab',):
+            app.file_open('')
+            ed.set_prop(app.PROP_ENC,       'UTF-8')
+            ed.set_prop(app.PROP_TAB_TITLE, _('Results'))
+            ed.set_text_all(m.rslt.get_text_all())
+            mrks    = m.rslt.attr(app.MARKERS_GET)
+            for mrk in (mrks if mrks else []):
+                ed.attr(app.MARKERS_ADD, *mrk)
+            ed.set_prop(app.PROP_LEXER_FILE, FIF_LEXER)
+            ed.set_prop(app.PROP_TAB_SIZE  , 1)
+            return []
+
         if act in ('go-next-fr', 'go-prev-fr'
                   ,'go-next-fi', 'go-prev-fi'):     # Move to next/prev frag/file
             if not m.rslt or not m.reporter:return []
@@ -2084,7 +2104,7 @@ class Fif4D:
         M.done_finds    = append_to_history(m.vals_opts('as_ps'), M.done_finds)
 
         m.rslt_srcf_acts('set-no-src')
-        gc.disable()
+#       gc.disable()
         m.working   = True
         # Prepare actors
         pass;                  #log__("?? Prepare actors",()         ,__=(log4fun,M.log4cls)) if _log4mod>=0 else 0
@@ -2153,7 +2173,7 @@ class Fif4D:
         frgfilters  = None
         fragmer     = None
 
-        gc.enable()
+#       gc.enable()
         
         return []
        #def work
@@ -2441,6 +2461,10 @@ class LexFilter:
             tab_id  = int(fn.split('/')[0].split(':')[1])
             edtab   = apx.get_tab_by_id(tab_id)
             lex     = edtab.get_prop(app.PROP_LEXER_FILE)
+            if not lex:
+                # Try to _parsing_ to set lexer
+                pass ##??
+            pass;               log("lex,ADV_LEXERS={}",(lex,ADV_LEXERS))
             if not (lex and (not ADV_LEXERS or lex in ADV_LEXERS)):
                 pass;          #log("lex={}",(lex))
                 return (None, lex)
@@ -2642,7 +2666,7 @@ class Reporter:
     def remove_last_frgs(self, fn):
         pass;                  #log("fn={!r}",(fn))
         pass;                  #log("self.rfrgs[-3:]={}",pfw(self.rfrgs[-3:]))
-        self.stats[Reporter.FRST_FILS].remove(fn)
+        self.stats[Reporter.FRST_FILS].remove(fn) if fn in self.stats[Reporter.FRST_FILS] else 0
         pos_to_rm   = len(self.rfrgs)
         rm_cnt      = 0
         for pos in range(len(self.rfrgs)-1, -1, -1):
@@ -2680,8 +2704,9 @@ class Reporter:
         if self.observer.opts.rp_lexa:          # Lexer path for each frg
             pass;              #log('frgs={}',pfw(frgs))
             for frg in frgs:
-                if 0==frg.w:    continue
+                if 0==frg.w:    continue#for frg
                 ed4lx,lex   = LexFilter._prep(fn, self.ed4lx, need_tree=True)
+                if not ed4lx:   break#for frg
                 lx_path     = LexFilter.get_lx_path(ed4lx.fif_tid, (frg.r,frg.c)).strip(SEP4LEXPATH)
                 pass;          #log('lx_path={}',lx_path)
                 # Skip if prev frg has the same path 
@@ -2939,7 +2964,6 @@ class Reporter:
         body        = [_('+Search')]
         fit_ftim    = lambda f: ':'.join(str(mtime(f)).split(':')[:2]) # 2019-07-19 18:05:14.90 -> "2019-07-19 18:05"
         def node2body(kids, body, locs, dpth=1):
-#       def node2body(kids, body, marks, locs, dpth=1):
             for kid in kids:
                 if kid.tp=='ff':
                     locs[len(body)] = [kid.p, []]
@@ -2950,7 +2974,6 @@ class Reporter:
                                 , tim=tim
                                 , cnt=kid.cnt)]
                     node2body(kid.subs, body, locs, 1+dpth)
-#                   node2body(kid.subs, body, marks, locs, 1+dpth)
                     continue
                 for rfrg in kid.frs:
                     loc_cw_rcs      = [] if rfrg.cws else \
@@ -2964,8 +2987,8 @@ class Reporter:
                                       )]
                         marks.append(   (len(body), dpth+pfx_wth+c, w) )
 
-                    fmt_vs  = dict(g=TAB*dpth, r=(1+rfrg.r if rfrg.r>=0 else ''), s=rfrg.s)
-#                   fmt_vs  = dict(g=TAB*dpth, r=1+rfrg.r, s=rfrg.s)
+                    fmt_vs  = dict(g=TAB*dpth, r=(1+rfrg.r if rfrg.r>=0 else ''), s=rfrg.s) # path has not r
+#                   fmt_vs  = dict(g=TAB*dpth, r=1+rfrg.r                       , s=rfrg.s)
                     if finl:
                         fmt_vs['p'] = os.path.relpath(rfrg.f, root) if relp and os.path.isfile(rfrg.f) else rfrg.f
                     if shcw:
@@ -2978,7 +3001,6 @@ class Reporter:
            #def node2body
         self.locs   = {}
         node2body(tree, body, self.locs)
-#       node2body(tree, body, marks, self.locs)
         pass;                  #log__('body=\n{}','\n'.join(body)         ,__=(log4fun,Reporter.log4cls))
         pass;                  #log__('marks=\n{}',(marks)         ,__=(log4fun,Reporter.log4cls))
         pass;                   log__('self.locs=\n{}',pfw(self.locs)         ,__=(log4fun,Reporter.log4cls)) if _log4mod>=0 else 0
@@ -3790,7 +3812,7 @@ def are_roots_included(fold):
 ToDo
 [+][kv-kv][19jun19] cells for status: [walked dirs], [reported/matched/tested fns], [reported/found frags] 
 [+][kv-kv][19jun19] m-dt of files 
-[ ][kv-kv][19jun19] lexer path of frags to filter/report
+[+][kv-kv][19jun19] lexer path of frags to filter/report
 [+][kv-kv][19jun19] unsaved text of tabs
 [+][kv-kv][19jun19] yield based obj chain: report - finder in text - file/tab... - walker
 [ ][kv-kv][19jun19] patterns to find w/o waiting Enter in form or w/o form at all
@@ -3815,7 +3837,7 @@ ToDo
                    !    ed.get_sublexer_ranges()
 [+][kv-kv][02aug19] Add field to statusbar to show timing of last act
 [?][kv-kv][04aug19] Try to use StringIO in Reporter
-[ ][kv-kv][07aug19] Smth blocks shrinking dlg height
+[ ][kv-kv][07aug19] !! Smth blocks shrinking dlg height
 [+][kv-kv][07aug19] Move const strings to separed py
 [+][kv-kv][07aug19] Try cgitb
 [ ][kv-kv][08aug19] ? New walker to only count in file (w/o fragments)
@@ -3828,7 +3850,7 @@ ToDo
 [ ][kv-kv][11aug19] Fit code to use many fs-roots
 [ ][kv-kv][11aug19] ? Find files are NOT contain pattern
 [+][kv-kv][11aug19] OS/Proj/Custom vars as "{SEL}" or "{CFILE}"
-[+][kv-kv][12aug19] ? Replace in code not ASCII char with unicode names
+[+][kv-kv][12aug19] Replace in code not ASCII char with unicode names
 [+][kv-kv][12aug19] Repare using Results after reopen dlg
 [+][kv-kv][12aug19] <(NUMLINE)> -> <NUMLINE>
 [+][kv-kv][13aug19] Stop w/o asking on second search
@@ -3842,4 +3864,5 @@ ToDo
 [+][kv-kv][30aug19] Map {ext:encoding}
 [+][kv-kv][30aug19] Lexer path for all frags - as src line
 [+][kv-kv][03sep19] Separate stage to collect files
+[+][kv-kv][04sep19] More detail for enco masks in infobar
 '''
