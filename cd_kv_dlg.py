@@ -143,6 +143,7 @@ class DlgAg:
         self._modal = None                                      # State of form
         self._onetime   = False                                 # Free form data on hide
         self._skip_free = False                                 # To ban to free form data
+        self.locks  = 0                                         # Lock counter to batch updates
 
         self.opts   = opts.copy() if opts else {}
         ctrl_to_meta= self.opts.get('ctrl_to_meta', 'by_os')
@@ -310,12 +311,6 @@ class DlgAg:
         mpr     = self.ctrls[name]
         if not live:
             attrs   = attrs if attrs else mpr
-#           return  odct([(attr
-#                         ,self.cattr(name, attr, live=live) if attr=='cols_ws' else 
-#                          mpr.get(attr)
-#                         ) 
-#                           for attr in attrs
-#                        ])
             return  {attr: self.cattr(name, attr, live=live) if attr=='cols_ws' else 
                                     mpr.get(attr)
                         for attr in attrs
@@ -334,17 +329,10 @@ class DlgAg:
                     break#for
             pass;              #log("rsp_attrs={}",(rsp_attrs))
             if rsp_attrs:
-#               return odct([(attr, mpr.get(rsp_attrs[attr])) for attr in rsp_attrs])
                 return {attr: mpr.get(rsp_attrs[attr]) for attr in rsp_attrs}
         
         lpr     = _dlg_proc(self.did, app.DLG_CTL_PROP_GET, name=name)
         attrs   = attrs if attrs else list(lpr.keys())
-#       return      odct([(attr
-#                         ,self.cattr(name, attr, live=live) if attr=='cols_ws' else 
-#                          self._cattr(lpr, name, attr)
-#                         )
-#                           for attr in attrs
-#                        ])
         return      {attr: self.cattr(name, attr, live=live) if attr=='cols_ws' else 
                            self._cattr(lpr, name, attr)
                             for attr in attrs
@@ -362,8 +350,6 @@ class DlgAg:
                     if names else \
                   [cid  for (cid,cfg) in self.ctrls.items() 
                         if cfg['type'] in _TYPE_WITH_VALUE]
-#       return  odct([(cid, self.cattr(cid, 'val', defv=None, live=live))
-#                       for cid in names])
         return  {cid:       self.cattr(cid, 'val', defv=None, live=live)
                         for cid in names}
     
@@ -383,6 +369,26 @@ class DlgAg:
         return []
        #def reset
     
+    
+    def _lock(self, how):
+        pass;                  #print(f'_lock: how={how} self.locks={self.locks}')
+        pass;                  #return 
+        if False:pass
+        elif how=='+':
+            if self.locks==0:
+                app.dlg_proc(self.did, app.DLG_LOCK)
+            self.locks += 1
+        elif how=='-':
+            self.locks = max(0, self.locks-1)
+            if self.locks==0:
+                app.dlg_proc(self.did, app.DLG_UNLOCK)
+        elif how=='.':
+            if self.locks >0:
+                app.dlg_proc(self.did, app.DLG_UNLOCK)
+            self.locks = 0
+       #def _lock
+    
+    
     def update(self, upds=None, ctrls=[], form={}, vals={}, fid='', retval=None, opts=None):
         """ Update most of dlg props
                 upds        dict(ctrls=, form=, vals=, fid=) 
@@ -395,7 +401,7 @@ class DlgAg:
         """
         pass;                   log4fun=0                       # Order log in the function
         if upds is None and (ctrls or form or vals or fid):
-            upds    = dict(ctrls=ctrls, form=form, vals=vals)
+            upds    = dict(ctrls=ctrls.copy(), form=form.copy(), vals=vals.copy())
             if fid:
                 upds['fid'] = fid
         pass;                   log__("upds, retval, opts={}",(upds, retval, opts)      ,__=(log4fun,)) if _log4mod>=0 else 0
@@ -415,13 +421,19 @@ class DlgAg:
         if upds is False:
             pass;              #log__('to stop ev'      ,__=(log4fun,)) if _log4mod>=0 else 0
             return False                                        # False to cancel the current event
+        if upds in ([], {}):
+            return 
         if likeslist(upds):                                     # Allow to use list of upd data
             pass;              #log__('many upds'      ,__=(log4fun,)) if _log4mod>=0 else 0
             shown   = not self._hidden
+            self._lock('+')
             for upd in upds:
                 self.update(upd, retval=retval, opts=opts)
                 if shown and self._hidden:    break             # hide is called on update
+            self._lock('-')
             return
+        
+        self._lock('+')
         cupds   = upds.get('ctrls',  [])
         cupds   = pair_list_to_dict(cupds)    if likeslist(cupds)     else cupds
         pass;                   log__('cupds={}',(cupds)      ,__=(log4fun,)) if _log4mod>=0 else 0
@@ -475,8 +487,10 @@ class DlgAg:
             self.form['fid']= fid
             app.dlg_proc(self.did, app.DLG_CTL_FOCUS
                         ,name=fid)
+        self._lock('-')
        #def update
-       
+    
+    
     @staticmethod
     def _check_data(mem_ctrls, ctrls, form, vals, fid):
         # Check cid/tid/fid in (ctrls, form, vals, fid) to exist into mem_ctrls
@@ -559,6 +573,9 @@ class DlgAg:
                 upds    = u_callbk(self, key, data)
                 if event=='on_close_query':                     # No upd, only bool about form close
                     return upds
+#               rsp     = self.update(upds)                     # :(
+#               self._lock('.')                                  # :(
+#               return rsp                                      # :(
                 return self.update(upds)
             return form_callbk
             
@@ -688,7 +705,10 @@ class DlgAg:
                     if event_val!=data[0]:
                         app.dlg_proc(          idd, app.DLG_CTL_PROP_SET, index=idc, prop={'val':data[0]})
                 upds    = u_callbk(self, cid, data)
-                return self.update(upds, retval=cid)
+                rsp     =  self.update(upds, retval=cid)
+                self._lock('.')
+                return rsp
+#               return self.update(upds, retval=cid)
                #def ctrl_callbk
             return ctrl_callbk
            #def get_proxy_cb
@@ -945,14 +965,6 @@ class DlgAg:
             new_val= [ci.split('\r')      for ci in new_val.split('\t')]
             pass;              #log('new_val={}',repr(new_val))
             int_sc = lambda s: _os_scale('unscale', {'w':int(s)})['w']
-#           new_val= [odct(('hd',       ci[0])
-#                         ,('wd',int_sc(ci[1]))
-#                         ,('mi',int_sc(ci[2]))
-#                         ,('ma',int_sc(ci[3]))
-#                         ,('al',       ci[4])
-#                         ,('au','1'==  ci[5])
-#                         ,('vi','1'==  ci[6])
-#                         ) for ci in new_val]
             new_val= [ dict(hd=       ci[0]
                            ,wd=int_sc(ci[1])
                            ,mi=int_sc(ci[2])
@@ -1363,14 +1375,26 @@ class DlgAg:
         stbr    = self.chandle(cid)
         for tag, ops in opts.items():
             stproc(     stbr, app.STATUSBAR_ADD_CELL            , tag=tag)
-            if ops.get('sz', 0):
+            if   ops.get('a', ''):
+                stproc( stbr, app.STATUSBAR_SET_CELL_ALIGN      , tag=tag, value=ops['a'])
+            if   ops.get('h', ''):
+                stproc( stbr, app.STATUSBAR_SET_CELL_HINT       , tag=tag, value=ops['h'])
+            if   ops.get('t', ''):
+                stproc( stbr, app.STATUSBAR_SET_CELL_TEXT       , tag=tag, value=ops['t'])
+            if   ops.get('f_nm', 0):
+                stproc( stbr, app.STATUSBAR_SET_CELL_FONT_NAME  , tag=tag, value=ops['f_nm'])
+            if   ops.get('f_sz', 0):
+                stproc( stbr, app.STATUSBAR_SET_CELL_FONT_SIZE  , tag=tag, value=ops['f_sz'])
+            if   ops.get('c') is not None:
+                clr = ops['c']
+                clr = apx.html_color_to_int(clr) if likesstr(clr) else clr
+                stproc( stbr, app.STATUSBAR_SET_CELL_COLOR_FONT , tag=tag, value=clr)
+            if   ops.get('asz', False):
+                stproc( stbr, app.STATUSBAR_SET_CELL_AUTOSIZE   , tag=tag, value=True)
+            elif ops.get('sz', 0):
                 stproc( stbr, app.STATUSBAR_SET_CELL_SIZE       , tag=tag, value=ops['sz'])
             else:
                 stproc( stbr, app.STATUSBAR_SET_CELL_AUTOSTRETCH, tag=tag, value=True)
-            if ops.get('a', ''):
-                stproc( stbr, app.STATUSBAR_SET_CELL_ALIGN      , tag=tag, value=ops['a'])
-            if ops.get('h', ''):
-                stproc( stbr, app.STATUSBAR_SET_CELL_HINT       , tag=tag, value=ops['h'])
         return stbr
        #def fit_statusbar
 
@@ -1956,8 +1980,33 @@ def dlg_list_input(title, choices, val=None, vals=None, label=None, opts={}):
    #def dlg_list_input
 
 
-
-
+#_tabid2eds    = {}
+#def get_ed_by_id(tab_id):
+#   """ Editor object for tab_id.
+#       Not re-create object to same tab_id (cached).
+#       Return 
+#           None    if no tab with the tab_id
+#           Editor  if tab exists
+#   """
+#   global _tabid2eds
+#   live_hs = {h    for h in app.ed_handles()}
+#   died_hs = {e.h  for e in _tabid2eds.values() if e.h not in live_hs}
+#   if live_hs != cchd_hs:
+#       _tabid2eds  = {tid:e for tid,e in _tabid2eds.items() 
+#                       if e.h not in died_hs}
+#   try_ed  = None
+#   for h in app.ed_handles(): 
+#       try_ed  = app.Editor(h)
+#       if int(tab_id) == try_ed.get_prop(app.PROP_TAB_ID, ''):
+#           break
+#   else:#for                                   # Not live
+#       _tabid2eds.pop(tab_id, None)            # Forget
+#       return None
+#   if tab_id not in _tabid2eds:
+#       _tabid2eds[tab_id]  = try_ed            # New
+#   return _tabid2eds[tab_id]
+#  #def get_ed_by_id
+#
 
 
 if __name__ == '__main__' :

@@ -1,25 +1,44 @@
+﻿4.6.05 2019-09-26
+added: Dialog Help, page History
+added: Show option "Show lexer path for all fragments" in infobar and Results as "<>>"
+added: Trick to escape/unescape pattern: Shift+Click on ".*"
+added: Search any/all parts of pattern with delimeters "|" and "&" when reg.exp is off
+		(see engine option "any_all_parts") 
+added: Results show important setting in the first line 
+		"+Search "" with [***]. Report with [***]"
+added: Allow to store "Show lexer path for all fragments" in presets
+added: Menu command "Fast search" and Shift+F2 allow to run single search as fast as posible 
+		(ignoring the slowing options)
+added: Allow to copy styles (font/background color, font bold/italic) from source lines to Results 
+		(see engine options "copy_styles" and "copy_styles_max_lines")
+added: Autosave parameters of executed searches. Alt+Left/Right to restore it. Only runtime saving.
+added: Allow to save/restore form position/size and Results height via preset
+added: Engine option to set statusbar styles (height, font size/color for cells)
+added: Autosize for statusbar fields
+changed: Statusbar is now placed between parameters and Results
+
 4.6.04 2019-09-04
-added: Command to copy Results to new tab (see local Results menu)
-added: Show in infobar which encodings are in masks
+added: Command "Сopy Results to new tab" (local menu) with marks of found fragments and lexer coloring (if is)
+added: Show encodings info in infobar
 
 4.6.03 2019-09-03
 added: Option "Show lexer path for all fragments" (see menu and "lex_path_style")
-added: Map {mask:encoding} to encoding plan
+added: Map {mask:encoding} - start part of encoding plan
 added: Engine option "lex_path_style"
 added: Engine option "file_picking_stage"
 added: Engine option "show_progress_fragments"
 
 4.6.02 2019-08-30
-added: Option (see menu) to show lex path for all found fragments
+added: Option (main menu) to show lex path for all found fragments
 added: Source encoding by file mask (by extension)
 added: Filter syntax elements in sublexer parts
 added: Prepare new search with lexer path filter by selected Source (Shift+F11)
 
 4.6.01 2019-08-27
-changed: Python version is 3.6
+changed: Python version is 3.6+
 
 4.5.01 2019-08-26
-added: Filter lexer path with "[:condition:]"
+added: Filter lexer path of found fragments with "[:condition:]"
 
 4.4.09 2019-08-22
 added: "F2" hotkey to start search

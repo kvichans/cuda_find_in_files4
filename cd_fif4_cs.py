@@ -61,6 +61,18 @@ FIF4_META_OPTS=[
         'frm': 'bool',
         'chp': _('Search'),
     },
+    {   'cmt': re.sub(r'  +', r'', _(
+               """When reg-exp is off, option allows to separate pattern text into "parts" and search any/all of them:
+                 "|" - find any of right/left parts,
+                 "&" - find all of right/left parts.
+               If pattern text has both symbols "|" and "&", "|" separates first.
+               If the option is off, symbols "|" and "&" don't have special meaning.
+               """)),
+        'opt': 'any_all_parts',
+        'def': False,
+        'frm': 'bool',
+        'chp': _('Search'),
+    },
     {   'cmt': _('Size of buffer (at file start) to detect binary files.'),
         'opt': 'is_binary_head_size(bytes)',
         'def': 1024,
@@ -142,6 +154,20 @@ FIF4_META_OPTS=[
         'frm': 'json',
         'chp': _('Results'),
     },
+    {   'cmt': _('Copy styles (color+bold/italic) from source lines to Results'
+                 'Warning! The setting significantly slows down the search.'),
+        'opt': 'copy_styles',
+        'def': True,
+        'frm': 'bool',
+        'chp': _('Results'),
+    },
+    {   'cmt': _('Maximum lines to copy styles from source lines to Results (0 - all)'
+                 'Warning! The big value significantly slows down the search.'),
+        'opt': 'copy_styles_max_lines',
+        'def': 100,
+        'frm': 'int',
+        'chp': _('Results'),
+    },
     {   'cmt': _('Show first N fragments while search is in progress (min 10).'),
         'opt': 'show_progress_fragments',
         'def': 100,
@@ -190,9 +216,21 @@ FIF4_META_OPTS=[
         'frm': 'int',
         'chp': _('Dialog layout'),
     },
-    {   'cmt': _('Width of statusbar fields.'),
-        'opt': 'statusbar_field_widths',
-        'def': [70,100,60,0,50],
+    {   'cmt': _('Statusbar height.'),
+        'opt': 'statusbar_height',
+        'def': 21,
+        'min': 17,
+        'frm': 'int',
+        'chp': _('Dialog layout'),
+    },
+    {   'cmt': _('Styles of statusbar fields.'),
+        'opt': 'statusbar_style',
+        'def': {'frgs':{'color_font':'#606060', 'font_size':10, },
+                'fils':{'color_font':'#606060', 'font_size':10, },
+                'dirs':{'color_font':'#606060', 'font_size':10, },
+                'msg' :{'color_font':'#0000A0', 'font_size':10, },
+                'time':{'color_font':'#606060', 'font_size':10, },
+        },
         'frm': 'json',
         'chp': _('Dialog layout'),
     },
@@ -225,7 +263,8 @@ sort_hi = _('Sort picked files by modification time.'
             '\n↓↓ from newest.'
             '\n↑↑ from oldest.')
 find_ca = _('Fin&d')
-find_hi = _('Start search (F2)')
+find_hi = _('Start search (F2)'
+            '\nShift+Click Start fast search (Shift+F2)')
 mask_hi = _('Space-separated file or folder masks.'
             '\nFolder mask starts with "/".'
             '\nDouble-quote mask, which needs space char.'
@@ -310,12 +349,13 @@ DHLP_KEYS_TABLE = _(r'''
 │ Find                                  │                Enter │ Except focus in multi-line "Find" │
 │                                       │                      │  or in Results or in Source       │
 │ Find                                  │                   F2 │                                   │
+│ Find as fast as posible               │             Shift+F2 │ Ignoring the slowing options      │
 ├───────────────────────────────────────┼──────────────────────┼───────────────────────────────────┤
 │ Go to next found fragment             │                   F3 │                                   │
 │ Go to prev found fragment             │             Shift+F3 │                                   │
 │ Go to next file(tab) found fragment   │              Ctrl+F3 │                                   │
 │ Go to prev file(tab) found fragment   │        Ctrl+Shift+F3 │                                   │
-│ Open found fragment                   │                Enter │ If focus in Results/Source        │
+│ Open found fragment in tab            │                Enter │ If focus in Results/Source        │
 │ Open found fragment and close dialog  │          Shift+Enter │ If focus in Results/Source        │
 ├───────────────────────────────────────┼──────────────────────┼───────────────────────────────────┤
 │ Put focus to Results                  │           Ctrl+Enter │ Except focus in Results/Source    │
@@ -323,12 +363,15 @@ DHLP_KEYS_TABLE = _(r'''
 │ Move focus: Results << Source << Find │            Shift+Tab │                                   │
 ├───────────────────────────────────────┼──────────────────────┼───────────────────────────────────┤
 │ Show history of search patterns       │               Alt+Dn │ If focus in "Find"                │
-│ Closed loop over all Depth values     │           Ctrl+Dn/Up │                                   │
+│ Loop over all Depth values            │           Ctrl+Dn/Up │                                   │
+├───────────────────────────────────────┼──────────────────────┼───────────────────────────────────┤
 │ Choose folder                         │               Ctrl+B │                                   │
 │ Choose file                           │         Ctrl+Shift+B │                                   │
 │ Use folder of the current file        │               Ctrl+U │                                   │
 │ To search in the current tab          │         Ctrl+Shift+U │                                   │
-│ Prepare to find in the current source │                  F11 │                                   │
+│ To search in the current Source       │                  F11 │                                   │
+│ To search in the current Source and   │                      │                                   │
+│   current lexer path                  │            Shift+F11 │                                   │
 │ Append newline char "§" to "Find"     │          Shift+Enter │ If focus in sigle-line "Find"     │
 ├───────────────────────────────────────┼──────────────────────┼───────────────────────────────────┤
 │ Fold/Unfold the caret branch          │               Ctrl+= │ If focus in Results               │
@@ -337,7 +380,7 @@ DHLP_KEYS_TABLE = _(r'''
 │ Load preset #1/#2/../#9               │        Ctrl+1/2/../9 │ All presets via menu              │
 │ Create new preset                     │               Ctrl+S │                                   │
 │ Choose preset to apply                │                Alt+S │                                   │
-│ Load prev/next executed search params │            Alt+Lf/Rt │                                   │
+│ Restore prev/next executed parameters │            Alt+Lf/Rt │                                   │
 ├───────────────────────────────────────┼──────────────────────┼───────────────────────────────────┤
 │ Append macro var to current field     │               Ctrl+A │ If focus in editable field        │
 │ Show fields after macros substitution │         Ctrl+Shift+A │                                   │
@@ -359,7 +402,7 @@ DHLP_KEYS_TABLE = _(r'''
 DHLP_TIPS_FIND  = f(_(r'''
 String to find (pattern) can be multi-line. Button "+" sets single-line or multi-line control.
 In single-line control the newlines are shown as §.
- 
+
 ———————————————————————————————————————————————————————————————————————————————————————————— 
 Some search options can be changed only via menu.
     · Sort collected files before reading text.
@@ -367,6 +410,9 @@ Some search options can be changed only via menu.
     · Skip hidden/binary files.
     · Filter by "Syntax elements" (comments or literal strings).
     · Encoding plan
+Warning! 
+    Be careful with filtering "Syntax elements" in long search. 
+    The filters significantly slow down the search.
 
 There is infobar to the left of "Find" button.
 The infobar shows not trivial values of "{OTH4FND}".
@@ -384,12 +430,12 @@ The infobar shows not trivial values of "{OTH4FND}".
     ?""?        Search only outside of literal strings.
     /*?*/ "?"   Search only inside comments OR literal strings.
     ?/**/? ?""? Search only outside of comments AND literal strings.
-Also infobar shows mask encodings and first step encoding from "Encoding plan".
+Also infobar shows other settings:
+    <>>         Show lexer path for all fragments.
+    (2:cp866)   Encodings masks.
+    utf8        First step encoding from "Encoding plan".
 Right-click on the infobar shows local menu with "{OTH4FND}".
 Double-click on the infobar clears all values except encoding.
-Warning! 
-    Be careful with filtering "Syntax elements" in long search. 
-    The filters significantly slow down the search.
 
 ———————————————————————————————————————————————————————————————————————————————————————————— 
 Set special value "{tabs}" for field "{fold}" to search in tabs (opened documents).
@@ -457,6 +503,21 @@ See engine option "re_verbose" to use complex reg-exp.
 See full documentation on the page
     docs.python.org/3/library/re.html
  
+If "Regular Expression" option is off, pattern still can supports some special symbols:
+    |   to separate the pattern to parts to find any of them
+    &   to separate the pattern to parts to find all of them
+See engine option "any_all_parts", how to turn those special symbols on/off.
+Symbols "|" are applied first, and "&" symbols are applied next (to make more parts 
+between "|" symbols, if "|" is present).
+To include symbols as is, escape them with a backslash: "\|", "\&".
+Example.
+    Find:   abc|xyz
+    Found:  "abc cba", "zyx xyz", "_abc_xyz_"
+    Find:   abc&xyz
+    Found:  "abc xyz", "_xyz_abc_"
+Note. Option "w" (whole word) applies to all parts, after splitting by "|" and "&".
+If any of final part has a non-word character, "w" option is ignored.
+
 ———————————————————————————————————————————————————————————————————————————————————————————— 
 Long-term searches can be interrupted by ESC.
 ''')
@@ -533,7 +594,7 @@ See "mark_style" in section "Results".
 
 How Results are shown, when files were sorted?
 Found fragments are always shown by the found order. 
-If tree format is "<path:r>: line", it is not a problem. For other formats content of 
+If tree format is "<path:r>: line", no problems. For other formats content of 
 "folder lines" and "file lines" adapts (via folder merging) to show correct data. 
 In extreme cases format automatically sets to "<path:r>: line".
 ''').strip()
@@ -549,19 +610,27 @@ To perform optimal search, you need to consider these notes.
     "w"  {word}
 do not reduce the speed at all. 
 
-2. Using not trivial setttings of "Sort collected files" or "Age of files"
-practicaly do not reduce the speed.
+2. Using non-trivial setttings of "Sort collected files" or "Age of files"
+does not reduce the speed, in practice.
 
 3. Appending context lines to Results ("-?+?") slightly decrease the speed.
 
-3. Multi-line pattern ("+") markedly decrease the speed.
+4. Multi-line pattern ("+") markedly decrease the speed.
 
-4. Inappropriate "Encoding plan" can greatly reduce the speed if too many files need to be read.
+5. Inappropriate "Encoding plan" can greatly reduce the speed if 
+too many files need to be read.
 
-5. The slowest search (the slowdown in dozens of times) occurs if 
-    any of "Syntax elements" is turned on,
-    option "Show lexer path for all fragments" is turned on,
-    lexer path filter includes in "{incl}" or "{excl}" fields.
+6. The slowest search (the slowdown in dozens of times) occurs if 
+    - any of "Syntax elements" is turned on,
+    - option "Show lexer path for all fragments" is turned on,
+    - lexer path filter is included in the "{incl}" or "{excl}" fields,
+    - styles are copied from disk file source lines to Results 
+        (search in tabs is also slowed but not too much).
+
+7. If engine option "copy_styles" is on and Results has a lot of lines then
+value of engine option "copy_styles_max_lines" is important. Extra time is directly 
+proportional to the value of the option. So default value 100 (coloring only the first 100 
+lines) is one of compromise values. 
 
 ———————————————————————————————————————————————————————————————————————————————————————————— 
 Special cases.
@@ -570,15 +639,23 @@ If pattern is regular expresion (".*" is checked) then it can be indirectly mult
 So in this case, to avoid guessing, plugin sees single-line or multi-line state, 
 to detect which search is needed.
 
-Huge files can also be involved in the search. For optimal memory usage you need
-- Turn off the appending context lines ("-N+M").
-- Turn off the multi-line pattern ("+") and remove newline character "§".
-- Turn off all "Syntax elements".
-- Turn off "Show lexer path for all fragments".
-- Ensure that no lexer path filters.
+If pattern includes "|" or "&" (options "any_all_parts" is on) then 
+plugin sees newline in pattern ("§" for single-line state) to detect which search is needed:
+    no newline - search into each line separately,
+    with newline - search in whole file.
+
+Huge files can also be involved in the search. For optimal memory usage you need:
+    - Turn off the appending context lines ("-N+M").
+    - Turn off the multi-line pattern ("+") and remove newline character "§".
+    - Turn off all "Syntax elements".
+    - Turn off "Show lexer path for all fragments".
+    - Ensure no lexer path filters are used.
+    - Turn off engine option "copy_styles".
+Hint. Start "Fast search" (Shift+F2) to ignore all these options (except lexer path filters) 
+without turn them off.
 Also see engine options 
-- skip_file_size_more(Kb),
-- dont_show_file_size_more(Kb).
+    - skip_file_size_more(Kb),
+    - dont_show_file_size_more(Kb).
 ''')
 , reex=reex_hi
 , case=case_hi
@@ -588,6 +665,29 @@ Also see engine options
 ).strip()
 
 DHLP_TIPS_TRCK  = f(_(r'''
+How to replace found fragments in many files? Use plugin "Find in Files". 
+It is not died and will be supported permanently.
+The plugin has almost all search options of "Find in Files 4". There are not
+    - multi-line pattern,
+    - "Syntax elements" filters,
+    - "Encoding plan" (partially),
+    - "Lexer path" filter.
+In the rest "Find in Files" can search as "Find in Files 4". 
+And it can replace the found.
+
+———————————————————————————————————————————————————————————————————————————————————————————— 
+Shift+F2 starts the single search, which ignores slowing down options:
+    - "Extra context lines",
+    - "Syntax elements",
+    - "Show lexer path for all fragments",
+    - "copy_styles" (engine).
+
+———————————————————————————————————————————————————————————————————————————————————————————— 
+Hold Shift-key when clicking ".*" ("Regular Expression") to toggle the option and also 
+escape/unescape all non-word characters in the pattern. It is guaranteed that search results 
+will not change because of that.
+
+———————————————————————————————————————————————————————————————————————————————————————————— 
 If 
     field "{excl}" contains " /. " 
 then 
@@ -595,13 +695,25 @@ then
 
 ———————————————————————————————————————————————————————————————————————————————————————————— 
 The field "{fold}" can contain many folders to search.
-These folders should not be included in each other.
-The field also can contain folder(s) and {tabs} together.
+Folder names must be independent, ie not included into each other.
+The field can also contains both folder mask(s) and {tabs}.
 
 ———————————————————————————————————————————————————————————————————————————————————————————— 
 Use \§ to find the character §.
-Multi-line control shows a pattern with extra newline (known bug). So if pattern ends with 
-a newline, this newline will be stripped from actual search string.
+Note. Multi-line control shows a pattern with extra newline (known bug). So if pattern ends 
+with a newline, this newline will be stripped from actual search string.
+
+———————————————————————————————————————————————————————————————————————————————————————————— 
+Hotkeys Ctrl+1, ..., Ctrl+9 apply presets #1, ..., #9.
+Preset can store need options values.
+So you can use presets to quickly turn on/off the single option instead of using the menu.
+Example.
+    Create preset #1 with only check on
+        [x]3 ' '            (No extra search options).
+    Create preset #2 with only check on
+        [x]3 '?/**/?'       ("Syntax elements/Outside of comments").
+    Use Ctrl+1 to quickly clear extra search options without changing others search settings.
+    Use Ctrl+2 to quickly set only "Outside of comments".
 
 ———————————————————————————————————————————————————————————————————————————————————————————— 
 You can use macros in any editable fields. For ex, "~ {{t}}" will be auto-replaced to "~ {tabs}". 
@@ -611,9 +723,9 @@ To use the expression with brackets like "{{t}}", escape brackets with backslash
 Engine option 
     "use_selection_on_start"
 uses selected text from document for the field "Find what".
-It can be replaced with using of macro var
+Instead of this option, you can use macro variable
     {{ed:SelectedText}}.
-So you can use document selection many times but not only on start.
+This way you can use selected text many times, not only at start.
 
 The macro 
     {{ed:CurrentWord}}
