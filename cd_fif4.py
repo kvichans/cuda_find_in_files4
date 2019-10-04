@@ -2,7 +2,7 @@
 Authors:
     Andrey Kvichansky   (kvichans on github.com)
 Version:
-    '4.6.05 2019-09-26'
+    '4.6.06 2019-10-04'
 ToDo: (see end of file)
 '''
 import  re, os, traceback, locale, itertools, codecs, time, datetime as dt #, types, json
@@ -433,7 +433,7 @@ class Fif4D:
     sort_ca     = lambda self: Fif4D.SORT_CA(self.opts)
     
     AGEF_CA     = lambda opts: \
-        f(_('<{}'),         opts.wk_agef.split('/')[0]+Fif4D.AGEF_MP().get(opts.wk_agef.split('/')[1], '?')) \
+        f('<{}',            opts.wk_agef.split('/')[0]+Fif4D.AGEF_MP().get(opts.wk_agef.split('/')[1], '?')) \
                         if  opts.wk_agef and \
                         not opts.wk_agef.startswith('0') else ''
     agef_ca     = lambda self: Fif4D.AGEF_CA(self.opts)
@@ -976,7 +976,7 @@ class Fif4D:
                         ,   '\n'.join([f('{}\t{}', nm+(f' ({al}) ' if al!='' else ''),  cm)  
                                         for nm,al,cm in ENCODINGS])
                         ,   focused=enc_ind
-                        ,   caption=_(f'Encoding for files "{msk}"'))
+                        ,   caption=_('Encoding for files')+f' "{msk}"')
                 if enc_ind is None: return []
                 ms[msk] = ENCODINGS[enc_ind][0]
                 return d(ctrls={'e'+cid[1:]:d(val=ms[msk])},fid='m'+cid[1:])
@@ -1027,6 +1027,15 @@ class Fif4D:
             return d(fid=self.cid_what()
                     ,ctrls=d(di_i4op=d(cap=m.i4op_ca())))
 
+        if aid=='wk_clea':                      # Clear all Extra to find
+            m.opts.wk_sort  = ''
+            m.opts.wk_agef  = ''
+            m.opts.wk_sycm  = ''
+            m.opts.wk_syst  = ''
+            m.opts.wk_skip  = ''
+            return d(fid=self.cid_what()
+                    ,ctrls=d(di_i4op=d(cap=m.i4op_ca())))
+
         if aid=='wk_enco_d':                    # Change enco steps
             m.opts.wk_enco = WK_ENCO_DPLN
             return []
@@ -1042,7 +1051,7 @@ class Fif4D:
                                     for nm,al,cm in encsNAC] 
                                  +[DETECT_ENCO+' '+_('(analyze file content)')+'\t???'])
                     ,   focused=enc_ind
-                    ,   caption=_(f'Source encoding for step #{1+step}'))
+                    ,   caption=_('Source encoding for step')+f' #{1+step}')
             if enc_ind is None: return []
             enc     = encsNAC[enc_ind][0]   if enc_ind<len(encsNAC) else    DETECT_ENCO
             m.opts.wk_enco[step]    = enc
@@ -1082,12 +1091,12 @@ class Fif4D:
                 if not M.done_finds:                    return m.stbr_act(_('No yet executed searches'))
                 new_pos         = M.done_finds_pos \
                                 + (-1 if aid=='ps_prev' else 1)
-                if not (0<=new_pos<len(M.done_finds)):  return m.stbr_act(_(f'No more executed searches ({len(M.done_finds)})'))
+                if not (0<=new_pos<len(M.done_finds)):  return m.stbr_act(_('No more executed searches')+f' ({len(M.done_finds)})')
                 M.done_finds_pos= new_pos
                 ps              = M.done_finds[M.done_finds_pos]
                 for k in ps:
                     m.opts[k]   = ps[k]
-                m.stbr_act(_(f'Executed parameters ({1+M.done_finds_pos}/{len(M.done_finds)}) is restored'))
+                m.stbr_act(f(_('Executed parameters ({}/{}) is restored'), 1+M.done_finds_pos, len(M.done_finds)))
                 M.done_finds_pos= 1 if 1==len(M.done_finds) else M.done_finds_pos
                 pass;          #log("M.done_finds_pos={}",(M.done_finds_pos))
                 return d(vals=m.vals_opts('o2v')
@@ -1105,9 +1114,9 @@ class Fif4D:
                 ps  = m.dlg_preset()
                 if not ps:  return []
                 m.opts.ps_pset += [ps]
-                return m.stbr_act(_(f'Preset is saved: {M.ZIP_PS4MENU(ps)}'))
+                return m.stbr_act(_('Preset is saved:')+f' {M.ZIP_PS4MENU(ps)}')
             ps_num  = int(aid.split('_')[2])
-            if ps_num>=len(m.opts.ps_pset): return m.stbr_act(_(f'No preset #{1+ps_num}'))
+            if ps_num>=len(m.opts.ps_pset): return m.stbr_act(_('No preset')+f' #{1+ps_num}')
             ps      = m.opts.ps_pset[ps_num]
             if aid[:7]=='ps_edit':
                 ps_new  = m.dlg_preset(ps)
@@ -1115,9 +1124,9 @@ class Fif4D:
                 ps['nm']= ps_new['nm']
                 return []
             if aid[:7]=='ps_remv':
-                if app.ID_OK==msg_box(_(f'Remove preset\n"{M.ZIP_PS4MENU(ps)}"?')):
+                if app.ID_OK==msg_box(_('Remove preset\n')+f'"{M.ZIP_PS4MENU(ps)}"?'):
                     del m.opts.ps_pset[ps_num]
-                    m.stbr_act(_(f'Preset is removed: {M.ZIP_PS4MENU(ps)}'))
+                    m.stbr_act(_('Preset is removed:')+f' {M.ZIP_PS4MENU(ps)}')
                 return []
             if aid[:7]=='ps_load':
                 for k in ps:
@@ -1129,7 +1138,7 @@ class Fif4D:
                     ag.update(form=ps['la_fmwh']
                              ,ctrls=d(di_rslt=d(h=ps['la_rslh'])
                                      ,di_sptr=d(y=ps['la_rslh'])))
-                m.stbr_act(_(f'Preset is loaded: {M.ZIP_PS4MENU(ps)}'))
+                m.stbr_act(_('Preset is loaded:')+f' {M.ZIP_PS4MENU(ps)}')
                 return d(vals=m.vals_opts('o2v')
                         ,ctrls=d(di_i4op=d(cap=m.i4op_ca())
                                 ,rp_cntx=d(cap=m.cntx_ca())))
@@ -1284,14 +1293,6 @@ class Fif4D:
                 m.opts.rp_trfm  = newf
                 return m.do_acts(ag, 'up_rslt')
             return []
-        if tag=='wk_clea':                      # Clear all Extra to find
-            m.opts.wk_sort  = ''
-            m.opts.wk_agef  = ''
-            m.opts.wk_sycm  = ''
-            m.opts.wk_syst  = ''
-            m.opts.wk_skip  = ''
-            return d(fid=self.cid_what()
-                    ,ctrls=d(di_i4op=d(cap=m.i4op_ca())))
 
         if tag[:8]=='wk_sort:':                 # Set
             m.opts.wk_sort  = tag[8:]
@@ -1337,7 +1338,7 @@ class Fif4D:
                   )
         pass;                  #m.opts.ps_pset  = [dcta(nm='n1'),dcta(nm='n2'),]
         
-        enc_plan=((f'masks (#{len(m.opts.wk_enco_ms)}), ' if m.opts.wk_enco_ms else '')
+        enc_plan=((_('masks')+f' (#{len(m.opts.wk_enco_ms)}), ' if m.opts.wk_enco_ms else '')
                 + ', '.join(m.opts.wk_enco))
         cap_val = lambda cap, val: cap+': '+val.strip()+DDD if val.strip() else cap+DDD
         fidc    = m.caps.get(ag.focused(), '')
@@ -1364,9 +1365,9 @@ class Fif4D:
     ),d(tag='sy_inst'       ,cap=M.INSTR_CP         ,ch=(m.opts.wk_syst=='in')
     ),d(tag='sy_otst'       ,cap=M.OTSTR_CP         ,ch=(m.opts.wk_syst=='ot')
                                                                                             )]),(
-    ),d(tag='wk_clea'   ,cap=_(f'Reset a&ll "{OTH4FND}"')
+    ),d(tag='a:wk_clea' ,cap=_('Reset a&ll')+f' "{OTH4FND}"'
     ),d(                 cap='-'
-    ),d(                 cap=_(f'En&codings plan: {enc_plan}')                              ,sub=[(
+    ),d(                 cap=_('En&codings plan:')+f' {enc_plan}'                           ,sub=[(
     ),d(tag='a:wk_enco_ms'  ,cap=_('Set masks')+DDD
     ),d(                     cap='-'
     )]+[d(                   cap=f'{msk} : {enc}'  ,en=False)
@@ -1405,16 +1406,18 @@ class Fif4D:
                   )]
     
         mn_srcf = [(
-    ),d(tag='a:go-next-fr'  ,cap=_('Go to next found fragment')         ,key='F3'
-    ),d(tag='a:go-prev-fr'  ,cap=_('Go to prev found fragment')         ,key='Shift+F3'
-    ),d(tag='a:go-next-fi'  ,cap=_('Go to next tab/file found fragment'),key='Ctrl+F3'
-    ),d(tag='a:go-prev-fi'  ,cap=_('Go to prev tab/file found fragment'),key='Ctrl+Shift+F3'
+    ),d(tag='a:go-next-fr'  ,cap=_('Go to next found fragment')         ,key='F3'           ,en=bool(m.reporter)
+    ),d(tag='a:go-prev-fr'  ,cap=_('Go to prev found fragment')         ,key='Shift+F3'     ,en=bool(m.reporter)
+    ),d(tag='a:go-next-fi'  ,cap=_('Go to next tab/file found fragment'),key='Ctrl+F3'      ,en=bool(m.reporter)
+    ),d(tag='a:go-prev-fi'  ,cap=_('Go to prev tab/file found fragment'),key='Ctrl+Shift+F3',en=bool(m.reporter)
     ),d(                     cap='-'
-    ),d(tag='a:nav-to'      ,cap=_('Open found fragment in tab')        ,key='Enter'
+    ),d(tag='a:nav-to'      ,cap=_('Open found fragment in tab')        ,key='Enter'        ,en=bool(m.reporter)
     ),d(                     cap='-'
-    ),d(tag='a:nf_frag'     ,cap=_('Prepare to search in the So&urce')  ,key='F11'
-    ),d(tag='a:nf_frlp'     ,cap=_('Prepare to search in the Sou&rce and the lexer path'),key='Shift+F11'
-                                ,en=m.opts.rp_lexa or m.opts.rp_lexp
+    ),d(tag='a:nf_frag'     ,cap=_('Prepare to search in the So&urce')  ,key='F11'          ,en=bool(m.reporter)
+    ),d(tag='a:nf_frlp'     ,cap=_('Prepare to search in the Sou&rce and the lexer path')
+                                                                        ,key='Shift+F11'
+                                                                                            ,en=bool(m.reporter) and 
+                                                                                                (m.opts.rp_lexa or m.opts.rp_lexp)
                     )]
         if aid=='di_srcf':
             ag.show_menu(mn_srcf
@@ -1425,7 +1428,7 @@ class Fif4D:
             pass;              #log__('mn_rslt=\n{}',pfw(mn_rslt)         ,__=(log4fun,M.log4cls)) if _log4mod>=0 else 0
             ag.show_menu(mn_srcf +[(
     ),d(                     cap='-'
-    ),d(tag='a:rslt-to-tab' ,cap=_('Copy Results to new tab')
+    ),d(tag='a:rslt-to-tab' ,cap=_('Copy Results to new tab')                               ,en=bool(m.reporter)
     ),d(                     cap='-'
                 )]+ mn_rslt
                 , aid, where, dx+5, dy+10, cmd4all=self.wnen_menu)
@@ -1448,9 +1451,9 @@ class Fif4D:
     ),d(tag='a:ac_usec:allt',cap=_('Prepare a search in &all tabs (in memory)')  
                     )]
         nm_preset=[(
-    ),d(tag='a:ps_prev'         ,cap=_(f'Restore prev ({done_prv}/{len(M.done_finds)}) executed parameters')
+    ),d(tag='a:ps_prev'         ,cap=f(_('Restore prev ({}/{}) executed parameters'), done_prv, len(M.done_finds))
        ,key='Alt+Left'                                      ,en=M.done_finds and 0<M.done_finds_pos
-    ),d(tag='a:ps_next'         ,cap=_(f'Restore next ({done_nxt}/{len(M.done_finds)}) executed parameters')
+    ),d(tag='a:ps_next'         ,cap=f(_('Restore next ({}/{}) executed parameters'), done_nxt, len(M.done_finds))
        ,key='Alt+Right'                                     ,en=M.done_finds and   M.done_finds_pos<len(M.done_finds)-1
     ),d(                         cap='-'
     ),d(tag='a:ps_save'         ,cap=_('&Create new preset')+DDD
@@ -1466,7 +1469,7 @@ class Fif4D:
        ,key=('Ctrl+'+str(n+1) if n<9 else '')
                                             ) for n,ps in enumerate(m.opts.ps_pset)]
         nm_macro= [(
-    ),d(tag='a:vr-add'          ,cap=_(f'&Add embeded/project/custom var{" to "+fidc if fidc else ""}')+DDD 
+    ),d(tag='a:vr-add'          ,cap=_('&Add embeded/project/custom var')+f'{" ("+fidc+")" if fidc else ""}'+DDD 
        ,key='Ctrl+A'                                        ,en=bool(fidc) 
     ),d(tag='a:vr-new'          ,cap=_('Define n&ew custom var')+DDD
     ),d(                         cap=_('Chan&ge/remove custom var') ,en=bool(m.opts.vs_defs)    ,sub=[
@@ -1613,7 +1616,7 @@ class Fif4D:
         
         m.last_fid  = m.opts.us_focus
         m.ag = DlgAg(
-            form    =dict(cap=_(f'Find in Files 4 ({VERSION_V})')
+            form    =dict(cap=_('Find in Files 4')+f' ({VERSION_V})'
                          ,h=form_h,w=form_w             ,h_min0=form_h0,w_min0=form_w
                                                         ,h_min=form_h0,w_min=form_w
                          ,frame='resize'
@@ -1682,11 +1685,11 @@ class Fif4D:
            ,M.STBR_FILS: d(asz=1, a='R', c=fil_st.get('color_font',clr)
                                     , f_sz=fil_st.get('font_size',11)
                         , t=_('Files?')    
-                        , h=_('Reported / Parsed [/ Stacked files]'))
+                        , h=_('Reported / Parsed [/ Stacked] files'))
            ,M.STBR_DIRS: d(asz=1, a='R', c=dir_st.get('color_font',clr)
                                     , f_sz=dir_st.get('font_size',11)
                         , t=_('Dirs?')     
-                        , h=_('Reported [/ Stacked dirs]'))
+                        , h=_('Reported [/ Stacked] dirs'))
            ,M.STBR_MSG : d(              c=msg_st.get('color_font',clM)
                                     , f_sz=msg_st.get('font_size',11))
            ,M.STBR_TIM:  d(asz=1, a='R', c=tim_st.get('color_font',clr)
@@ -1881,7 +1884,7 @@ class Fif4D:
             vars_l += [vnm    +'\t'+vcm     for vnm,vev,vcm in STD_VARS]
             var_i   = app.dlg_menu(app.MENU_LIST_ALT+app.MENU_NO_FULLFILTER # Filter only names
                         , '\n'.join(vars_l)
-                        , caption=_('Append macro vars'+(f' to "{to_fld}"' if to_fld else '')))
+                        , caption=_('Append macro vars')+f' to "{to_fld}"' if to_fld else '')
             if var_i is None:   return None
             return vars_l[var_i].split('\t')[0]
             
@@ -2118,6 +2121,7 @@ class Fif4D:
             if path.startswith('tab:'):
                 tab_id  = int(path.split('/')[0].split(':')[1])
                 tab_ed  = apx.get_tab_by_id(tab_id)
+                tab_ed.focus()  if tab_ed else 0
             elif os.path.isfile(path):
                 app.file_open(path)
                 tab_ed  = ed
@@ -2291,7 +2295,7 @@ class Fif4D:
             try:
                 fifwork(m.observer, m.rslt, walkers, fragmer, frgfilters, m.reporter)
             except Exception as ex:
-                msg_box(_(f'Internal Error:\n{ex}'))
+                msg_box(f'Internal Error:\n{ex}')
                 log(traceback.format_exc()) 
             finally:
                 lock_act('unlock')
@@ -2816,7 +2820,7 @@ def fifwork(observer, ed4rpt, walkers, fragmer, frgfilters, reporter):
                         reporter.add_frg(fn, frgs)
                        #for frgs
                 except UnicodeError as ex:
-                    print(_(f'Cannot read "{fn}": ({enco}) {ex}'))  if enco_n==len(enco_l)-1 else 0
+                    print(f'Cannot read "{fn}": ({enco}) {ex}')     if enco_n==len(enco_l)-1 else 0
                     pass;      #print(_(f'Cannot read "{fn}": ({enco}) {ex}'))
                     reporter.remove_last_frgs(fn)
                     continue
@@ -3762,7 +3766,7 @@ class FSWalker:
             except Exception as ex:
                 pass;          #log__('ex="{}" on enco_s="{}"',(ex),enco_s         ,__=(log4fun,FSWalker.log4cls))
                 if enco_n == len(enco_l)-1:
-                    print(_(f'Cannot read "{fp}" (encodings={enco_l}): {ex}'))
+                    print(f'Cannot read "{fp}" (encodings={enco_l}): {ex}')
            #for encd_n
         return body
        #def get_filebody
@@ -4000,9 +4004,9 @@ class Observer:
                 + (Fif4D.LEXA_CA(self.opts)    +' ' if self.opts.rp_lexa else '')
                 + (_('styles ') if COPY_STYLES else '')
                 ).strip().replace('  ', ' ')
-        desc    = _(f'+Search "{what}"') \
-                + (_(f' with [{fnd}]')          if fnd else '') \
-                + (_(f'. Report with [{rpt}].') if rpt else '')
+        desc    = _('+Search')+f' "{what}"' \
+                + (_(' with')+f' [{fnd}]'          if fnd else '') \
+                + (_('. Report with')+f' [{rpt}].' if rpt else '')
         return desc
        #def opts_desc
 
@@ -4248,13 +4252,13 @@ ToDo
 [?][kv-kv][04aug19] Try to use StringIO in Reporter
 [+][kv-kv][07aug19] Smth blocks shrinking dlg height
 [+][kv-kv][07aug19] Move const strings to separed py
-[+][kv-kv][07aug19] Try cgitb
+[+][kv-kv][07aug19] - Try cgitb
 [ ][kv-kv][08aug19] ? New walker to only count in file (w/o fragments)
 [ ][kv-kv][08aug19] BUG-OpEd: no edit json val (not knowns where storing file)
 [+][kv-kv][08aug19] How to exlcude root?
 [ ][kv-kv][09aug19] ? Show (as dlg_menu to replace pttn) list of literal fragments which matches re-pattern
 [+][kv-kv][09aug19] Add commands to jump Next/Prev Frag (File/Fold/Branch?)
-[ ][at-kv][09aug19] Take only some lines (not whole body) for big files
+[+][at-kv][09aug19] Take only some lines (not whole body) for big files
 [ ][kv-kv][10aug19] Add command to count files with frgm
 [ ][kv-kv][11aug19] Fit code to use many fs-roots
 [ ][kv-kv][11aug19] ? Find files are NOT contain pattern
@@ -4280,11 +4284,14 @@ ToDo
 [+][kv-kv][05sep19] Save dlg layout in preset
 [+][kv-kv][16sep19] Add ref to FIF in Help for users who want to replace
 [+][kv-kv][16sep19] Shift+F2 to report now with not copy_styles 
-[ ][kv-kv][19sep19] (Speed) Use current tab(s) editor(s) in LexHelper
+[+][kv-kv][19sep19] (Speed) Use current tab(s) editor(s) in LexHelper
 [+][kv-kv][19sep19] Add pattern (as single-line str) to Results
 [+][kv-kv][16sep19] Shift+F2 to fast search: off all expensive options "Synt","LxPaths","Copy styles"
 [ ][kv-kv][20sep19] ? "Only start dir" -> "Only start dir/group"
 [+][at-kv][20sep19] Many not-re pattern: A|B&C -> (A)|((B.*C)|(C.*B))
-[ ][kv-kv][24sep19] Apply re.escape() to pattern on Shift+. or Shift+Click(".*")
+[+][kv-kv][24sep19] Apply re.escape() to pattern on Shift+. or Shift+Click(".*")
 [ ][kv-kv][25sep19] Apply "Sort" to tabs also
+[+][kv-kv][03oct19] BUG: not open tab by Enter
+[ ][kv-kv][04oct19] Flicker on start if prev pattern has many lines
+[ ][kv-kv][04oct19] Var submenu when click on "="
 '''

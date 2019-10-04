@@ -20,7 +20,7 @@ VERSION     = re.split('Version:', __doc__)[1].split("'")[1]
 VERSION_V,  \
 VERSION_D   = VERSION.split(' ')
 
-def version():  return VERSION_V
+version     = lambda: VERSION_V
 
 _       = None
 try:
@@ -106,9 +106,8 @@ _ATTR_TP_ABBRS  = {**_ATTR_ABBRS, 'tp':'type'}
 _LIVE_ATTRS     = {'r', 'b', 'x', 'y', 'w', 'h', 'val', 'columns', 'cols', 'cols_ws', 'items'}
 _LIVE_CALC_ATTRS= {'r', 'b'}
 
-CB_HIDE = lambda ag,name,d='':None                              # Control callback to hide dlg
-def CBP_WODATA(cb_user):                                        # Callback-proxy to skip data
-    return lambda ag,name,d='':cb_user(ag,name)
+CB_HIDE     = lambda ag,name,d='':None                              # Control callback to hide dlg
+CBP_WODATA  = lambda cb_user: lambda ag,name,d='':cb_user(ag,name)  # Callback-proxy to skip data
 
 ALI_CL  = app.ALIGN_CLIENT
 ALI_LF  = app.ALIGN_LEFT

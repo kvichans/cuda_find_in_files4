@@ -1,0 +1,1368 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR ORGANIZATION
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"POT-Creation-Date: 2019-10-04 12:30+0300\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: pygettext.py 1.5\n"
+
+
+#: cd_fif4.py:246
+msgid "<path:r>:line"
+msgstr ""
+
+#: cd_fif4.py:247
+msgid "<path>#N/<r>:line"
+msgstr ""
+
+#: cd_fif4.py:248
+msgid "<dir>#N/<file:r>:line"
+msgstr ""
+
+#: cd_fif4.py:269
+msgid "To view/edit options install plugin \"Options Editor\""
+msgstr ""
+
+#: cd_fif4.py:276
+msgid "\"Find in Files 4\" options"
+msgstr ""
+
+#: cd_fif4.py:299
+msgid "Hotkeys"
+msgstr ""
+
+#: cd_fif4.py:299
+msgid "Speed"
+msgstr ""
+
+#: cd_fif4.py:299
+msgid "Tricks"
+msgstr ""
+
+#: cd_fif4.py:299 cd_fif4.py:2074 cd_fif4_cs.py:108 cd_fif4_cs.py:119
+#: cd_fif4_cs.py:137 cd_fif4_cs.py:155 cd_fif4_cs.py:162 cd_fif4_cs.py:169
+#: cd_fif4_cs.py:176 cd_fif4_cs.py:182 cd_fif4_cs.py:188
+msgid "Results"
+msgstr ""
+
+#: cd_fif4.py:299 cd_fif4_cs.py:22
+msgid "History"
+msgstr ""
+
+#: cd_fif4.py:299 cd_fif4_cs.py:36 cd_fif4_cs.py:42 cd_fif4_cs.py:48
+#: cd_fif4_cs.py:62 cd_fif4_cs.py:74 cd_fif4_cs.py:80 cd_fif4_cs.py:86
+#: cd_fif4_cs.py:96
+msgid "Search"
+msgstr ""
+
+#: cd_fif4.py:301
+msgid "\"Find in Files 4\" help"
+msgstr ""
+
+#: cd_fif4.py:338 cd_fif4.py:3429
+msgid "detect"
+msgstr ""
+
+#: cd_fif4.py:388
+msgid "A&ge of files"
+msgstr ""
+
+#: cd_fif4.py:390
+msgid "d"
+msgstr ""
+
+#: cd_fif4.py:390
+msgid "h"
+msgstr ""
+
+#: cd_fif4.py:390
+msgid "m"
+msgstr ""
+
+#: cd_fif4.py:390
+msgid "w"
+msgstr ""
+
+#: cd_fif4.py:390
+msgid "y"
+msgstr ""
+
+#: cd_fif4.py:391
+msgid "day(s)"
+msgstr ""
+
+#: cd_fif4.py:391
+msgid "hour(s)"
+msgstr ""
+
+#: cd_fif4.py:391
+msgid "month(s)"
+msgstr ""
+
+#: cd_fif4.py:391
+msgid "week(s)"
+msgstr ""
+
+#: cd_fif4.py:391
+msgid "year(s)"
+msgstr ""
+
+#: cd_fif4.py:394
+msgid "+1 level"
+msgstr ""
+
+#: cd_fif4.py:394
+msgid "+2 levels"
+msgstr ""
+
+#: cd_fif4.py:394
+msgid "+3 levels"
+msgstr ""
+
+#: cd_fif4.py:394
+msgid "+4 levels"
+msgstr ""
+
+#: cd_fif4.py:394
+msgid "+5 levels"
+msgstr ""
+
+#: cd_fif4.py:394
+msgid "+All subfolders"
+msgstr ""
+
+#: cd_fif4.py:394
+msgid "Only start dir"
+msgstr ""
+
+#: cd_fif4.py:396
+msgid "S&ort collected files"
+msgstr ""
+
+#: cd_fif4.py:397
+msgid "Don'&t sort"
+msgstr ""
+
+#: cd_fif4.py:397
+msgid "S&ort, newest first"
+msgstr ""
+
+#: cd_fif4.py:397
+msgid "Sort, o&ldest first"
+msgstr ""
+
+#: cd_fif4.py:400
+msgid "Skip &hidden/binary files"
+msgstr ""
+
+#: cd_fif4.py:401
+msgid "Don'&t skip"
+msgstr ""
+
+#: cd_fif4.py:401
+msgid "Skip &binary"
+msgstr ""
+
+#: cd_fif4.py:401
+msgid "Skip &hidden"
+msgstr ""
+
+#: cd_fif4.py:401
+msgid "Skip hidden &and binary"
+msgstr ""
+
+#: cd_fif4.py:404
+msgid "S&yntax elements (slowdown)"
+msgstr ""
+
+#: cd_fif4.py:405
+msgid "Inside &comment"
+msgstr ""
+
+#: cd_fif4.py:406
+msgid "Outside of c&omment"
+msgstr ""
+
+#: cd_fif4.py:407
+msgid "Inside literal &string"
+msgstr ""
+
+#: cd_fif4.py:408
+msgid "Outside of literal s&tring"
+msgstr ""
+
+#: cd_fif4.py:666
+msgid "Create"
+msgstr ""
+
+#: cd_fif4.py:666
+msgid "Save"
+msgstr ""
+
+#: cd_fif4.py:667
+msgid "Create new preset"
+msgstr ""
+
+#: cd_fif4.py:667
+msgid "View preset"
+msgstr ""
+
+#: cd_fif4.py:682
+msgid " Form position"
+msgstr ""
+
+#: cd_fif4.py:683
+msgid " Form sizes and Results height"
+msgstr ""
+
+#: cd_fif4.py:715
+msgid ">Na&me:"
+msgstr ""
+
+#: cd_fif4.py:950
+msgid "Age:"
+msgstr ""
+
+#: cd_fif4.py:956
+msgid "Search in files with the age (0 - in all)"
+msgstr ""
+
+#: cd_fif4.py:979
+msgid "Encoding for files"
+msgstr ""
+
+#: cd_fif4.py:990
+msgid "Remove all and save?"
+msgstr ""
+
+#: cd_fif4.py:1021
+msgid "File mask and encodings"
+msgstr ""
+
+#: cd_fif4.py:1043
+msgid "(analyze file content)"
+msgstr ""
+
+#: cd_fif4.py:1045
+msgid "Source encoding for step"
+msgstr ""
+
+#: cd_fif4.py:1060
+msgid "&Before:"
+msgstr ""
+
+#: cd_fif4.py:1062
+msgid "A&fter:"
+msgstr ""
+
+#: cd_fif4.py:1066
+msgid "Extra context lines"
+msgstr ""
+
+#: cd_fif4.py:1082
+msgid "No yet executed searches"
+msgstr ""
+
+#: cd_fif4.py:1085
+msgid "No more executed searches"
+msgstr ""
+
+#: cd_fif4.py:1090
+msgid "Executed parameters ({}/{}) is restored"
+msgstr ""
+
+#: cd_fif4.py:1108
+msgid "Preset is saved:"
+msgstr ""
+
+#: cd_fif4.py:1110
+msgid "No preset"
+msgstr ""
+
+#: cd_fif4.py:1118
+msgid ""
+"Remove preset\n"
+msgstr ""
+
+#: cd_fif4.py:1120
+msgid "Preset is removed:"
+msgstr ""
+
+#: cd_fif4.py:1132
+msgid "Preset is loaded:"
+msgstr ""
+
+#: cd_fif4.py:1178
+msgid "Choose file to find in it"
+msgstr ""
+
+#: cd_fif4.py:1183
+msgid "Initial search folder"
+msgstr ""
+
+#: cd_fif4.py:1340
+msgid "masks"
+msgstr ""
+
+#: cd_fif4.py:1367
+msgid "Reset a&ll"
+msgstr ""
+
+#: cd_fif4.py:1369
+msgid "En&codings plan:"
+msgstr ""
+
+#: cd_fif4.py:1370
+msgid "Set masks"
+msgstr ""
+
+#: cd_fif4.py:1376
+msgid "Step &1: {}"
+msgstr ""
+
+#: cd_fif4.py:1377
+msgid "Step &2: {}"
+msgstr ""
+
+#: cd_fif4.py:1378
+msgid "Step &3: {}"
+msgstr ""
+
+#: cd_fif4.py:1380
+msgid "Use &default steps: {}"
+msgstr ""
+
+#: cd_fif4.py:1390
+msgid "Show relati&ve paths"
+msgstr ""
+
+#: cd_fif4.py:1392
+msgid "Show &modification time"
+msgstr ""
+
+#: cd_fif4.py:1396
+msgid "Results &tree: "
+msgstr ""
+
+#: cd_fif4.py:1401
+msgid "Show le&xer path for all fragments (slowdown)"
+msgstr ""
+
+#: cd_fif4.py:1403
+msgid "Add le&xer path to the statusbar"
+msgstr ""
+
+#: cd_fif4.py:1408
+msgid "Go to next found fragment"
+msgstr ""
+
+#: cd_fif4.py:1409
+msgid "Go to prev found fragment"
+msgstr ""
+
+#: cd_fif4.py:1410
+msgid "Go to next tab/file found fragment"
+msgstr ""
+
+#: cd_fif4.py:1411
+msgid "Go to prev tab/file found fragment"
+msgstr ""
+
+#: cd_fif4.py:1413
+msgid "Open found fragment in tab"
+msgstr ""
+
+#: cd_fif4.py:1415
+msgid "Prepare to search in the So&urce"
+msgstr ""
+
+#: cd_fif4.py:1416
+msgid "Prepare to search in the Sou&rce and the lexer path"
+msgstr ""
+
+#: cd_fif4.py:1428
+msgid "Copy Results to new tab"
+msgstr ""
+
+#: cd_fif4.py:1435
+msgid "Choose start &folder"
+msgstr ""
+
+#: cd_fif4.py:1437
+msgid "Choose fil&e to find in it"
+msgstr ""
+
+#: cd_fif4.py:1440
+msgid "Use folder of the &current file"
+msgstr ""
+
+#: cd_fif4.py:1443
+msgid "Prepare a search in the current f&ile (on disk)"
+msgstr ""
+
+#: cd_fif4.py:1446
+msgid "Prepare a search in the current ta&b (in memory)"
+msgstr ""
+
+#: cd_fif4.py:1448
+msgid "Prepare a search in &all tabs (in memory)"
+msgstr ""
+
+#: cd_fif4.py:1451
+msgid "Restore prev ({}/{}) executed parameters"
+msgstr ""
+
+#: cd_fif4.py:1453
+msgid "Restore next ({}/{}) executed parameters"
+msgstr ""
+
+#: cd_fif4.py:1456
+msgid "&Create new preset"
+msgstr ""
+
+#: cd_fif4.py:1458
+msgid "Choo&se preset"
+msgstr ""
+
+#: cd_fif4.py:1460
+msgid "&Remove preset"
+msgstr ""
+
+#: cd_fif4.py:1462
+msgid "&View preset"
+msgstr ""
+
+#: cd_fif4.py:1469
+msgid "&Add embeded/project/custom var"
+msgstr ""
+
+#: cd_fif4.py:1471
+msgid "Define n&ew custom var"
+msgstr ""
+
+#: cd_fif4.py:1472
+msgid "Chan&ge/remove custom var"
+msgstr ""
+
+#: cd_fif4.py:1476
+msgid "E&xpand all vars"
+msgstr ""
+
+#: cd_fif4.py:1481
+msgid "Help"
+msgstr ""
+
+#: cd_fif4.py:1483
+msgid "Sco&pe"
+msgstr ""
+
+#: cd_fif4.py:1484
+msgid "Pre&sets"
+msgstr ""
+
+#: cd_fif4.py:1485
+msgid "Macro v&ars"
+msgstr ""
+
+#: cd_fif4.py:1486
+msgid "Engine options.&.."
+msgstr ""
+
+#: cd_fif4.py:1488
+msgid "Fast search (ignore some options)"
+msgstr ""
+
+#: cd_fif4.py:1544
+msgid "Menu"
+msgstr ""
+
+#: cd_fif4.py:1616
+msgid "Find in Files 4"
+msgstr ""
+
+#: cd_fif4.py:1680
+msgid "Fragments?"
+msgstr ""
+
+#: cd_fif4.py:1681
+msgid "[Filtered /] Found fragments"
+msgstr ""
+
+#: cd_fif4.py:1684
+msgid "Files?"
+msgstr ""
+
+#: cd_fif4.py:1685
+msgid "Reported / Parsed [/ Stacked] files"
+msgstr ""
+
+#: cd_fif4.py:1688
+msgid "Dirs?"
+msgstr ""
+
+#: cd_fif4.py:1689
+msgid "Reported [/ Stacked] dirs"
+msgstr ""
+
+#: cd_fif4.py:1694
+msgid "Timing?"
+msgstr ""
+
+#: cd_fif4.py:1695
+msgid "Last act duration"
+msgstr ""
+
+#: cd_fif4.py:1853
+msgid "Name \"{}\" is already used"
+msgstr ""
+
+#: cd_fif4.py:1857
+msgid "&Name:"
+msgstr ""
+
+#: cd_fif4.py:1859
+msgid "Val&ue:"
+msgstr ""
+
+#: cd_fif4.py:1861
+msgid "Add &var"
+msgstr ""
+
+#: cd_fif4.py:1862
+msgid "Add &path"
+msgstr ""
+
+#: cd_fif4.py:1863
+msgid "Remove"
+msgstr ""
+
+#: cd_fif4.py:1870
+msgid "Remove?"
+msgstr ""
+
+#: cd_fif4.py:1884
+msgid "Append macro vars"
+msgstr ""
+
+#: cd_fif4.py:2149
+msgid "Stop?"
+msgstr ""
+
+#: cd_fif4.py:2192 cd_fif4.py:2194 cd_fif4.py:2196
+msgid "Fill the field \"{}\""
+msgstr ""
+
+#: cd_fif4.py:2198 cd_fif4.py:2200 cd_fif4.py:2202
+msgid "Fix quotes in the field \"{}\""
+msgstr ""
+
+#: cd_fif4.py:2207
+msgid ""
+"Set correct \"{}\" reg.ex.\n"
+"\n"
+"Error:\n"
+"{}"
+msgstr ""
+
+#: cd_fif4.py:2210
+msgid "Set not included folders"
+msgstr ""
+
+#: cd_fif4.py:3506
+msgid "Skip \"{}\" item: {}"
+msgstr ""
+
+#: cd_fif4.py:4001
+msgid "styles "
+msgstr ""
+
+#: cd_fif4.py:4003
+msgid "+Search"
+msgstr ""
+
+#: cd_fif4.py:4004
+msgid " with"
+msgstr ""
+
+#: cd_fif4.py:4005
+msgid ". Report with"
+msgstr ""
+
+#: cd_fif4_cs.py:9
+msgid ""
+"Option allows to save separate search settings\n"
+"                (pattern, files mask, folders etc)\n"
+"                per each mentioned session or project.\n"
+"                Each item in the option is a pair (Prefix,RegEx).\n"
+"                RegEx is compared with the full path of session (project).\n"
+"                First matched item is used.\n"
+"                Prefix is appended to keys.\n"
+"                Example. {'cuda':'cuda'}\n"
+"                    \"in_what\" -> \"cuda:in_what\"  "
+msgstr ""
+
+#: cd_fif4_cs.py:25
+msgid "Use selected text from document for the field \"Find what\"."
+msgstr ""
+
+#: cd_fif4_cs.py:29
+msgid "Start"
+msgstr ""
+
+#: cd_fif4_cs.py:32
+msgid "Append specified string to the field \"Exclude\"."
+msgstr ""
+
+#: cd_fif4_cs.py:38
+msgid "Separate search stage, which collects all suitable files first."
+msgstr ""
+
+#: cd_fif4_cs.py:44
+msgid "Start file picking from the deepest folders."
+msgstr ""
+
+#: cd_fif4_cs.py:50
+msgid ""
+"Allow comments in multi-line reg-exp.\n"
+"               Whitespaces are ignored, except when in a character class or when preceded by an unescaped backslash.\n"
+"               All characters from the leftmost \"#\" through the end of the line are ignored.\n"
+"               Example. Single-line \"\\d\\w+$\" is same as multi-line reg-exp\n"
+"                 \\d  # Start digit\n"
+"                 \\w+ # Some letters\n"
+"                 $   # End of source\n"
+"               "
+msgstr ""
+
+#: cd_fif4_cs.py:64
+msgid ""
+"When reg-exp is off, option allows to separate pattern text into \"parts\" and search any/all of them:\n"
+"                 \"|\" - find any of right/left parts,\n"
+"                 \"&\" - find all of right/left parts.\n"
+"               If pattern text has both symbols \"|\" and \"&\", \"|\" separates first.\n"
+"               If the option is off, symbols \"|\" and \"&\" don't have special meaning.\n"
+"               "
+msgstr ""
+
+#: cd_fif4_cs.py:76
+msgid "Size of buffer (at file start) to detect binary files."
+msgstr ""
+
+#: cd_fif4_cs.py:82
+msgid "If value>0, skip all files, which sizes are bigger than this value (in Kb)."
+msgstr ""
+
+#: cd_fif4_cs.py:88
+msgid ""
+"Default encoding to read files.\n"
+"                If value is empty, then the following is used:\n"
+"                  cp1252 for Linux,\n"
+"                  preferred encoding from locale for others (Win, macOS, …)."
+msgstr ""
+
+#: cd_fif4_cs.py:99
+msgid ""
+"List of source file lexers.\n"
+"                  For these lexers extra filters and info will work:\n"
+"                    Search by lexer tree path,\n"
+"                    Search inside/outside of comments and/or literal strings.\n"
+"                  Empty list - allow all lexers."
+msgstr ""
+
+#: cd_fif4_cs.py:110
+msgid ""
+"List of lexers for Results.\n"
+"                  First available lexer is used."
+msgstr ""
+
+#: cd_fif4_cs.py:121
+msgid ""
+"Style to mark found fragment in the Results panel.\n"
+"                Full form:\n"
+"                   \"mark_style\":{\n"
+"                     \"color_back\":\"\", \n"
+"                     \"color_font\":\"\",\n"
+"                     \"font_bold\":false, \n"
+"                     \"font_italic\":false,\n"
+"                     \"color_border\":\"\", \n"
+"                     \"borders\":{\"left\":\"\",\"right\":\"\",\"bottom\":\"\",\"top\":\"\"}\n"
+"                   },\n"
+"                Color values: \"\" - skip, \"#RRGGBB\" - hex-digits\n"
+"                Values for border sides: \"solid\", \"dash\", \"2px\", \"dotted\", \"rounded\", \"wave\" "
+msgstr ""
+
+#: cd_fif4_cs.py:139
+msgid ""
+"Style to mark lexer path.\n"
+"                Full form:\n"
+"                   \"lex_path_style\":{\n"
+"                     \"color_back\":\"\", \n"
+"                     \"color_font\":\"\",\n"
+"                     \"font_bold\":false, \n"
+"                     \"font_italic\":false,\n"
+"                     \"color_border\":\"\", \n"
+"                     \"borders\":{\"left\":\"\",\"right\":\"\",\"bottom\":\"\",\"top\":\"\"}\n"
+"                   },\n"
+"                Color values: \"\" - skip, \"#RRGGBB\" - hex-digits\n"
+"                Values for border sides: \"solid\", \"dash\", \"2px\", \"dotted\", \"rounded\", \"wave\" "
+msgstr ""
+
+#: cd_fif4_cs.py:157
+msgid ""
+"Copy styles (color+bold/italic) from source lines to Results.\n"
+"Warning! The setting significantly slows down the search."
+msgstr ""
+
+#: cd_fif4_cs.py:164
+msgid ""
+"Maximum lines to copy styles from source lines to Results (0 - all).\n"
+"Warning! The big value significantly slows down the search."
+msgstr ""
+
+#: cd_fif4_cs.py:171
+msgid "Show first N fragments while search is in progress (min 10)."
+msgstr ""
+
+#: cd_fif4_cs.py:178
+msgid "Auto select first found fragment."
+msgstr ""
+
+#: cd_fif4_cs.py:184
+msgid "If value>0, do not show all files, which sizes are bigger than this value (in Kb)."
+msgstr ""
+
+#: cd_fif4_cs.py:191
+msgid "Height of dialog grid cell (min 25)."
+msgstr ""
+
+#: cd_fif4_cs.py:196 cd_fif4_cs.py:203 cd_fif4_cs.py:210 cd_fif4_cs.py:217
+#: cd_fif4_cs.py:224 cd_fif4_cs.py:235
+msgid "Dialog layout"
+msgstr ""
+
+#: cd_fif4_cs.py:198
+msgid "Width of button \"=\" (min 15)."
+msgstr ""
+
+#: cd_fif4_cs.py:205
+msgid "Width of button to switch regex/case/words (min 30)."
+msgstr ""
+
+#: cd_fif4_cs.py:212
+msgid "Minimal width of fields to set files/folders (min 150)."
+msgstr ""
+
+#: cd_fif4_cs.py:219
+msgid "Statusbar height."
+msgstr ""
+
+#: cd_fif4_cs.py:226
+msgid "Styles of statusbar fields."
+msgstr ""
+
+#: cd_fif4_cs.py:247
+msgid "Extra search options"
+msgstr ""
+
+#: cd_fif4_cs.py:248
+msgid "Options to view Results"
+msgstr ""
+
+#: cd_fif4_cs.py:250
+msgid "F3/{u}F3 - next/prev fragment, ^F3/^{u}F3 - next/prev file fragment, Enter - open."
+msgstr ""
+
+#: cd_fif4_cs.py:252
+msgid "Results. "
+msgstr ""
+
+#: cd_fif4_cs.py:253
+msgid "Source. "
+msgstr ""
+
+#: cd_fif4_cs.py:256
+msgid "Alt+Down - pattern history"
+msgstr ""
+
+#: cd_fif4_cs.py:258
+msgid "Regular expression"
+msgstr ""
+
+#: cd_fif4_cs.py:259
+msgid "Case sensitive"
+msgstr ""
+
+#: cd_fif4_cs.py:260
+msgid "Whole words"
+msgstr ""
+
+#: cd_fif4_cs.py:261
+msgid "Use multi-line input field"
+msgstr ""
+
+#: cd_fif4_cs.py:262
+msgid ""
+"Sort picked files by modification time.\n"
+"↓↓ from newest.\n"
+"↑↑ from oldest."
+msgstr ""
+
+#: cd_fif4_cs.py:265
+msgid "Fin&d"
+msgstr ""
+
+#: cd_fif4_cs.py:266
+msgid ""
+"Start search (F2)\n"
+"Shift+Click Start fast search (Shift+F2)"
+msgstr ""
+
+#: cd_fif4_cs.py:268
+msgid ""
+"Space-separated file or folder masks.\n"
+"Folder mask starts with \"/\".\n"
+"Double-quote mask, which needs space char.\n"
+"Use \"?\" for any character and \"*\" for any fragment.\n"
+"Note: \"*\" matches all names, \"*.*\" doesn't match all."
+msgstr ""
+
+#: cd_fif4_cs.py:273
+msgid ""
+"\n"
+"\n"
+"Always excluded:\n"
+"   {}\n"
+"See engine option \"always_not_in_files\" to change."
+msgstr ""
+
+#: cd_fif4_cs.py:273
+msgid ""
+"Exclude file[s]/folder[s]\n"
+msgstr ""
+
+#: cd_fif4_cs.py:280
+msgid ""
+"Start folder(s).\n"
+"Space-separated folders.\n"
+"Double-quote folder, which needs space char.\n"
+"\"~\" is user home folder.\n"
+"{} or {{t}} to search in tabs."
+msgstr ""
+
+#: cd_fif4_cs.py:287
+msgid ""
+"How many folder levels to search.\n"
+"Use Ctrl+Up/Down to change this option."
+msgstr ""
+
+#: cd_fif4_cs.py:290
+msgid ""
+"Click or Ctrl+B\n"
+"   Choose folder.\n"
+"Shift+Click or Ctrl+Shift+B\n"
+"   Choose file to find in it."
+msgstr ""
+
+#: cd_fif4_cs.py:295
+msgid "All a&ges"
+msgstr ""
+
+#: cd_fif4_cs.py:296
+msgid ""
+"Show result line with its adjacent lines (above/below).\n"
+"\"-N+M\" - N lines above and M lines below.\n"
+"Turn option on to show config dialog."
+msgstr ""
+
+#: cd_fif4_cs.py:299
+msgid ""
+"{OTH4FND}. \n"
+"Use popup menu to change."
+msgstr ""
+
+#: cd_fif4_cs.py:301
+msgid "&Find:"
+msgstr ""
+
+#: cd_fif4_cs.py:302
+msgid "F&iles:"
+msgstr ""
+
+#: cd_fif4_cs.py:303
+msgid "Ex&:"
+msgstr ""
+
+#: cd_fif4_cs.py:304
+msgid "F&rom:"
+msgstr ""
+
+#: cd_fif4_cs.py:305
+msgid ""
+"Pattern to find. \n"
+"It can be multi-line. Newline is shown as \"§\".\n"
+"Use Shift+Enter to append \"§\" at pattern end.\n"
+"Or switch to multi-line mode (\"+\") to see/insert natural newlines."
+msgstr ""
+
+#: cd_fif4_cs.py:312
+msgid "To search in tabs"
+msgstr ""
+
+#: cd_fif4_cs.py:315
+msgid "Full path"
+msgstr ""
+
+#: cd_fif4_cs.py:318
+msgid "File folder path"
+msgstr ""
+
+#: cd_fif4_cs.py:321
+msgid "File name only, without folder path"
+msgstr ""
+
+#: cd_fif4_cs.py:324
+msgid "File name without extension and path"
+msgstr ""
+
+#: cd_fif4_cs.py:327
+msgid "File extension"
+msgstr ""
+
+#: cd_fif4_cs.py:330
+msgid "Text of current line"
+msgstr ""
+
+#: cd_fif4_cs.py:333
+msgid "Selected text"
+msgstr ""
+
+#: cd_fif4_cs.py:336
+msgid "Text of current word"
+msgstr ""
+
+#: cd_fif4_cs.py:344
+msgid ""
+"\n"
+"┌───────────────────────────────────────┬──────────────────────┬───────────────────────────────────┐\n"
+"│                Command                │        Hotkey        │              Comment              │\n"
+"╞═══════════════════════════════════════╪══════════════════════╪═══════════════════════════════════╡\n"
+"│ Find                                  │                Alt+D │                                   │\n"
+"│ Find                                  │                Enter │ Except focus in multi-line \"Find\" │\n"
+"│                                       │                      │  or in Results or in Source       │\n"
+"│ Find                                  │                   F2 │                                   │\n"
+"│ Find as fast as posible               │             Shift+F2 │ Ignoring the slowing options      │\n"
+"├───────────────────────────────────────┼──────────────────────┼───────────────────────────────────┤\n"
+"│ Go to next found fragment             │                   F3 │                                   │\n"
+"│ Go to prev found fragment             │             Shift+F3 │                                   │\n"
+"│ Go to next file(tab) found fragment   │              Ctrl+F3 │                                   │\n"
+"│ Go to prev file(tab) found fragment   │        Ctrl+Shift+F3 │                                   │\n"
+"│ Open found fragment in tab            │                Enter │ If focus in Results/Source        │\n"
+"│ Open found fragment and close dialog  │          Shift+Enter │ If focus in Results/Source        │\n"
+"├───────────────────────────────────────┼──────────────────────┼───────────────────────────────────┤\n"
+"│ Put focus to Results                  │           Ctrl+Enter │ Except focus in Results/Source    │\n"
+"│ Move focus: Results >> Source >> Find │                  Tab │                                   │\n"
+"│ Move focus: Results << Source << Find │            Shift+Tab │                                   │\n"
+"├───────────────────────────────────────┼──────────────────────┼───────────────────────────────────┤\n"
+"│ Show history of search patterns       │                Alt+↓ │ If focus in \"Find\"                │\n"
+"│ Loop over all Depth values            │             Ctrl+↓/↑ │                                   │\n"
+"├───────────────────────────────────────┼──────────────────────┼───────────────────────────────────┤\n"
+"│ Choose folder                         │               Ctrl+B │                                   │\n"
+"│ Choose file                           │         Ctrl+Shift+B │                                   │\n"
+"│ Use folder of the current file        │               Ctrl+U │                                   │\n"
+"│ To search in the current tab          │         Ctrl+Shift+U │                                   │\n"
+"│ To search in the current Source       │                  F11 │                                   │\n"
+"│ To search in the current Source and   │                      │                                   │\n"
+"│   current lexer path                  │            Shift+F11 │                                   │\n"
+"│ Append newline char \"§\" to \"Find\"     │          Shift+Enter │ If focus in sigle-line \"Find\"     │\n"
+"├───────────────────────────────────────┼──────────────────────┼───────────────────────────────────┤\n"
+"│ Fold/Unfold the caret branch          │               Ctrl+= │ If focus in Results               │\n"
+"│ Fold/Unfold all branches              │         Ctrl+Shift+= │ By state of the caret branch      │\n"
+"├───────────────────────────────────────┼──────────────────────┼───────────────────────────────────┤\n"
+"│ Load preset #1/#2/../#9               │        Ctrl+1/2/../9 │ All presets via menu              │\n"
+"│ Create new preset                     │               Ctrl+S │                                   │\n"
+"│ Choose preset to apply                │                Alt+S │                                   │\n"
+"│ Restore prev/next executed parameters │              Alt+←/→ │                                   │\n"
+"├───────────────────────────────────────┼──────────────────────┼───────────────────────────────────┤\n"
+"│ Append macro var to current field     │               Ctrl+A │ If focus in editable field        │\n"
+"│ Show fields after macros substitution │         Ctrl+Shift+A │                                   │\n"
+"├───────────────────────────────────────┼──────────────────────┼───────────────────────────────────┤\n"
+"│ Expand/Shrink Results height          │         Ctrl+Alt+↓/↑ │                                   │\n"
+"│ Expand/Shrink dialog height           │        Shift+Alt+↓/↑ │                                   │\n"
+"│ Expand/Shrink dialog width            │        Shift+Alt+→/← │                                   │\n"
+"│ Expand/Shrink height of               │                      │                                   │\n"
+"│   multi-line \"Find\"                   │   Shift+Ctrl+Alt+↓/↑ │ If multi-line \"Find\" is visible   │\n"
+"├───────────────────────────────────────┼──────────────────────┼───────────────────────────────────┤\n"
+"│ Show engine options                   │               Ctrl+E │                                   │\n"
+"│ Show dialog \"Help\"                    │               Ctrl+H │                                   │\n"
+"├───────────────────────────────────────┼──────────────────────┼───────────────────────────────────┤\n"
+"│ Call CudaText's \"Find\" dialog         │               Ctrl+F │ And copy pattern and              │\n"
+"│ Call CudaText's \"Replace\" dialog      │               Ctrl+R │     search options                │\n"
+"└───────────────────────────────────────┴──────────────────────┴───────────────────────────────────┘\n"
+msgstr ""
+
+#: cd_fif4_cs.py:402
+msgid ""
+"\n"
+"String to find (pattern) can be multi-line. Button \"+\" sets single-line or multi-line control.\n"
+"In single-line control the newlines are shown as §.\n"
+"\n"
+"———————————————————————————————————————————————————————————————————————————————————————————— \n"
+"Some search options can be changed only via menu.\n"
+"    · Sort collected files before reading text.\n"
+"    · Age of files.\n"
+"    · Skip hidden/binary files.\n"
+"    · Filter by \"Syntax elements\" (comments or literal strings).\n"
+"    · Encoding plan\n"
+"Warning! \n"
+"    Be careful with filtering \"Syntax elements\" in long search. \n"
+"    The filters significantly slow down the search.\n"
+"\n"
+"There is infobar to the left of \"Find\" button.\n"
+"The infobar shows not trivial values of \"{OTH4FND}\".\n"
+"    ↓↓          Start with the newest files.\n"
+"    ↑↑          Start with the oldest files.\n"
+"    <4d         Skip file older than 4 days.\n"
+"    <3w         Skip file older than 3 weeks.\n"
+"    <2m         Skip file older than 2 months.\n"
+"    <1y         Skip file older than 1 year.\n"
+"    -h          Skip hidden files.\n"
+"    -b          Skip binary files.\n"
+"    /*?*/       Search only inside comments.\n"
+"    ?/**/?      Search only outside of comments.\n"
+"    \"?\"         Search only inside literal strings.\n"
+"    ?\"\"?        Search only outside of literal strings.\n"
+"    /*?*/ \"?\"   Search only inside comments OR literal strings.\n"
+"    ?/**/? ?\"\"? Search only outside of comments AND literal strings.\n"
+"Also infobar shows other settings:\n"
+"    <>>         Show lexer path for all fragments.\n"
+"    (2:cp866)   Encodings masks.\n"
+"    utf8        First step encoding from \"Encoding plan\".\n"
+"Right-click on the infobar shows local menu with \"{OTH4FND}\".\n"
+"Double-click on the infobar clears all values except encoding.\n"
+"\n"
+"———————————————————————————————————————————————————————————————————————————————————————————— \n"
+"Set special value \"{tabs}\" for field \"{fold}\" to search in tabs (opened documents).\n"
+"Fields \"{incl}\" and \"{excl}\" will be used to filter tab titles, in this case.\n"
+"To search in all tabs fill \"{incl}\" with \"*\".\n"
+"See also: \n"
+"    Items of submenu \"Scope\".\n"
+"    Hotkey Ctrl+Shift+U.\n"
+"\n"
+"———————————————————————————————————————————————————————————————————————————————————————————— \n"
+"Values in fields \"{incl}\" and \"{excl}\" can contain\n"
+"    ?       for any single char,\n"
+"    *       for any substring (may be empty),\n"
+"    [seq]   any character in seq,\n"
+"    [!seq]  any character not in seq. \n"
+"Double-quote value, which needs space char.\n"
+"Note: \n"
+"    *       matches all names, \n"
+"    *.*     doesn't match all.\n"
+"\n"
+"Also the values can filter subfolder names if they start with \"/\".\n"
+"Example.\n"
+"    {incl:12}: /a*  *.txt\n"
+"    {excl:12}: /ab*\n"
+"    {fold:12}: c:/root\n"
+"    Depth       : All\n"
+"    Search will consider all *.txt files in folder c:/root and in all subfolders a* except ab*.\n"
+"\n"
+"Also the values can filter lexer path if they are embraced with \"[:\" and \":]\".\n"
+"The filter is path-like string with elements\n"
+"    >       path separator. Ex: \"a>b>c\" - node \"c\" is subnode of \"b\" and \"b\" is subnode of \"a\".\n"
+"    >>      recursive descent. Ex: \"a>>c\" - node \"c\" appears in branch \"a\".\n"
+"    word    name of a node.\n"
+"    *word   partial name of a node.\n"
+"    word*   partial name of a node.\n"
+"Blanks around all \"<\" are not important. So \"a>>b>c\" and \"a > > b > c\" are same.\n"
+"Lexer path is matched with a filter if some start segments of path are compatible \n"
+"with all segments of the filter. Path \"aa>bb>cc>dd\" is matched with filters \n"
+"    \"aa\"\n"
+"    \"*a\"\n"
+"    \"*>b*\"\n"
+"    \">>cc\"\n"
+"    \">>cc>*d\"\n"
+"and isnot matched with\n"
+"    \"bb\"\n"
+"    \"*>b\"\n"
+"    \">>c>dd\"\n"
+"Example.\n"
+"    {incl:12}: *.py [:def main:]\n"
+"    {excl:12}: [:def main>>class*:]\n"
+"    {fold:12}: <tabs>\n"
+"Search will consider all \"*.py\" open files and will search in module function \"main\"\n"
+"except searching in all classes defined inside the function.\n"
+"Warning! \n"
+"    Be careful with filtering lexer path in long search. \n"
+"    The filters significantly slow down the search.\n"
+"\n"
+"———————————————————————————————————————————————————————————————————————————————————————————— \n"
+"\".*\" - Option \"Regular Expression\". \n"
+"It allows to use in the field \"{find}\" such special symbols:\n"
+"    .   any character\n"
+"    \\d  digit character (0..9)\n"
+"    \\w  word-like character (digits, letters, \"_\")\n"
+"See engine option \"re_verbose\" to use complex reg-exp.\n"
+"See full documentation on the page\n"
+"    docs.python.org/3/library/re.html\n"
+" \n"
+"If \"Regular Expression\" option is off, pattern still can supports some special symbols:\n"
+"    |   to separate the pattern to parts to find any of them\n"
+"    &   to separate the pattern to parts to find all of them\n"
+"See engine option \"any_all_parts\", how to turn those special symbols on/off.\n"
+"Symbols \"|\" are applied first, and \"&\" symbols are applied next (to make more parts \n"
+"between \"|\" symbols, if \"|\" is present).\n"
+"To include symbols as is, escape them with a backslash: \"\\|\", \"\\&\".\n"
+"Example.\n"
+"    Find:   abc|xyz\n"
+"    Found:  \"abc cba\", \"zyx xyz\", \"_abc_xyz_\"\n"
+"    Find:   abc&xyz\n"
+"    Found:  \"abc xyz\", \"_xyz_abc_\"\n"
+"Note. Option \"w\" (whole word) applies to all parts, after splitting by \"|\" and \"&\".\n"
+"If any of final part has a non-word character, \"w\" option is ignored.\n"
+"\n"
+"———————————————————————————————————————————————————————————————————————————————————————————— \n"
+"Long-term searches can be interrupted by ESC.\n"
+msgstr ""
+
+#: cd_fif4_cs.py:532
+msgid ""
+"\n"
+"Only the options \n"
+"    \"-N+M\" (with lines above/below)\n"
+"    \"Show lexer path for all fragments\"\n"
+"needs to be set before start of search.\n"
+"All other options immediately change the Results view.\n"
+" \n"
+"Results options:\n"
+"┌────────────────────────────────────┬──────────────────────────────────────────────────┐\n"
+"│               Option               │                     Comment                      │\n"
+"╞════════════════════════════════════╪══════════════════════════════════════════════════╡\n"
+"│ \"-N/+M\" (with lines above/below)   │ See check-button \"-N+M\" near the search pattern. │\n"
+"│                                    │ Turn option on to show config dialog.            │\n"
+"├────────────────────────────────────┼──────────────────────────────────────────────────┤\n"
+"│ Show relative paths                │ The option immediately toggles between           │\n"
+"│                                    │   <c:/dir1/search-root/dir2>: #NN                │\n"
+"│                                    │   <c:/dir1/search-root/dir2/filename.ext>: #NN   │\n"
+"│                                    │ and                                              │\n"
+"│                                    │   <dir2>: #NN                                    │\n"
+"│                                    │   <dir2/filename.ext>: #NN                       │\n"
+"├────────────────────────────────────┼──────────────────────────────────────────────────┤\n"
+"│ Show modification time             │ If files are shown on separate lines             │\n"
+"│                                    │ (tree format is not \"<path:r>:line\")             │\n"
+"│                                    │ the option immediately toggles between           │\n"
+"│                                    │   <...filename.ext>: #NN                         │\n"
+"│                                    │ and                                              │\n"
+"│                                    │   <...filename.ext (1999.12.31 23:59)>: #NN      │\n"
+"├────────────────────────────────────┼──────────────────────────────────────────────────┤\n"
+"│ Format for Result tree             │ Full info about each fragment in one line.       │\n"
+"│   <path:r>:line                    │ Example                                          │\n"
+"│                                    │   <dir1/dir2/filename1.ext:12>: fragment line    │\n"
+"│                                    │   <dir1/dir3/filename2.ext:21>: fragment line    │\n"
+"├────────────────────────────────────┼──────────────────────────────────────────────────┤\n"
+"│ Format for Result tree             │ Separate line per each file.                     │\n"
+"│   <path>#N/<r>:line                │ Example                                          │\n"
+"│                                    │   <dir1/dir2/filename1.ext>: #1                  │\n"
+"│                                    │     <12>: fragment line                          │\n"
+"│                                    │   <dir1/dir3/filename2.ext>: #1                  │\n"
+"│                                    │     <21>: fragment line                          │\n"
+"├────────────────────────────────────┼──────────────────────────────────────────────────┤\n"
+"│ Format for Result tree             │ Separate line per each folder with files.        │\n"
+"│   <dir>#N/<file:r>:line            │ Example                                          │\n"
+"│                                    │   <dir1/dir2>: #1                                │\n"
+"│                                    │     <filename1.ext:12>: fragment line            │\n"
+"│                                    │   <dir1/dir3>: #1                                │\n"
+"│                                    │     <filename2.ext:21>: fragment line            │\n"
+"├────────────────────────────────────┼──────────────────────────────────────────────────┤\n"
+"│ Show lexer path for all fragments  │ Results include lines with lexer path.           │\n"
+"│                                    │ Example                                          │\n"
+"│                                    │   <filename.ext>: #1                             │\n"
+"│                                    │     <  >: path > to > fragment                   │\n"
+"│                                    │     <12>: fragment line                          │\n"
+"├────────────────────────────────────┼──────────────────────────────────────────────────┤\n"
+"│ Add lexer path to the statusbar    │ When you move caret in Results, or use commands  │\n"
+"│                                    │ \"Go to next/prev found fragment\", statusbar      │\n"
+"│                                    │ shows the path to current fragment’s file.       │\n"
+"│                                    │ If the option is on, then statusbar shows also   │\n"
+"│                                    │ the path in the document.                        │\n"
+"└────────────────────────────────────┴──────────────────────────────────────────────────┘\n"
+"\n"
+"To set the mark style of found fragmets, use the engine options dialog (Ctrl+E).\n"
+"See \"mark_style\" in section \"Results\".\n"
+"\n"
+"How Results are shown, when files were sorted?\n"
+"Found fragments are always shown by the found order. \n"
+"If tree format is \"<path:r>: line\", no problems. For other formats content of \n"
+"\"folder lines\" and \"file lines\" adapts (via folder merging) to show correct data. \n"
+"In extreme cases format automatically sets to \"<path:r>: line\".\n"
+msgstr ""
+
+#: cd_fif4_cs.py:602
+msgid ""
+"\n"
+"Some of the search parameters slightly decrease the search speed.\n"
+"Others reduce the speed dramatically.\n"
+"To perform optimal search, you need to consider these notes.\n"
+"\n"
+"1. The parameters \n"
+"    .*   {reex}\n"
+"    aA   {case}\n"
+"    \"w\"  {word}\n"
+"do not reduce the speed at all. \n"
+"\n"
+"2. Using non-trivial setttings of \"Sort collected files\" or \"Age of files\"\n"
+"does not reduce the speed, in practice.\n"
+"\n"
+"3. Appending context lines to Results (\"-?+?\") slightly decrease the speed.\n"
+"\n"
+"4. Multi-line pattern (\"+\") markedly decrease the speed.\n"
+"\n"
+"5. Inappropriate \"Encoding plan\" can greatly reduce the speed if \n"
+"too many files need to be read.\n"
+"\n"
+"6. The slowest search (the slowdown in dozens of times) occurs if \n"
+"    - any of \"Syntax elements\" is turned on,\n"
+"    - option \"Show lexer path for all fragments\" is turned on,\n"
+"    - lexer path filter is included in the \"{incl}\" or \"{excl}\" fields,\n"
+"    - styles are copied from disk file source lines to Results \n"
+"        (search in tabs is also slowed but not too much).\n"
+"\n"
+"7. If engine option \"copy_styles\" is on and Results has a lot of lines then\n"
+"value of engine option \"copy_styles_max_lines\" is important. Extra time is directly \n"
+"proportional to the value of the option. So default value 100 (coloring only the first 100 \n"
+"lines) is one of compromise values. \n"
+"\n"
+"———————————————————————————————————————————————————————————————————————————————————————————— \n"
+"Special cases.\n"
+"\n"
+"If pattern is regular expresion (\".*\" is checked) then it can be indirectly multi-line.\n"
+"So in this case, to avoid guessing, plugin sees single-line or multi-line state, \n"
+"to detect which search is needed.\n"
+"\n"
+"If pattern includes \"|\" or \"&\" (options \"any_all_parts\" is on) then \n"
+"plugin sees newline in pattern (\"§\" for single-line state) to detect which search is needed:\n"
+"    no newline - search into each line separately,\n"
+"    with newline - search in whole file.\n"
+"\n"
+"Huge files can also be involved in the search. For optimal memory usage you need:\n"
+"    - Turn off the appending context lines (\"-N+M\").\n"
+"    - Turn off the multi-line pattern (\"+\") and remove newline character \"§\".\n"
+"    - Turn off all \"Syntax elements\".\n"
+"    - Turn off \"Show lexer path for all fragments\".\n"
+"    - Ensure no lexer path filters are used.\n"
+"    - Turn off engine option \"copy_styles\".\n"
+"Hint. Start \"Fast search\" (Shift+F2) to ignore all these options (except lexer path filters) \n"
+"without turn them off.\n"
+"Also see engine options \n"
+"    - skip_file_size_more(Kb),\n"
+"    - dont_show_file_size_more(Kb).\n"
+msgstr ""
+
+#: cd_fif4_cs.py:667
+msgid ""
+"\n"
+"How to replace found fragments in many files? Use plugin \"Find in Files\". \n"
+"It is not died and will be supported permanently.\n"
+"The plugin has almost all search options of \"Find in Files 4\". There are not\n"
+"    - multi-line pattern,\n"
+"    - \"Syntax elements\" filters,\n"
+"    - \"Encoding plan\" (partially),\n"
+"    - \"Lexer path\" filter.\n"
+"In the rest \"Find in Files\" can search as \"Find in Files 4\". \n"
+"And it can replace the found.\n"
+"\n"
+"———————————————————————————————————————————————————————————————————————————————————————————— \n"
+"Shift+F2 starts the single search, which ignores slowing down options:\n"
+"    - \"Extra context lines\",\n"
+"    - \"Syntax elements\",\n"
+"    - \"Show lexer path for all fragments\",\n"
+"    - \"copy_styles\" (engine).\n"
+"\n"
+"———————————————————————————————————————————————————————————————————————————————————————————— \n"
+"Hold Shift-key when clicking \".*\" (\"Regular Expression\") to toggle the option and also \n"
+"escape/unescape all non-word characters in the pattern. It is guaranteed that search results \n"
+"will not change because of that.\n"
+"\n"
+"———————————————————————————————————————————————————————————————————————————————————————————— \n"
+"If \n"
+"    field \"{excl}\" contains \" /. \" \n"
+"then \n"
+"    the root folder(s) will be skipped.\n"
+"\n"
+"———————————————————————————————————————————————————————————————————————————————————————————— \n"
+"The field \"{fold}\" can contain many folders to search.\n"
+"Folder names must be independent, ie not included into each other.\n"
+"The field can also contains both folder mask(s) and {tabs}.\n"
+"\n"
+"———————————————————————————————————————————————————————————————————————————————————————————— \n"
+"Use \\§ to find the character §.\n"
+"Note. Multi-line control shows a pattern with extra newline (known bug). So if pattern ends \n"
+"with a newline, this newline will be stripped from actual search string.\n"
+"\n"
+"———————————————————————————————————————————————————————————————————————————————————————————— \n"
+"Hotkeys Ctrl+1, ..., Ctrl+9 apply presets #1, ..., #9.\n"
+"Preset can store need options values.\n"
+"So you can use presets to quickly turn on/off the single option instead of using the menu.\n"
+"Example.\n"
+"    Create preset #1 with only check on\n"
+"        [x]3 ' '            (No extra search options).\n"
+"    Create preset #2 with only check on\n"
+"        [x]3 '?/**/?'       (\"Syntax elements/Outside of comments\").\n"
+"    Use Ctrl+1 to quickly clear extra search options without changing others search settings.\n"
+"    Use Ctrl+2 to quickly set only \"Outside of comments\".\n"
+"\n"
+"———————————————————————————————————————————————————————————————————————————————————————————— \n"
+"You can use macros in any editable fields. For ex, \"~ {{t}}\" will be auto-replaced to \"~ {tabs}\". \n"
+"To use the expression with brackets like \"{{t}}\", escape brackets with backslashes like \"\\{{t\\}}\" \n"
+"(or like \"\\{{t}}\", if field doesn't have the outer bracket pair).\n"
+"\n"
+"Engine option \n"
+"    \"use_selection_on_start\"\n"
+"uses selected text from document for the field \"Find what\".\n"
+"Instead of this option, you can use macro variable\n"
+"    {{ed:SelectedText}}.\n"
+"This way you can use selected text many times, not only at start.\n"
+"\n"
+"The macro \n"
+"    {{ed:CurrentWord}}\n"
+"allows to use part of document text without selection at all.\n"
+"\n"
+"———————————————————————————————————————————————————————————————————————————————————————————— \n"
+"If \n"
+"    search is finished and\n"
+"    you cannot close dialog in usual way (\"Stop?\" message appears) \n"
+"then\n"
+"    hold Shift and click on \"x\" in titlebar. \n"
+msgstr ""
+
+#: cd_fif4_cs.py:748
+msgid "Welcome to the plugin's GitHub page"
+msgstr ""
+
+#: cd_kv_base.py:532
+msgid "Fail. Use only for python file."
+msgstr ""
+
+#: cd_kv_dlg.py:1879
+msgid "Apply the tunings to controls of all dialogs."
+msgstr ""
+
+#: cd_kv_dlg.py:1927
+msgid "&Save"
+msgstr ""
+
+#: cd_kv_dlg.py:1928
+msgid "Cancel"
+msgstr ""
+
+#: cd_kv_dlg.py:1931
+msgid "Tuning text vertical alignment for control pairs"
+msgstr ""
+

@@ -22,23 +22,12 @@ VERSION     = re.split('Version:', __doc__)[1].split("'")[1]
 VERSION_V,  \
 VERSION_D   = VERSION.split(' ')
 
-def version():  return VERSION_V
+version     = lambda: VERSION_V
 
 T,F,N       = True, False, None
 C13,C10,C9  = chr(13),chr(10),chr(9)
-def f(     s_, *args, **kwargs): return       s_.format(*args, **kwargs)
-def printf(s_, *args, **kwargs): return print(s_.format(*args, **kwargs))
-
-#odict       = collections.OrderedDict
-#class odct(collections.OrderedDict):
-#   def __init__(self, *args, **kwargs):
-#       pass;                  #print('args=',args)
-#       if     args: super().__init__( *args) \
-#           if 1==len(args) else \
-#                    super().__init__(  args)
-#       elif kwargs: super().__init__(kwargs.items())
-#   def __repr__(self):
-#       return '{%s}' % (', '.join("'%s': %r" % (k,v) for k,v in self.items()))
+f           = lambda s_, *args, **kwargs: s_.format(*args, **kwargs)
+printf      = lambda s_, *args, **kwargs: print(s_.format(*args, **kwargs))
 
 class dcta(dict):
     def __getattr__(self, name):
@@ -596,8 +585,8 @@ def set_all_for_tree(tree, sub_key, key, val):
     return tree
    #def set_all_for_tree
 
-def upd_dict(d1, d2):
-    rsp = d1.copy()
+def upd_dict(d1, d2, upd_d1=False):
+    rsp = d1 if upd_d1 else d1.copy() 
     rsp.update(d2)
     return rsp
    #def upd_dict

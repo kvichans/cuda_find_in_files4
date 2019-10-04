@@ -154,15 +154,15 @@ FIF4_META_OPTS=[
         'frm': 'json',
         'chp': _('Results'),
     },
-    {   'cmt': _('Copy styles (color+bold/italic) from source lines to Results'
-                 'Warning! The setting significantly slows down the search.'),
+    {   'cmt': _('Copy styles (color+bold/italic) from source lines to Results.'
+                 '\nWarning! The setting significantly slows down the search.'),
         'opt': 'copy_styles',
         'def': True,
         'frm': 'bool',
         'chp': _('Results'),
     },
-    {   'cmt': _('Maximum lines to copy styles from source lines to Results (0 - all)'
-                 'Warning! The big value significantly slows down the search.'),
+    {   'cmt': _('Maximum lines to copy styles from source lines to Results (0 - all).'
+                 '\nWarning! The big value significantly slows down the search.'),
         'opt': 'copy_styles_max_lines',
         'def': 100,
         'frm': 'int',
@@ -277,13 +277,13 @@ excl_hi_ = _('Exclude file[s]/folder[s]\n')+mask_hi+_(''
             '\nSee engine option "always_not_in_files" to change.'
             )
 
-fold_hi = _('Start folder(s).'
+fold_hi = f(_('Start folder(s).'
             '\nSpace-separated folders.'
             '\nDouble-quote folder, which needs space char.'
             '\n"~" is user home folder.'
-           f'\n{Walker_ROOT_IS_TABS} or {{t}} to search in tabs.'
+            '\n{} or {{t}} to search in tabs.'
 #           '\n{} to search in project folders (in short <p>).'
-            )
+            ), Walker_ROOT_IS_TABS)
 dept_hi = _('How many folder levels to search.'
             '\nUse Ctrl+Up/Down to change this option.'
             )
@@ -296,8 +296,8 @@ fage_ca = _('All a&ges')
 cntx_hi = _('Show result line with its adjacent lines (above/below).'
             '\n"-N+M" - N lines above and M lines below.'
             '\nTurn option on to show config dialog.')
-i4op_hi = _(f'{OTH4FND}. '
-            '\nUse popup menu to change.')
+i4op_hi = f(_('{OTH4FND}. '
+            '\nUse popup menu to change.'), OTH4FND=OTH4FND)
 WHA__CA = '>*'+_('&Find:')
 INC__CA = '>*'+_('F&iles:')
 EXC__CA = '>'+_('Ex&:')
@@ -315,7 +315,7 @@ STD_VARS= [
     ,_('Full path') 
     ),
     ('{ed:FileDir}'         ,'os.path.dirname(ed.get_filename())'
-    ,_('Folder path, without file name') 
+    ,_('File folder path') 
     ),
     ('{ed:FileNameOnly}'    ,'os.path.basename(ed.get_filename())'
     ,_('File name only, without folder path')
@@ -362,8 +362,8 @@ DHLP_KEYS_TABLE = _(r'''
 │ Move focus: Results >> Source >> Find │                  Tab │                                   │
 │ Move focus: Results << Source << Find │            Shift+Tab │                                   │
 ├───────────────────────────────────────┼──────────────────────┼───────────────────────────────────┤
-│ Show history of search patterns       │               Alt+Dn │ If focus in "Find"                │
-│ Loop over all Depth values            │           Ctrl+Dn/Up │                                   │
+│ Show history of search patterns       │                Alt+↓ │ If focus in "Find"                │
+│ Loop over all Depth values            │             Ctrl+↓/↑ │                                   │
 ├───────────────────────────────────────┼──────────────────────┼───────────────────────────────────┤
 │ Choose folder                         │               Ctrl+B │                                   │
 │ Choose file                           │         Ctrl+Shift+B │                                   │
@@ -380,16 +380,16 @@ DHLP_KEYS_TABLE = _(r'''
 │ Load preset #1/#2/../#9               │        Ctrl+1/2/../9 │ All presets via menu              │
 │ Create new preset                     │               Ctrl+S │                                   │
 │ Choose preset to apply                │                Alt+S │                                   │
-│ Restore prev/next executed parameters │            Alt+Lf/Rt │                                   │
+│ Restore prev/next executed parameters │              Alt+←/→ │                                   │
 ├───────────────────────────────────────┼──────────────────────┼───────────────────────────────────┤
 │ Append macro var to current field     │               Ctrl+A │ If focus in editable field        │
 │ Show fields after macros substitution │         Ctrl+Shift+A │                                   │
 ├───────────────────────────────────────┼──────────────────────┼───────────────────────────────────┤
-│ Expand/Shrink Results height          │       Ctrl+Alt+Dn/Up │                                   │
-│ Expand/Shrink dialog height           │      Shift+Alt+Dn/Up │                                   │
-│ Expand/Shrink dialog width            │      Shift+Alt+Rt/Lf │                                   │
+│ Expand/Shrink Results height          │         Ctrl+Alt+↓/↑ │                                   │
+│ Expand/Shrink dialog height           │        Shift+Alt+↓/↑ │                                   │
+│ Expand/Shrink dialog width            │        Shift+Alt+→/← │                                   │
 │ Expand/Shrink height of               │                      │                                   │
-│   multi-line "Find"                   │ Shift+Ctrl+Alt+Dn/Up │ If multi-line "Find" is visible   │
+│   multi-line "Find"                   │   Shift+Ctrl+Alt+↓/↑ │ If multi-line "Find" is visible   │
 ├───────────────────────────────────────┼──────────────────────┼───────────────────────────────────┤
 │ Show engine options                   │               Ctrl+E │                                   │
 │ Show dialog "Help"                    │               Ctrl+H │                                   │

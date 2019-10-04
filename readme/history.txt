@@ -1,4 +1,9 @@
-﻿4.6.05 2019-09-26
+﻿4.6.06 2019-10-04
+added: ru translation (see addon plugintranslation.kvichans_ru)
+fixed: open tab from Results
+fixed: dbl-click on infobar to clear extra search options
+
+4.6.05 2019-09-26
 added: Dialog Help, page History
 added: Show option "Show lexer path for all fragments" in infobar and Results as "<>>"
 added: Trick to escape/unescape pattern: Shift+Click on ".*"

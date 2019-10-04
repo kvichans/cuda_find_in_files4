@@ -5,7 +5,7 @@ desc=Gives dialog to search for multiple files containing some string/regex, lik
 type=cudatext-plugin
 subdir=cuda_find_in_files4
 homepage=https://github.com/kvichans/cuda_find_in_files4
-api=1.0.299
+api=1.0.302
 
 ;[item400]
 ;section=events
