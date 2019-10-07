@@ -1,4 +1,8 @@
-﻿4.6.06 2019-10-04
+﻿4.6.07 2019-10-07
+added: stable translation: use previous string translation if it is
+fixed: ru translation (see addon plugintranslation.kvichans_ru)
+
+4.6.06 2019-10-04
 added: ru translation (see addon plugintranslation.kvichans_ru)
 fixed: open tab from Results
 fixed: dbl-click on infobar to clear extra search options

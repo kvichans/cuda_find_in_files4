@@ -5,37 +5,44 @@ from              .cd_kv_base    import *        # as part of this plugin
 try:    _   = get_translation(__file__)
 except: _   = lambda p:p
 
+_t  = lambda key, key_tr, s_tr: s_tr if key==key_tr else key_tr
+
 FIF4_META_OPTS=[
-    {   'cmt': re.sub(r'  +', r'', _(
-               """Option allows to save separate search settings
+    {   'cmt': re.sub(r'  +', r'', _t('separated_histories', _('separated_histories'), _(
+               '''Option allows to save separate search settings
                 (pattern, files mask, folders etc)
                 per each mentioned session or project.
                 Each item in the option is a pair (Prefix,RegEx).
                 RegEx is compared with the full path of session (project).
                 First matched item is used.
                 Prefix is appended to keys.
-                Example. {'cuda':'cuda'}
-                    "in_what" -> "cuda:in_what"  """)),
+                Example. If session path includes "cudatext" then value 
+                    {"cuda":"cuda"}
+                changes storing key
+                    "in_what"
+                to 
+                    "cuda:in_what"'''))),
         'opt': 'separated_histories_for_sess_proj',
         'def': {'cuda':'cuda'},
         'frm': 'json',
         'chp': _('History'),
     },
 
-    {   'cmt': _('Use selected text from document for the field "Find what".'),
+    {   'cmt': _('Use selected text from document for the field "Find".'),
         'opt': 'use_selection_on_start',
         'def': True,
         'frm': 'bool',
         'chp': _('Start'),
     },
 
-    {   'cmt': _('Append specified string to the field "Exclude".'),
+    {   'cmt': _('Append specified string to the field "Ex".'),
         'opt': 'always_not_in_files',
         'def': '/.svn /.git /.hg /.idea /.cudatext',
         'frm': 'str',
         'chp': _('Search'),
     },
-    {   'cmt': _('Separate search stage, which collects all suitable files first.'),
+    {   'cmt': _t('file_picking_stage', _('file_picking_stage')
+             , _('Separate search stage, which collects all suitable files first.')),
         'opt': 'file_picking_stage',
         'def': True,
         'frm': 'bool',
@@ -47,27 +54,27 @@ FIF4_META_OPTS=[
         'frm': 'bool',
         'chp': _('Search'),
     },
-    {   'cmt': re.sub(r'  +', r'', _(
+    {   'cmt': re.sub(r'  +', r'', _t('re_verbose', _('re_verbose'), _(
                """Allow comments in multi-line reg-exp.
-               Whitespaces are ignored, except when in a character class or when preceded by an unescaped backslash.
+               Whitespaces are ignored, except when in a character class or when preceded 
+               by an unescaped backslash.
                All characters from the leftmost "#" through the end of the line are ignored.
                Example. Single-line "\d\w+$" is same as multi-line reg-exp
                  \d  # Start digit
                  \w+ # Some letters
-                 $   # End of source
-               """)),
+                 $   # End of source"""))),
         'opt': 're_verbose',
         'def': False,
         'frm': 'bool',
         'chp': _('Search'),
     },
-    {   'cmt': re.sub(r'  +', r'', _(
-               """When reg-exp is off, option allows to separate pattern text into "parts" and search any/all of them:
+    {   'cmt': re.sub(r'  +', r'', _t('any_all_parts', _('any_all_parts'), _(
+               """When reg-exp is off, option allows to separate pattern text into "parts" 
+               and search any/all of them:
                  "|" - find any of right/left parts,
                  "&" - find all of right/left parts.
                If pattern text has both symbols "|" and "&", "|" separates first.
-               If the option is off, symbols "|" and "&" don't have special meaning.
-               """)),
+               If the option is off, symbols "|" and "&" don't have special meaning."""))),
         'opt': 'any_all_parts',
         'def': False,
         'frm': 'bool',
@@ -96,12 +103,12 @@ FIF4_META_OPTS=[
         'chp': _('Search'),
     },
 
-    {   'cmt': re.sub(r'  +', r'', _(
+    {   'cmt': re.sub(r'  +', r'', _t('lexers_to_filter', _('lexers_to_filter'), _(
                """List of source file lexers.
                   For these lexers extra filters and info will work:
                     Search by lexer tree path,
                     Search inside/outside of comments and/or literal strings.
-                  Empty list - allow all lexers.""")),
+                  Empty list - allow all lexers."""))),
         'opt': 'lexers_to_filter',
         'def': [],
         'frm': 'json',
@@ -118,8 +125,8 @@ FIF4_META_OPTS=[
         'frm': 'json',
         'chp': _('Results'),
     },
-    {   'cmt': re.sub(r'  +', r'', _(
-               """Style to mark found fragment in the Results panel.
+    {   'cmt': re.sub(r'  +', r'', _t('mark_style', _('mark_style'), _(
+               '''Style to mark found fragment in the Results panel.
                 Full form:
                    "mark_style":{
                      "color_back":"", 
@@ -130,14 +137,14 @@ FIF4_META_OPTS=[
                      "borders":{"left":"","right":"","bottom":"","top":""}
                    },
                 Color values: "" - skip, "#RRGGBB" - hex-digits
-                Values for border sides: "solid", "dash", "2px", "dotted", "rounded", "wave" """)),  #! Shift uses chr(160)
+                Values for border sides: "solid", "dash", "2px", "dotted", "rounded", "wave"'''))),  #! Shift uses chr(160)
         'opt': 'mark_style',
         'def': {'borders': {'bottom': 'dotted'}},
         'frm': 'json',
         'chp': _('Results'),
     },
-    {   'cmt': re.sub(r'  +', r'', _(
-               """Style to mark lexer path.
+    {   'cmt': re.sub(r'  +', r'', _t('lex_path_style', _('lex_path_style'), _(
+               '''Style to mark lexer path.
                 Full form:
                    "lex_path_style":{
                      "color_back":"", 
@@ -148,27 +155,30 @@ FIF4_META_OPTS=[
                      "borders":{"left":"","right":"","bottom":"","top":""}
                    },
                 Color values: "" - skip, "#RRGGBB" - hex-digits
-                Values for border sides: "solid", "dash", "2px", "dotted", "rounded", "wave" """)),  #! Shift uses chr(160)
+                Values for border sides: "solid", "dash", "2px", "dotted", "rounded", "wave"'''))),  #! Shift uses chr(160)
         'opt': 'lex_path_style',
         'def': {'color_font': '#909090'},
         'frm': 'json',
         'chp': _('Results'),
     },
-    {   'cmt': _('Copy styles (color+bold/italic) from source lines to Results.'
-                 '\nWarning! The setting significantly slows down the search.'),
+    {   'cmt': _t('copy_styles', _('copy_styles')
+              , _('Copy styles (color+bold/italic) from source lines to Results.'
+                 '\nWarning! The setting significantly slows down the search.')),
         'opt': 'copy_styles',
         'def': True,
         'frm': 'bool',
         'chp': _('Results'),
     },
-    {   'cmt': _('Maximum lines to copy styles from source lines to Results (0 - all).'
-                 '\nWarning! The big value significantly slows down the search.'),
+    {   'cmt': _t('copy_styles_max_lines', _('copy_styles_max_lines')
+              , _('Maximum lines to copy styles from source lines to Results (0 - all).'
+                 '\nWarning! The big value significantly slows down the search.')),
         'opt': 'copy_styles_max_lines',
         'def': 100,
         'frm': 'int',
         'chp': _('Results'),
     },
-    {   'cmt': _('Show first N fragments while search is in progress (min 10).'),
+    {   'cmt': _t('show_progress_fragments', _('show_progress_fragments')
+              , _('Show first N fragments while search is in progress (min 10).')),
         'opt': 'show_progress_fragments',
         'def': 100,
         'min': 10,
@@ -285,7 +295,7 @@ fold_hi = f(_('Start folder(s).'
 #           '\n{} to search in project folders (in short <p>).'
             ), Walker_ROOT_IS_TABS)
 dept_hi = _('How many folder levels to search.'
-            '\nUse Ctrl+Up/Down to change this option.'
+            '\nUse Ctrl+↑/↓ to change this option.'
             )
 brow_hi = _('Click or Ctrl+B'
           '\n   Choose folder.'
@@ -341,66 +351,66 @@ STD_VARS= [
     )   for env_k, env_v in os.environ.items()
 ]
 
-DHLP_KEYS_TABLE = _(r'''
-┌───────────────────────────────────────┬──────────────────────┬───────────────────────────────────┐
-│                Command                │        Hotkey        │              Comment              │
-╞═══════════════════════════════════════╪══════════════════════╪═══════════════════════════════════╡
-│ Find                                  │                Alt+D │                                   │
-│ Find                                  │                Enter │ Except focus in multi-line "Find" │
-│                                       │                      │  or in Results or in Source       │
-│ Find                                  │                   F2 │                                   │
-│ Find as fast as posible               │             Shift+F2 │ Ignoring the slowing options      │
-├───────────────────────────────────────┼──────────────────────┼───────────────────────────────────┤
-│ Go to next found fragment             │                   F3 │                                   │
-│ Go to prev found fragment             │             Shift+F3 │                                   │
-│ Go to next file(tab) found fragment   │              Ctrl+F3 │                                   │
-│ Go to prev file(tab) found fragment   │        Ctrl+Shift+F3 │                                   │
-│ Open found fragment in tab            │                Enter │ If focus in Results/Source        │
-│ Open found fragment and close dialog  │          Shift+Enter │ If focus in Results/Source        │
-├───────────────────────────────────────┼──────────────────────┼───────────────────────────────────┤
-│ Put focus to Results                  │           Ctrl+Enter │ Except focus in Results/Source    │
-│ Move focus: Results >> Source >> Find │                  Tab │                                   │
-│ Move focus: Results << Source << Find │            Shift+Tab │                                   │
-├───────────────────────────────────────┼──────────────────────┼───────────────────────────────────┤
-│ Show history of search patterns       │                Alt+↓ │ If focus in "Find"                │
-│ Loop over all Depth values            │             Ctrl+↓/↑ │                                   │
-├───────────────────────────────────────┼──────────────────────┼───────────────────────────────────┤
-│ Choose folder                         │               Ctrl+B │                                   │
-│ Choose file                           │         Ctrl+Shift+B │                                   │
-│ Use folder of the current file        │               Ctrl+U │                                   │
-│ To search in the current tab          │         Ctrl+Shift+U │                                   │
-│ To search in the current Source       │                  F11 │                                   │
-│ To search in the current Source and   │                      │                                   │
-│   current lexer path                  │            Shift+F11 │                                   │
-│ Append newline char "§" to "Find"     │          Shift+Enter │ If focus in sigle-line "Find"     │
-├───────────────────────────────────────┼──────────────────────┼───────────────────────────────────┤
-│ Fold/Unfold the caret branch          │               Ctrl+= │ If focus in Results               │
-│ Fold/Unfold all branches              │         Ctrl+Shift+= │ By state of the caret branch      │
-├───────────────────────────────────────┼──────────────────────┼───────────────────────────────────┤
-│ Load preset #1/#2/../#9               │        Ctrl+1/2/../9 │ All presets via menu              │
-│ Create new preset                     │               Ctrl+S │                                   │
-│ Choose preset to apply                │                Alt+S │                                   │
-│ Restore prev/next executed parameters │              Alt+←/→ │                                   │
-├───────────────────────────────────────┼──────────────────────┼───────────────────────────────────┤
-│ Append macro var to current field     │               Ctrl+A │ If focus in editable field        │
-│ Show fields after macros substitution │         Ctrl+Shift+A │                                   │
-├───────────────────────────────────────┼──────────────────────┼───────────────────────────────────┤
-│ Expand/Shrink Results height          │         Ctrl+Alt+↓/↑ │                                   │
-│ Expand/Shrink dialog height           │        Shift+Alt+↓/↑ │                                   │
-│ Expand/Shrink dialog width            │        Shift+Alt+→/← │                                   │
-│ Expand/Shrink height of               │                      │                                   │
-│   multi-line "Find"                   │   Shift+Ctrl+Alt+↓/↑ │ If multi-line "Find" is visible   │
-├───────────────────────────────────────┼──────────────────────┼───────────────────────────────────┤
-│ Show engine options                   │               Ctrl+E │                                   │
-│ Show dialog "Help"                    │               Ctrl+H │                                   │
-├───────────────────────────────────────┼──────────────────────┼───────────────────────────────────┤
-│ Call CudaText's "Find" dialog         │               Ctrl+F │ And copy pattern and              │
-│ Call CudaText's "Replace" dialog      │               Ctrl+R │     search options                │
-└───────────────────────────────────────┴──────────────────────┴───────────────────────────────────┘
-''').strip()
+DLG_HELP_KEYS = _t('DLG_HELP_KEYS', _('DLG_HELP_KEYS'), _(r'''
+┌───────────────────────────────────────┬────────────────────┬───────────────────────────────────┐
+│                Command                │       Hotkey       │              Comment              │
+╞═══════════════════════════════════════╪════════════════════╪═══════════════════════════════════╡
+│ Find                                  │              Alt+D │                                   │
+│ Find                                  │              Enter │ Except focus in multi-line "Find" │
+│                                       │                    │  or in Results or in Source       │
+│ Find                                  │                 F2 │                                   │
+│ Find as fast as posible               │           Shift+F2 │ Ignoring the slowing options      │
+├───────────────────────────────────────┼────────────────────┼───────────────────────────────────┤
+│ Go to next found fragment             │                 F3 │                                   │
+│ Go to prev found fragment             │           Shift+F3 │                                   │
+│ Go to next file(tab) found fragment   │            Ctrl+F3 │                                   │
+│ Go to prev file(tab) found fragment   │      Ctrl+Shift+F3 │                                   │
+│ Open found fragment in tab            │              Enter │ If focus in Results/Source        │
+│ Open found fragment and close dialog  │        Shift+Enter │ If focus in Results/Source        │
+├───────────────────────────────────────┼────────────────────┼───────────────────────────────────┤
+│ Put focus to Results                  │         Ctrl+Enter │ Except focus in Results/Source    │
+│ Move focus: Results >> Source >> Find │                Tab │                                   │
+│ Move focus: Results << Source << Find │          Shift+Tab │                                   │
+├───────────────────────────────────────┼────────────────────┼───────────────────────────────────┤
+│ Show history of search patterns       │              Alt+↓ │ If focus in "Find"                │
+│ Loop over all Depth values            │           Ctrl+↓/↑ │                                   │
+├───────────────────────────────────────┼────────────────────┼───────────────────────────────────┤
+│ Choose folder                         │             Ctrl+B │                                   │
+│ Choose file                           │       Ctrl+Shift+B │                                   │
+│ Use folder of the current file        │             Ctrl+U │                                   │
+│ To search in the current tab          │       Ctrl+Shift+U │                                   │
+│ To search in the current Source       │                F11 │                                   │
+│ To search in the current Source and   │                    │                                   │
+│   current lexer path                  │          Shift+F11 │                                   │
+│ Append newline char "§" to "Find"     │        Shift+Enter │ If focus in sigle-line "Find"     │
+├───────────────────────────────────────┼────────────────────┼───────────────────────────────────┤
+│ Fold/Unfold the caret branch          │             Ctrl+= │ If focus in Results               │
+│ Fold/Unfold all branches              │       Ctrl+Shift+= │ By state of the caret branch      │
+├───────────────────────────────────────┼────────────────────┼───────────────────────────────────┤
+│ Load preset #1/#2/../#9               │      Ctrl+1/2/../9 │ All presets via menu              │
+│ Create new preset                     │             Ctrl+S │                                   │
+│ Choose preset to apply                │              Alt+S │                                   │
+│ Restore prev/next executed parameters │            Alt+←/→ │                                   │
+├───────────────────────────────────────┼────────────────────┼───────────────────────────────────┤
+│ Append macro var to current field     │             Ctrl+A │ If focus in editable field        │
+│ Show fields after macros substitution │       Ctrl+Shift+A │                                   │
+├───────────────────────────────────────┼────────────────────┼───────────────────────────────────┤
+│ Expand/Shrink Results height          │       Ctrl+Alt+↓/↑ │                                   │
+│ Expand/Shrink dialog height           │      Shift+Alt+↓/↑ │                                   │
+│ Expand/Shrink dialog width            │      Shift+Alt+→/← │                                   │
+│ Expand/Shrink height of               │                    │                                   │
+│   multi-line "Find"                   │ Shift+Ctrl+Alt+↓/↑ │ If multi-line "Find" is visible   │
+├───────────────────────────────────────┼────────────────────┼───────────────────────────────────┤
+│ Show engine options                   │             Ctrl+E │                                   │
+│ Show dialog "Help"                    │             Ctrl+H │                                   │
+├───────────────────────────────────────┼────────────────────┼───────────────────────────────────┤
+│ Call CudaText's "Find" dialog         │             Ctrl+F │ And copy pattern and              │
+│ Call CudaText's "Replace" dialog      │             Ctrl+R │     search options                │
+└───────────────────────────────────────┴────────────────────┴───────────────────────────────────┘
+''')).strip()
 
-DHLP_TIPS_FIND  = f(_(r'''
-String to find (pattern) can be multi-line. Button "+" sets single-line or multi-line control.
+DLG_HELP_FIND  = f(_t('DLG_HELP_FIND', _('DLG_HELP_FIND'), _(
+r'''String to find (pattern) can be multi-line. Button "+" sets single-line or multi-line control.
 In single-line control the newlines are shown as §.
 
 ———————————————————————————————————————————————————————————————————————————————————————————— 
@@ -418,6 +428,7 @@ There is infobar to the left of "Find" button.
 The infobar shows not trivial values of "{OTH4FND}".
     ↓↓          Start with the newest files.
     ↑↑          Start with the oldest files.
+    <5h         Skip file older than 5 hours.
     <4d         Skip file older than 4 days.
     <3w         Skip file older than 3 weeks.
     <2m         Skip file older than 2 months.
@@ -520,7 +531,7 @@ If any of final part has a non-word character, "w" option is ignored.
 
 ———————————————————————————————————————————————————————————————————————————————————————————— 
 Long-term searches can be interrupted by ESC.
-''')
+'''))
 , find=WHA__CA[2:].replace('&', '').replace(':', '')
 , incl=INC__CA[2:].replace('&', '').replace(':', '')
 , excl=EXC__CA[1:].replace('&', '').replace(':', '')
@@ -529,8 +540,9 @@ Long-term searches can be interrupted by ESC.
 , OTH4FND=OTH4FND
 ).strip()
 
-DHLP_TIPS_RSLT  = _(r'''
-Only the options 
+
+DLG_HELP_RESULTS  = _t('DLG_HELP_RESULTS', _('DLG_HELP_RESULTS'), _(
+r'''Only the options 
     "-N+M" (with lines above/below)
     "Show lexer path for all fragments"
 needs to be set before start of search.
@@ -597,10 +609,10 @@ Found fragments are always shown by the found order.
 If tree format is "<path:r>: line", no problems. For other formats content of 
 "folder lines" and "file lines" adapts (via folder merging) to show correct data. 
 In extreme cases format automatically sets to "<path:r>: line".
-''').strip()
+''')).strip()
 
-DHLP_TIPS_FAST  = f(_(r'''
-Some of the search parameters slightly decrease the search speed.
+DLG_HELP_SPEED  = f(_t('DLG_HELP_SPEED', _('DLG_HELP_SPEED'), _(
+r'''Some of the search parameters slightly decrease the search speed.
 Others reduce the speed dramatically.
 To perform optimal search, you need to consider these notes.
 
@@ -610,8 +622,8 @@ To perform optimal search, you need to consider these notes.
     "w"  {word}
 do not reduce the speed at all. 
 
-2. Using non-trivial setttings of "Sort collected files" or "Age of files"
-does not reduce the speed, in practice.
+2. Using non-trivial setttings of "Sort collected files" or "Age of files" does not reduce 
+the speed, in practice.
 
 3. Appending context lines to Results ("-?+?") slightly decrease the speed.
 
@@ -656,7 +668,7 @@ without turn them off.
 Also see engine options 
     - skip_file_size_more(Kb),
     - dont_show_file_size_more(Kb).
-''')
+'''))
 , reex=reex_hi
 , case=case_hi
 , word=word_hi
@@ -664,16 +676,14 @@ Also see engine options
 , excl=EXC__CA[1:].replace('&', '').replace(':', '')
 ).strip()
 
-DHLP_TIPS_TRCK  = f(_(r'''
-How to replace found fragments in many files? Use plugin "Find in Files". 
+DLG_HELP_TRICKS  = f(_t('DLG_HELP_TRICKS', _('DLG_HELP_TRICKS'), _(
+r'''How to replace found fragments in many files? Use plugin "Find in Files". 
 It is not died and will be supported permanently.
 The plugin has almost all search options of "Find in Files 4". There are not
     - multi-line pattern,
     - "Syntax elements" filters,
     - "Encoding plan" (partially),
     - "Lexer path" filter.
-In the rest "Find in Files" can search as "Find in Files 4". 
-And it can replace the found.
 
 ———————————————————————————————————————————————————————————————————————————————————————————— 
 Shift+F2 starts the single search, which ignores slowing down options:
@@ -737,7 +747,7 @@ If
     you cannot close dialog in usual way ("Stop?" message appears) 
 then
     hold Shift and click on "x" in titlebar. 
-''')
+'''))
 , excl=EXC__CA[1:].replace('&', '').replace(':', '')
 , fold=FOL__CA[2:].replace('&', '').replace(':', '')
 , tabs=Walker_ROOT_IS_TABS

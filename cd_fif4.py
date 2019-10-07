@@ -2,7 +2,7 @@
 Authors:
     Andrey Kvichansky   (kvichans on github.com)
 Version:
-    '4.6.06 2019-10-04'
+    '4.6.07 2019-10-07'
 ToDo: (see end of file)
 '''
 import  re, os, traceback, locale, itertools, codecs, time, datetime as dt #, types, json
@@ -282,11 +282,11 @@ def dlg_fif4_xopts():
 
 
 def dlg_fif4_help(fif):
-    TIPS_FIND   = DHLP_TIPS_FIND
-    TIPS_RSLT   = DHLP_TIPS_RSLT
-    KEYS_TABLE  = DHLP_KEYS_TABLE
-    TIPS_FAST   = DHLP_TIPS_FAST
-    TIPS_TRCK   = DHLP_TIPS_TRCK
+    KEYS_TABLE  = DLG_HELP_KEYS
+    TIPS_FIND   = DLG_HELP_FIND
+    TIPS_RSLT   = DLG_HELP_RESULTS
+    TIPS_FAST   = DLG_HELP_SPEED
+    TIPS_TRCK   = DLG_HELP_TRICKS
     history     = open(os.path.dirname(__file__)+os.sep+r'readme'+os.sep+f('history.txt'), encoding='utf-8').read()
     c2m         = 'mac'==get_desktop_environment() #or True
     KEYS_TABLE  = KEYS_TABLE.replace('Ctrl+', 'Meta+') if c2m else KEYS_TABLE
