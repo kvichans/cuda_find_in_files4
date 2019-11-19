@@ -410,7 +410,18 @@ DLG_HELP_KEYS = _t('DLG_HELP_KEYS', _('DLG_HELP_KEYS'), _(r'''
 ''')).strip()
 
 DLG_HELP_FIND  = f(_t('DLG_HELP_FIND', _('DLG_HELP_FIND'), _(
-r'''String to find (pattern) can be multi-line. Button "+" sets single-line or multi-line control.
+r'''Plugin provides 3 CudaText commands to display its dialog:
+    "Find in files": just show dialog.
+    "Find in current tab": show dialog and start the search, if text pattern is auto set
+(using the engine option "use_selection_on_start").
+    "Find by preset": ask for a preset, then show dialog, filled from the chosen preset, and start 
+the search. Those presets are allowed, which have stored:
+    - pattern (or "use_selection_on_start" is on and selection is not empty),
+    - mask of files,
+    - start folder or/and tabs.
+
+———————————————————————————————————————————————————————————————————————————————————————————— 
+String to find (pattern) can be multi-line. Button "+" sets single-line or multi-line control.
 In single-line control the newlines are shown as §.
 
 ———————————————————————————————————————————————————————————————————————————————————————————— 

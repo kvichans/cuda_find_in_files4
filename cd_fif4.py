@@ -2,7 +2,7 @@
 Authors:
     Andrey Kvichansky   (kvichans on github.com)
 Version:
-    '4.6.07 2019-10-07'
+    '4.6.08 2019-10-09'
 ToDo: (see end of file)
 '''
 import  re, os, traceback, locale, itertools, codecs, time, datetime as dt #, types, json
@@ -219,20 +219,22 @@ def reload_opts():                              #NOTE: reload_opts
         V_L     = ['solid', 'dash', '2px', 'dotted', 'rounded', 'wave']
         shex2int= apx.html_color_to_int
         kwargs  = {}
-        if js.get('color_back'  , ''):   kwargs['color_bg']      = shex2int(js['color_back'])
-        if js.get('color_font'  , ''):   kwargs['color_font']    = shex2int(js['color_font'])
-        if js.get('color_border', ''):   kwargs['color_border']  = shex2int(js['color_border'])
-        if js.get('font_bold'   , False):kwargs['font_bold']     = 1
-        if js.get('font_italic' , False):kwargs['font_italic']   = 1
+        if js.get('color_back'  , ''):   kwargs['color_bg']     = shex2int(js['color_back'])
+        if js.get('color_font'  , ''):   kwargs['color_font']   = shex2int(js['color_font'])
+#       kwargs[                                 'color_border'] = shex2int(js.get('color_border', '#000'))
+        if js.get('color_border', ''):   kwargs['color_border'] = shex2int(js['color_border'])
+        if js.get('font_bold'   , False):kwargs['font_bold']    = 1
+        if js.get('font_italic' , False):kwargs['font_italic']  = 1
         jsbr    = js.get('borders', {})
-        if jsbr.get('left'  , ''):       kwargs['border_left']   = V_L.index(jsbr['left'  ])+1
-        if jsbr.get('right' , ''):       kwargs['border_right']  = V_L.index(jsbr['right' ])+1
-        if jsbr.get('bottom', ''):       kwargs['border_down']   = V_L.index(jsbr['bottom'])+1
-        if jsbr.get('top'   , ''):       kwargs['border_up']     = V_L.index(jsbr['top'   ])+1
+        if jsbr.get('left'  , ''):       kwargs['border_left']  = V_L.index(jsbr['left'  ])+1
+        if jsbr.get('right' , ''):       kwargs['border_right'] = V_L.index(jsbr['right' ])+1
+        if jsbr.get('bottom', ''):       kwargs['border_down']  = V_L.index(jsbr['bottom'])+1
+        if jsbr.get('top'   , ''):       kwargs['border_up']    = V_L.index(jsbr['top'   ])+1
         pass;                  #log("kwargs={}",(kwargs))
         return kwargs
        #def fit_mark_style_for_attr
     MARK_FIND_STYLE = fit_mark_style_for_attr(MARK_FIND_STYLE)
+    pass;                      #log("MARK_FIND_STYLE={}",(MARK_FIND_STYLE))
     LPTH_FIND_STYLE = fit_mark_style_for_attr(LPTH_FIND_STYLE)
 reload_opts()
 
@@ -320,6 +322,7 @@ class Command:
     def dlg_fif_opts(self):             return dlg_fif4_xopts()
     def show_dlg(self):                 return show_fif4()
     def show_dlg_and_find_in_tab(self): return show_fif4(d(work='in_tab'))
+    def choose_preset_to_run(self):     return choose_preset_to_run()
    #class Command:
 
 
@@ -327,9 +330,35 @@ class Command:
 the_fif4    = None
 def show_fif4(run_opts=None):
     global the_fif4
-    the_fif4    = Fif4D() if not the_fif4 else the_fif4
+    the_fif4    = the_fif4 if the_fif4 else Fif4D()
     the_fif4.show(run_opts)
    #def show_fif4
+
+
+def choose_preset_to_run():
+    global the_fif4
+    the_fif4    = the_fif4 if the_fif4 else Fif4D()
+    
+    M,m     = the_fif4.__class__,the_fif4
+    has_sel = USE_SEL_ON_START and ed.get_text_sel()
+    ps4run  = [(nps,ps) for nps,ps in enumerate(m.opts.ps_pset)
+                if  ('in_what' in ps or has_sel)
+                and  'wk_incl' in ps
+                and  'wk_fold' in ps
+              ]
+    if not ps4run:  return msg_box(_('No presets to run'))
+    ps_num  = min(fget_hist('ps_to_run', 0), len(ps4run)-1)
+    ps_num  = app.dlg_menu(app.MENU_LIST, '\n'.join([
+                ps['nm']+'\t'+M.ZIP_PS4MENU(ps, False)
+                for nps,ps in ps4run])
+            ,   focused=ps_num
+            ,   caption=_('Choose preset to run')
+                )
+    if ps_num is None: return []
+    fset_hist('ps_to_run', ps_num)
+    the_fif4.show(d(work=f'by_ps:{ps4run[ps_num][0]}'))
+    
+   #def choose_preset_to_run
 
 
 excl_hi = f(excl_hi_, ALWAYS_EXCL)
@@ -478,7 +507,8 @@ class Fif4D:
     FIT_SL4OPT  = lambda s: s.replace('\\'+FF_EOL, chr(1)).replace(FF_EOL, C10).replace(chr(1), FF_EOL)
     FIT_OPT4SL  = lambda s: s.replace(FF_EOL  , '\\'+FF_EOL ).replace(C10, FF_EOL)
     
-    ZIP_PS4MENU = lambda ps, wnm=True:(( '"'+ps['nm']+'" ' if wnm else '')
+#   ZIP_PS4MENU = lambda ps, wnm=True:(( '"'+ps['nm']+'" ' if wnm else '')
+    ZIP_PS4MENU = lambda ps, wnm=True:((ps['nm']+' [' if wnm else '')
                             +( '[.*] '                                              if 'in_reex' in ps else '')
                             +( '[-+] '                                              if 'rp_cntx' in ps else '')
                             +(f(' "{}" '    , ps['in_what'].strip()[:20].strip())   if 'in_what' in ps else '')
@@ -489,6 +519,7 @@ class Fif4D:
                             +( Fif4D.I4OP_CA(ps)                                                              )
                             +(' XY '                                                if 'la_fmxy' in ps else '')
                             +(' HW '                                                if 'la_fmwh' in ps else '')
+                            +(']' if wnm else '')
                             ).replace('  ',' ').strip()
     
     dur2msg     = lambda dur: f'{dur:.2f}"' \
@@ -775,7 +806,7 @@ class Fif4D:
         # in_reex in_case in_word
         # more-fh less-fh more-fw less-fw more-r less-r more-ml less-ml
         # addEOL hist vw_mlin wk_agef wk_enco_d rp_cntx
-        # di_menu ps_prev ps_next ps_save ps_menu ps_remv_N ps_load_N
+        # di_menu ps_prev ps_next ps_save ps_menu ps_move ps_remv_N ps_load_N
         # ac_usec di_brow
         # nf_frag nf_frlp 
         # up_rslt di_find vi_fldi
@@ -1087,6 +1118,14 @@ class Fif4D:
             return self.do_menu(ag, aid, data)
         
         if aid[:3]=='ps_':                      # Presets
+            if aid[:7]=='ps_move':
+                ps_num  = int(aid.split('_')[2])
+                nw_num  = int(aid.split('_')[3])
+                if nw_num!=ps_num:
+                    m.opts.ps_pset[ps_num], \
+                    m.opts.ps_pset[nw_num]  = m.opts.ps_pset[nw_num],   \
+                                              m.opts.ps_pset[ps_num]
+                return []
             if aid in ('ps_prev', 'ps_next'):
                 if not M.done_finds:                    return m.stbr_act(_('No yet executed searches'))
                 new_pos         = M.done_finds_pos \
@@ -1341,7 +1380,9 @@ class Fif4D:
         enc_plan=((_('masks')+f' (#{len(m.opts.wk_enco_ms)}), ' if m.opts.wk_enco_ms else '')
                 + ', '.join(m.opts.wk_enco))
         cap_val = lambda cap, val: cap+': '+val.strip()+DDD if val.strip() else cap+DDD
-        fidc    = m.caps.get(ag.focused(), '')
+        cid     = ag.focused()
+        cid     = self.cid_what() if cid=='di_menu' else cid
+        fidc    = m.caps.get(cid, '')
         done_prv= f'{M.done_finds_pos}'   if 0<M.done_finds_pos and M.done_finds    else '?'
         done_nxt= f'{M.done_finds_pos+2}' if   M.done_finds_pos<len(M.done_finds)-1 else '?'
         
@@ -1450,6 +1491,12 @@ class Fif4D:
        ,key='Ctrl+Shift+U' 
     ),d(tag='a:ac_usec:allt',cap=_('Prepare a search in &all tabs (in memory)')  
                     )]
+        nm_ps_move_to = [d(tag='a:ps_move_{}_'+str(n) ,cap=ps['nm'])
+                            for n,ps in enumerate(m.opts.ps_pset)]
+        nm_ps_move_fr = [d(                            cap=ps['nm'].ljust(50)+_(' swaps with'), sub=[
+                         d(tag=it['tag'].format(n)    ,cap=it['cap']    ,en=(n!=m))
+                            for m,it in enumerate(nm_ps_move_to)                                    ])
+                            for n,ps in enumerate(m.opts.ps_pset)]
         nm_preset=[(
     ),d(tag='a:ps_prev'         ,cap=f(_('Restore prev ({}/{}) executed parameters'), done_prv, len(M.done_finds))
        ,key='Alt+Left'                                      ,en=M.done_finds and 0<M.done_finds_pos
@@ -1458,18 +1505,20 @@ class Fif4D:
     ),d(                         cap='-'
     ),d(tag='a:ps_save'         ,cap=_('&Create new preset')+DDD
        ,key='Ctrl+S'
-    ),d(tag='a:ps_menu'         ,cap=_('Choo&se preset')+DDD
-       ,key='Alt+S'
     ),d(                         cap=_('&Remove preset')    ,en=m.opts.ps_pset  ,sub=[
       d(tag='a:ps_remv_'+str(n) ,cap=M.ZIP_PS4MENU(ps)) for n,ps in enumerate(m.opts.ps_pset)]
     ),d(                         cap=_('&View preset')      ,en=m.opts.ps_pset  ,sub=[
       d(tag='a:ps_edit_'+str(n) ,cap=M.ZIP_PS4MENU(ps)) for n,ps in enumerate(m.opts.ps_pset)]
+    ),d(                         cap=_('Change preset &position')   ,en=m.opts.ps_pset  ,sub=nm_ps_move_fr
+    ),d(                         cap='-'
+    ),d(tag='a:ps_menu'         ,cap=_('Choo&se preset')+DDD
+       ,key='Alt+S'
     ),d(                         cap='-') ] + [
       d(tag='a:ps_load_'+str(n) ,cap=M.ZIP_PS4MENU(ps)
        ,key=('Ctrl+'+str(n+1) if n<9 else '')
                                             ) for n,ps in enumerate(m.opts.ps_pset)]
         nm_macro= [(
-    ),d(tag='a:vr-add'          ,cap=_('&Add embeded/project/custom var')+f'{" ("+fidc+")" if fidc else ""}'+DDD 
+    ),d(tag='a:vr-add'          ,cap=_('&Append macro var')+f'{" ("+fidc+")" if fidc else ""}'+DDD 
        ,key='Ctrl+A'                                        ,en=bool(fidc) 
     ),d(tag='a:vr-new'          ,cap=_('Define n&ew custom var')+DDD
     ),d(                         cap=_('Chan&ge/remove custom var') ,en=bool(m.opts.vs_defs)    ,sub=[
@@ -1497,7 +1546,7 @@ class Fif4D:
             , aid, where, dx, dy
             , cmd4all=self.wnen_menu            # All nodes have same handler
         )
-        return []
+        return d(fid=self.cid_what())
        #def do_menu
 
 
@@ -1727,6 +1776,15 @@ class Fif4D:
             m.opts.wk_incl  = ed.get_prop(app.PROP_TAB_TITLE).strip('*')
             m.opts.wk_excl  = ''
             m.opts.wk_fold  = Walker.ROOT_IS_TABS
+            m.ag.update(vals=m.vals_opts('o2v'))
+            app.timer_proc(app.TIMER_START_ONE, m.on_timer, M.TIMER_DELAY, tag='di_find')
+
+        if m.ropts.get('work', '').startswith('by_ps'):
+            ps_num  = int(m.ropts.get('work').split(':')[1])
+            ps      = m.opts.ps_pset[ps_num]
+            for k in ps:
+                if k[:2] in ('nm', 'la'): continue
+                m.opts[k]   = ps[k]
             m.ag.update(vals=m.vals_opts('o2v'))
             app.timer_proc(app.TIMER_START_ONE, m.on_timer, M.TIMER_DELAY, tag='di_find')
 
@@ -3273,20 +3331,38 @@ class Reporter:
         ed_.set_text_all('\n'.join(body))
         ed_.set_prop(app.PROP_RO         ,True)
         
-        if ltkns:
-            ltkns   = merge_markers(ltkns, marks, MARK_FIND_STYLE)
-            for rw, cl, ln, st in ltkns:
-                ed_.attr(app.MARKERS_ADD, x=cl, y=rw, len=ln, **st)
-        else:
-            for rw, cl, ln in marks:
-                ed_.attr(app.MARKERS_ADD, x=cl, y=rw, len=ln, **MARK_FIND_STYLE)
-#       for rw, cl, ln, st in ltkns:
-#           ed_.attr(app.MARKERS_ADD, x=cl, y=rw, len=ln, **st)
-#       for rw, cl, ln in marks:
-#           ed_.attr(app.MARKERS_ADD, x=cl, y=rw, len=ln, **MARK_FIND_STYLE)
+        pass;                  #log("?? marks")
+        if -1==-1 and app.app_api_version()>='1.0.310':# app 1.88.8
+            if ltkns:
+                ltkns   = merge_markers(ltkns, marks, MARK_FIND_STYLE)
+                ltkns_s = {}
+                ltkns_a = {}
+                for rw, cl, ln, st in ltkns:
+                    ltkns_s[id(st)] = st
+                    ltkns_a.setdefault(id(st), []).append((rw, cl, ln))
+                for id_st,rw_cl_ln in ltkns_a.items():
+                    rws, cls, lns   = list(zip(*rw_cl_ln))
+                    st              = ltkns_s[id_st]
+                    ed_.attr(app.MARKERS_ADD_MANY, x=cls, y=rws, len=lns, **st)
+            elif marks:
+                rws, cls, lns = list(zip(*marks))
+                ed_.attr(app.MARKERS_ADD_MANY, x=cls, y=rws, len=lns, **MARK_FIND_STYLE)
             
-        for rw, cl, ln in lpths:
-            ed_.attr(    app.MARKERS_ADD, x=cl, y=rw, len=ln, **LPTH_FIND_STYLE)
+            if lpths:
+                rws, cls, lns = list(zip(*lpths))
+                ed_.attr(app.MARKERS_ADD_MANY, x=cls, y=rws, len=lns, **LPTH_FIND_STYLE)
+        else:
+            if ltkns:
+                ltkns   = merge_markers(ltkns, marks, MARK_FIND_STYLE)
+                for rw, cl, ln, st in ltkns:
+                    ed_.attr(app.MARKERS_ADD, x=cl, y=rw, len=ln, **st)
+            else:
+                for rw, cl, ln in marks:
+                    ed_.attr(app.MARKERS_ADD, x=cl, y=rw, len=ln, **MARK_FIND_STYLE)
+            
+            for rw, cl, ln in lpths:
+                ed_.attr(    app.MARKERS_ADD, x=cl, y=rw, len=ln, **LPTH_FIND_STYLE)
+        pass;                  #log("ok marks")
        #def show_results
        
     
@@ -4253,15 +4329,15 @@ ToDo
 [+][kv-kv][07aug19] Smth blocks shrinking dlg height
 [+][kv-kv][07aug19] Move const strings to separed py
 [+][kv-kv][07aug19] - Try cgitb
-[ ][kv-kv][08aug19] ? New walker to only count in file (w/o fragments)
+[ ][kv-kv][08aug19]? New walker to only count in file (w/o fragments)
 [ ][kv-kv][08aug19] BUG-OpEd: no edit json val (not knowns where storing file)
 [+][kv-kv][08aug19] How to exlcude root?
-[ ][kv-kv][09aug19] ? Show (as dlg_menu to replace pttn) list of literal fragments which matches re-pattern
+[ ][kv-kv][09aug19]? Show (as dlg_menu to replace pttn) list of literal fragments which matches re-pattern
 [+][kv-kv][09aug19] Add commands to jump Next/Prev Frag (File/Fold/Branch?)
 [+][at-kv][09aug19] Take only some lines (not whole body) for big files
 [ ][kv-kv][10aug19] Add command to count files with frgm
 [ ][kv-kv][11aug19] Fit code to use many fs-roots
-[ ][kv-kv][11aug19] ? Find files are NOT contain pattern
+[ ][kv-kv][11aug19]? Find files are NOT contain pattern
 [+][kv-kv][11aug19] OS/Proj/Custom vars as "{SEL}" or "{CFILE}"
 [+][kv-kv][12aug19] Replace in code not ASCII char with unicode names
 [+][kv-kv][12aug19] Repare using Results after reopen dlg
@@ -4269,29 +4345,31 @@ ToDo
 [+][kv-kv][13aug19] Stop w/o asking on second search
 [+][kv-kv][13aug19] Auto-sel first found frag (by op?)
 [+][kv-kv][14aug19] Empty val in history
-[ ][kv-kv][19aug19] ? Add command/param "find and pause after N files|frags are reported"
-[ ][kv-kv][19aug19] ? Code: Add more annotains (with typing module)
+[ ][kv-kv][19aug19]? Add command/param "find and pause after N files|frags are reported"
+[ ][kv-kv][19aug19]? Code: Add more annotains (with typing module)
 [+][kv-kv][20aug19] Store (in mem) some last search param sets. Alt+Lf/Rt to load
-[ ][kv-kv][20aug19] ? Show speed of search: files/sec or frags/sec
+[ ][kv-kv][20aug19]? Show speed of search: files/sec or frags/sec
 [+][kv-kv][21aug19] Check: all roots are not included each others
 [+][kv-kv][30aug19] Map {ext:encoding}
 [+][kv-kv][30aug19] Lexer path for all frags - as src line
 [+][kv-kv][03sep19] Separate stage to collect files
 [+][kv-kv][04sep19] More detail for enco masks in infobar
 [+][kv-kv][05sep19] Place statusbar between Params and Results
-[ ][at-kv][05sep19] ? Dock form
-[ ][at-kv][05sep19] ? Source in tab
+[ ][at-kv][05sep19]? Dock form
+[ ][at-kv][05sep19]? Source in tab
 [+][kv-kv][05sep19] Save dlg layout in preset
 [+][kv-kv][16sep19] Add ref to FIF in Help for users who want to replace
 [+][kv-kv][16sep19] Shift+F2 to report now with not copy_styles 
 [+][kv-kv][19sep19] (Speed) Use current tab(s) editor(s) in LexHelper
 [+][kv-kv][19sep19] Add pattern (as single-line str) to Results
 [+][kv-kv][16sep19] Shift+F2 to fast search: off all expensive options "Synt","LxPaths","Copy styles"
-[ ][kv-kv][20sep19] ? "Only start dir" -> "Only start dir/group"
+[ ][kv-kv][20sep19]? "Only start dir" -> "Only start dir/group"
 [+][at-kv][20sep19] Many not-re pattern: A|B&C -> (A)|((B.*C)|(C.*B))
 [+][kv-kv][24sep19] Apply re.escape() to pattern on Shift+. or Shift+Click(".*")
 [ ][kv-kv][25sep19] Apply "Sort" to tabs also
 [+][kv-kv][03oct19] BUG: not open tab by Enter
 [ ][kv-kv][04oct19] Flicker on start if prev pattern has many lines
-[ ][kv-kv][04oct19] Var submenu when click on "="
+[+][kv-kv][04oct19] Var submenu when click on "="
+[ ][kv-kv][08oct19]? Show % of work for files
+[ ][kv-kv][11nov19] DblClick==Enter in Results/Source
 '''
