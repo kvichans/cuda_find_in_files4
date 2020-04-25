@@ -1,4 +1,9 @@
-﻿4.6.08 2019-10-09
+﻿4.6.09 2020-04-25
+added: allow ";" to separate folders in field "From"
+fixed: double show context menu on Linux
+fixed: crash on sym link directory
+
+4.6.08 2019-10-09
 added: New command "Find by preset..." (see CudaText menu)
 added: New command "Change preset position" (see =/Presets menu)
 

@@ -2,7 +2,7 @@
 Authors:
     Andrey Kvichansky   (kvichans on github.com)
 Version:
-    '4.6.08 2019-10-09'
+    '4.6.09 2020-04-25'
 ToDo: (see end of file)
 '''
 import  re, os, traceback, locale, itertools, codecs, time, datetime as dt #, types, json
@@ -51,7 +51,7 @@ pass;                           pfw=lambda d,w=150:pformat(d,width=w)
 pass;                           pfwg=lambda d,w,g='': re.sub('^', g, pfw(d,w), flags=re.M) if g else pfw(d,w)
 pass;                           # Manage log actions
 pass;                           Tr.sec_digs= 2
-pass;                           Tr.to_file = str(Path(get_opt('log_file', ''))) #! Need app restart
+pass;                          #Tr.to_file = str(Path(get_opt('log_file', ''))) #! Need app restart
                                                 #NOTE: _log4mod
 pass;                           _log4mod                    = -1    # 0=False=LOG_FREE, 1=True=LOG_ALLOW, 2=LOG_NEED, -1=LOG_FORBID
 pass;                           _log4mod                    =  get_opt('_log4mod', _log4mod)
@@ -815,7 +815,7 @@ class Fif4D:
         M,m     = self.__class__,self
         scam    = ag.scam()
         pass;                  #log("aid,scam={}",(aid,scam))
-        pass;                   log__("aid,data,ops={}",(aid,data,ops)         ,__=(log4fun,M.log4cls)) if _log4mod>=0 else 0
+        pass;                  #log__("aid,data,ops={}",(aid,data,ops)         ,__=(log4fun,M.log4cls)) if _log4mod>=0 else 0
 
         # Copy values from form to m.opts
         m.vals_opts('v2o', ag)
@@ -1185,12 +1185,14 @@ class Fif4D:
         def set_dir(path):                      # Tool to set current folder/file/tab[s]
             if not path:    return d(fid=self.cid_what())
             m.opts.wk_fold = path.replace(M.USERHOME, '~')
+            m.opts.wk_fold = '"'+m.opts.wk_fold+'"' if ' ' in m.opts.wk_fold else m.opts.wk_fold;
             return d(fid=self.cid_what()
                     ,vals=d(wk_fold=m.opts.wk_fold))
         def set_fn(fn, fold=None):              # Tool to set current folder/file/tab[s]
             if not fn:      return d(fid=self.cid_what())
             m.opts.wk_incl = os.path.basename(fn)
             m.opts.wk_fold = fold if fold else os.path.dirname(fn).replace(M.USERHOME, '~')
+            m.opts.wk_fold = '"'+m.opts.wk_fold+'"' if ' ' in m.opts.wk_fold else m.opts.wk_fold;
             m.opts.wk_excl = ''
             m.opts.wk_dept = 1
             return d(fid=self.cid_what()
@@ -1643,14 +1645,13 @@ class Fif4D:
         ctrls['di_rslt']['on_caret']        = lambda ag, aid, data='': \
             [] if app.timer_proc(app.TIMER_START_ONE, m.on_timer, M.TIMER_DELAY, tag='on_rslt_crt') else []
         ctrls['di_menu']['on_menu']         = m.do_menu
-        ctrls['di_rslt']['on_mouse_down']   = lambda ag, aid, data='': \
-            m.do_menu(ag, 'di_rslt', data) if 1==data['btn'] else []
-        ctrls['di_srcf']['on_mouse_down']   = lambda ag, aid, data='': \
-            m.do_menu(ag, 'di_srcf', data) if 1==data['btn'] else []
-        ctrls['di_i4op']['on_mouse_down']   = lambda ag, aid, data='': \
-            m.do_menu(ag, 'di_i4op', data) if 1==data['btn'] else []
-        ctrls['di_i4op']['on_click_dbl']    = lambda ag, aid, data='': \
-            m.do_acts(ag, 'wk_clea')
+        ctrls['di_rslt']['on_mouse_down']   = lambda ag, aid, data='': m.do_menu(ag, 'di_rslt', data) if 1==data['btn'] else []
+        ctrls['di_srcf']['on_mouse_down']   = lambda ag, aid, data='': m.do_menu(ag, 'di_srcf', data) if 1==data['btn'] else []
+        ctrls['di_i4op']['on_mouse_down']   = lambda ag, aid, data='': m.do_menu(ag, 'di_i4op', data) if 1==data['btn'] else []
+        ctrls['di_i4op']['on_click_dbl']    = lambda ag, aid, data='': m.do_acts(ag, 'wk_clea')
+        # Fix for Linux: double show context menu
+        ctrls['di_rslt']['on_menu']         = lambda ag, aid, data='': False
+        ctrls['di_srcf']['on_menu']         = lambda ag, aid, data='': False
         # To save last focus useful place
         def save_fid(cid):  m.last_fid  = cid; return []
         ctrls['in_what']['on_focus_enter']  = lambda ag, aid, data='':save_fid(aid)
@@ -2904,7 +2905,7 @@ def fifwork(observer, ed4rpt, walkers, fragmer, frgfilters, reporter):
     reporter.show_results(ed4rpt)
     pass;                       work_end    = ptime()
     pass;                       print(f('report done: {:.2f} secs', work_end-search_end)) if _dev_kv else 0
-    pass;                       print(f('woks   done: {:.2f} secs', work_end-work_start_t)) if _dev_kv else 0
+    pass;                       print(f('works  done: {:.2f} secs', work_end-work_start_t)) if _dev_kv else 0
    #def fifwork
 
 
@@ -3551,6 +3552,8 @@ class Walker:
                 mask:             /   "/a b/c"   m/n
                 output:         ['/', '/a b/c', 'm/n']
         """
+        if ';' in mask:
+            return [f.strip() for f in mask.split(';')]
         mask    = mask.strip()
         flds    = mask.split(' ')
         if '"' in mask:
@@ -3571,6 +3574,7 @@ class Walker:
         roots   = wk_opts.pop('wk_fold', None)
         roots   = Walker.prep_quoted_folders(roots)
         pass;                   log__('qud roots={}',(roots)         ,__=(log4fun,)) if _log4mod>=0 else 0
+#       pass;                   print('qud roots={}',(roots))
         roots   = list(map(os.path.expanduser, roots))
 #       roots   = list(map(os.path.expandvars, roots))
         pass;                   log__('exp roots={}',(roots)         ,__=(log4fun,)) if _log4mod>=0 else 0
@@ -3759,11 +3763,12 @@ class FSWalker:
             Walker.stats[Walker.WKST_AFNS]  += len(filenames)
             for filename in filenames:
                 # Skip the file if...
+                path    = dirpath+os.sep+filename
+                if     os.path.islink(path):                                    continue#for filename
+                if not os.path.exists(path):                                    continue#for filename
                 if not       any(map(lambda cl:fnmatch(filename, cl), incls)):  continue#for filename
                 if excls and any(map(lambda cl:fnmatch(filename, cl), excls)):  continue#for filename
-                path    = dirpath+os.sep+filename
                 psize   = os.path.getsize( path)
-                if          os.path.islink(path):                               continue#for filename
                 if              psize == 0:                                     continue#for filename
                 if max_size and psize > max_size*1024:                          continue#for filename
                 if           not os.access(path, os.R_OK):                      continue#for filename
