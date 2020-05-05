@@ -2,9 +2,9 @@
 Authors:
     Andrey Kvichansky   (kvichans on github.com)
 Version:
-    '4.6.09 2020-04-25'
-ToDo: (see end of file)
+    '4.6.10 2020-05-04'
 '''
+
 import  re, os, traceback, locale, itertools, codecs, time, datetime as dt #, types, json
 from            pathlib         import Path
 from            fnmatch         import fnmatch
@@ -393,7 +393,7 @@ class Fif4D:
                 def timing_if(self, *args, **kwargs):
                     if argpos>=len(args) or args[argpos] not in argvals:
                         return mth(self, *args, **kwargs)
-                    M,m     = self.__class__,self
+                    M,m     = type(self),self
                     self.stbr_act(DDD, M.STBR_TIM)
                     app.app_idle()
                     bgn_tm  = ptime()
@@ -534,7 +534,7 @@ class Fif4D:
     done_finds_pos  = 0                         # Pos of last loaded
     
     def __init__(self, run_opts=None):
-        M,m     = self.__class__,self
+        M,m     = type(self),self
         run_opts= run_opts if run_opts else {}
         m.ropts = run_opts
 
@@ -613,12 +613,17 @@ class Fif4D:
                                                 
         m._prev_frgi     = ()                   # Last processed fragment in Results
         
+        # Fix: Crash if user press Tab on first start
+        m.opts.us_focus = 'in_whaM' \
+                            if m.opts.vw.mlin else  \
+                          'in_what'
+
         m.init_layout()
        #def __init__
     
     
     def vals_opts(self, act, ag=None):
-        M,m     = self.__class__,self
+        M,m     = type(self),self
         if False:pass
         elif act=='v2o':
             # Copy values/positions from form to m.opts
@@ -663,7 +668,7 @@ class Fif4D:
 
     def dlg_preset(self, ps=None):
         pass;                  #log("ps={}",(ps))
-        M,m     = self.__class__,self
+        M,m     = type(self),self
         RAW     = '!1'
         CNT     = '!2'
         I4O     = '!3'
@@ -812,7 +817,7 @@ class Fif4D:
         # up_rslt di_find vi_fldi
         # on_rslt_crt go-next go-prev nav-to
         pass;                   log4fun= 1
-        M,m     = self.__class__,self
+        M,m     = type(self),self
         scam    = ag.scam()
         pass;                  #log("aid,scam={}",(aid,scam))
         pass;                  #log__("aid,data,ops={}",(aid,data,ops)         ,__=(log4fun,M.log4cls)) if _log4mod>=0 else 0
@@ -1325,7 +1330,7 @@ class Fif4D:
     
     
     def wnen_menu(self, ag, tag):
-        M,m     = self.__class__,self
+        M,m     = type(self),self
         if tag[:2]=='a:':   return m.do_acts(ag, *(tag.split(':')[1:]))
         if tag=='opts':     dlg_fif4_xopts();return []
         if tag[:5]=='trfm:':
@@ -1368,7 +1373,7 @@ class Fif4D:
        #def wnen_menu
 
     def do_menu(self, ag, aid, data=''):
-        M,m     = self.__class__,self
+        M,m     = type(self),self
         pass;                   log4fun=-1
         pass;                   log__('aid, data={}',(aid, data)         ,__=(log4fun,M.log4cls)) if _log4mod>=0 else 0
 
@@ -1444,7 +1449,7 @@ class Fif4D:
     ),d(                 cap='-'
     ),d(tag='rp_lexa'   ,cap=_('Show le&xer path for all fragments (slowdown)')
         ,ch=m.opts.rp_lexa
-    ),d(tag='rp_lexp'   ,cap=_('Add le&xer path to the statusbar')
+    ),d(tag='rp_lexp'   ,cap=_('Add le&xer path to file path in the statusbar')
         ,ch=m.opts.rp_lexp
                   )]
     
@@ -1471,7 +1476,7 @@ class Fif4D:
             pass;              #log__('mn_rslt=\n{}',pfw(mn_rslt)         ,__=(log4fun,M.log4cls)) if _log4mod>=0 else 0
             ag.show_menu(mn_srcf +[(
     ),d(                     cap='-'
-    ),d(tag='a:rslt-to-tab' ,cap=_('Copy Results to new tab')                               ,en=bool(m.reporter)
+    ),d(tag='a:rslt-to-tab' ,cap=_('Copy Results to new tab')           ,key='Ctrl+Shift+Enter' ,en=bool(m.reporter)
     ),d(                     cap='-'
                 )]+ mn_rslt
                 , aid, where, dx+5, dy+10, cmd4all=self.wnen_menu)
@@ -1539,8 +1544,12 @@ class Fif4D:
     ),d(                 cap=_('Macro v&ars')   ,sub=nm_macro
     ),d(tag='opts'      ,cap=_('Engine options.&..')
        ,key='Ctrl+E' 
+    ),d(                 cap='-'
     ),d(tag='fast'      ,cap=_('Fast search (ignore some options)')
        ,key='Shift+F2' 
+    ),d(tag='rslt-to-tab',cap=_('Copy Results to new tab')
+       ,key='Ctrl+Shift+Enter'  ,en=m.rslt.get_line_count()>1
+    ),d(                 cap='-'
     ),(*mn_i4op
     ),d(                 cap='-'
     ),(*mn_rslt
@@ -1553,7 +1562,7 @@ class Fif4D:
 
 
     def init_layout(self):
-        M,m     = self.__class__,self
+        M,m     = type(self),self
         pass;                   log4fun=0
         pass;                   log__('',()         ,__=(log4fun,M.log4cls)) if _log4mod>=0 else 0
        
@@ -1754,7 +1763,7 @@ class Fif4D:
 
 
     def show(self, run_opts=None):
-        M,m     = self.__class__,self
+        M,m     = type(self),self
         run_opts= run_opts if run_opts else {}
         m.ropts = run_opts
 
@@ -1800,7 +1809,7 @@ class Fif4D:
 
     def do_key_down(self, ag, key, data=''):
         pass;                   log4fun=-1
-        M,m     = self.__class__,self
+        M,m     = type(self),self
         scam    = data if data else ag.scam()
         fid     = ag.focused()
         pass;                  #log("fid,scam,key,key_name={}",(fid,scam,key,get_const_name(key, module=cudatext_keys)))
@@ -1886,6 +1895,7 @@ class Fif4D:
         elif skef==(  '',VK_ENTER, 'di_srcf'):          upd=m.do_acts(ag, 'nav-to')             #       Enter in srcf
         elif skef==( 's',VK_ENTER, 'di_rslt'):              m.do_acts(ag, 'nav-to'); upd=None   # Shift+Enter in rslt
         elif skef==( 's',VK_ENTER, 'di_srcf'):              m.do_acts(ag, 'nav-to'); upd=None   # Shift+Enter in srcf
+        elif skey==('sc',VK_ENTER):                     upd=m.do_acts(ag, 'rslt-to-tab')        # Ctrl+Shift+Enter
         else:                                               return []
         pass;                   log__('upd={}',(upd)         ,__=(log4fun,M.log4cls)) if _log4mod>=0 else 0
         ag.update(upd)
@@ -1894,7 +1904,7 @@ class Fif4D:
        #def do_key_down
 
     def var_acts(self, act, par=None):
-        M,m = self.__class__,self
+        M,m = type(self),self
         
         if act in ('new', 'edit'):
             var = dcta(nm='', bd='')    if act=='new' else dcta(par)
@@ -1990,7 +2000,7 @@ class Fif4D:
        #def var_acts
 
     def stbrProxy(self):
-        M,m     = self.__class__,self
+        M,m     = type(self),self
         prx = {'frgs':M.STBR_FRGS
               ,'fils':M.STBR_FILS
               ,'dirs':M.STBR_DIRS
@@ -1999,7 +2009,7 @@ class Fif4D:
         return lambda fld, val: m.stbr_act(val, prx[fld]) if fld in prx else None
         
     def stbr_act(self, val='', tag=None, opts={}):
-        M,m = self.__class__,self
+        M,m = type(self),self
         tag = M.STBR_MSG if tag is None else tag
         if not m.stbr:  return 
         if likeslist(val):
@@ -2012,7 +2022,7 @@ class Fif4D:
     
 
     def on_exit(self, ag):
-        M,m = self.__class__,self
+        M,m = type(self),self
         m.vals_opts('v2o', ag)
         pref    = prefix_for_opts()
         fset_hist([pref, 'opts'] if pref else 'opts' 
@@ -2030,7 +2040,7 @@ class Fif4D:
         #   set-no-src
         #   nav-to
         pass;                   log4fun=1
-        M,m     = self.__class__,self
+        M,m     = type(self),self
         pass;                   log__("act,par={}",(act,par)         ,__=(log4fun,M.log4cls)) if _log4mod>=0 else 0
         pass;                  #log("###act,par={}",(act,par))
 
@@ -2131,6 +2141,7 @@ class Fif4D:
             return []
 
         if act in ('rslt-to-tab',):
+            if m.rslt.get_line_count()<=1:  return []
             app.file_open('')
             ed.set_prop(app.PROP_ENC,       'UTF-8')
             ed.set_prop(app.PROP_TAB_TITLE, _('Results'))
@@ -2197,7 +2208,6 @@ class Fif4D:
             m.srcf.fif_ready_tree   = False
             m.srcf.fif_path         = ''
             m._prev_frgi            = ()
-
        #def rslt_srcf_acts
     
     
@@ -2209,7 +2219,9 @@ class Fif4D:
             self.working    = False
         if self.working     and \
            self.observer    and \
-           app.ID_YES == msg_box(_('Stop?'), app.MB_YESNO+app.MB_ICONQUESTION):
+           app.ID_YES == msg_box(
+                           _(f'Stop {self.observer.step_name[-1]}?') if self.observer.step_name else _('Stop?')
+                        , app.MB_YESNO+app.MB_ICONQUESTION):
             self.observer.will_break()
         return not self.working
        #def do_close_query
@@ -2217,7 +2229,7 @@ class Fif4D:
 
     def work(self, ag, data):
         " Start new search"
-        M,m     = self.__class__,self
+        M,m     = type(self),self
         pass;                   log4fun=0
         pass;                  #log__('opts={}',(m.opts)         ,__=(log4fun,M.log4cls)) if _log4mod>=0 else 0
         
@@ -2347,15 +2359,24 @@ class Fif4D:
         
         # Main work
         pass;                  #log("m.working={}",(m.working))
-        if _dev_kv:                             # UNSAFE work
+        if False:
+#       if _dev_kv:                             # UNSAFE work
             fifwork(    m.observer, m.rslt, walkers, fragmer, frgfilters, m.reporter)
         else:                                   # SAFE work: with lock/try/finally
             lock_act('lock')
             try:
                 fifwork(m.observer, m.rslt, walkers, fragmer, frgfilters, m.reporter)
             except Exception as ex:
-                msg_box(f'Internal Error:\n{ex}')
                 log(traceback.format_exc()) 
+                msg_box(f'Internal Error:\n{ex}'
+                        '\n'
+                        '\nPlease pass content of the console and the description of your steps to the plugin author.'
+                        '\nSee Help (Ctrl+H) bottom link.'
+                        '\n'
+                        '\nNote.'
+                        '\nTo avoid error try to search with simpler options.'
+                        '\n"Fast search" (Shift+F2) is good for the first attempt.'
+                        )
             finally:
                 lock_act('unlock')
         m.working   = False
@@ -2838,7 +2859,7 @@ def fifwork(observer, ed4rpt, walkers, fragmer, frgfilters, reporter):
             pass;               log__("fn={}",(fn)         ,__=(log4fun,)) if _log4mod>=0 else 0
             if fn is None:
                 break#for fn
-            if  prev_stat_t+0.3 < ptime():
+            if  prev_stat_t+0.2 < ptime():
                 prev_stat_t     = ptime()
                 observer.dlg_status('msg', fn)
                 observer.dlg_status('dirs', [reporter.stat(Reporter.FRST_DIRS)
@@ -3220,6 +3241,8 @@ class Reporter:
         pass;                   log__('report=\n{}',('\n'.join(str(v) for v in self.rfrgs))         ,__=(log4fun,Reporter.log4cls)) if _log4mod>=0 else 0
 
         TAB         = '\t'
+        
+        pass;                  #_=1/0 # Testing error
         
         trfm        = self.rp_opts['rp_trfm']
         ftim        = self.rp_opts['rp_time']
@@ -3609,7 +3632,7 @@ class TabsWalker:
        #def __init__
 
 
-    def provide_path(self):                    
+    def provide_path(self):
         " Create generator to yield tabs's title/body "
         pass;                   log4fun=0
 #       self.stats      = Walker.new_stats()
@@ -3697,7 +3720,7 @@ class FSWalker:
                dt <  age_d['thr']
 
     
-    def provide_path(self):                        #NOTE: FS walk
+    def provide_path(self):                      #NOTE: FS walk
         " Create generator to yield file's path "
         pass;                  #log4fun= 1
         pass;                   log4fun=_log4fun_FSWalker_walk
@@ -3719,12 +3742,14 @@ class FSWalker:
         sort    = self.wk_opts.get('wk_sort', '')   # ''/'new'/'old'
 
         age_d   = FSWalker.fit_age(age_s) 
-        mtfps   = [] if sort or WALK_F_PICKING else None
+        mtfps   = [] if (sort or WALK_F_PICKING) else None
         pass;                   picking_start   = ptime()
+        pass;                   prev_qstop_t    = ptime()
+        if (sort or WALK_F_PICKING):    self.observer.step_name.append(FPATH_PICKING)
         
         for dirpath, dirnames, filenames in os.walk(self.root, topdown=not WALK_DOWNTOP):
             pass;               log__('dirpath={}',(dirpath)         ,__=(log4fun,FSWalker.log4cls)) if _log4mod>=0 else 0
-            if self.observer.time_to_stop():    return      ##?? Not at every loop
+#           if self.observer.time_to_stop():    return      ##?? Not at every loop
 
             Walker.stats[Walker.WKST_DIRS]  += 1
 
@@ -3786,11 +3811,24 @@ class FSWalker:
                     mtfps.append(                          path )
                 else:
                     yield path
+
+                if (sort or WALK_F_PICKING):
+                    if  prev_qstop_t+0.2 < ptime():
+                        prev_qstop_t     = ptime()
+                        app.app_idle()
+                    if self.observer.need_break:
+                        break#for filename
+            if (sort or WALK_F_PICKING) and self.observer.need_break:
+                break#for dirpath
            #for dirpath
         if not (sort or WALK_F_PICKING):
             return 
+        else:
+            self.observer.step_name.pop()
+            self.observer.need_break = False
+
         pass;                   
-        pass;                   print(f('pickin done: {:.2f} secs', ptime()-picking_start)) if _dev_kv else 0
+        pass;                   print(f('picking done: {:.2f} secs', ptime()-picking_start)) if _dev_kv else 0
         paths   = [tp[1] for tp in sorted(mtfps, reverse=(sort=='new'))] \
                     if sort else \
                   mtfps
@@ -4073,6 +4111,7 @@ class Observer:
 #       self.breaks     = 0                     # How many times breaked 
         self.opts       = opts                  # All opts to walk, find, report
 #       app.app_proc(app.PROC_SET_ESCAPE, '0')
+        self.step_name  = []                    # Stack of step names
 
 #   def set_progress(self, msg:str):
 #       msg_status(self.prefix+msg, process_messages=True)
@@ -4096,7 +4135,7 @@ class Observer:
         self.need_break = True
 #       self.breaks    += 1
 
-    time_to_stop    =lambda self: self.need_break
+#   time_to_stop    =lambda self: self.need_break
 #   def time_to_stop(self, toask=True, hint=_('Stop?'))->bool:
 #       pass;                   log("toask,self.need_break={}",(toask,self.need_break))
 #       if not self.need_break: return False

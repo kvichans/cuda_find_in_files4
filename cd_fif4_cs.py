@@ -367,6 +367,7 @@ DLG_HELP_KEYS = _t('DLG_HELP_KEYS', _('DLG_HELP_KEYS'), _(r'''
 │ Go to prev file(tab) found fragment   │      Ctrl+Shift+F3 │                                   │
 │ Open found fragment in tab            │              Enter │ If focus in Results/Source        │
 │ Open found fragment and close dialog  │        Shift+Enter │ If focus in Results/Source        │
+│ Copy Results to new tab               │   Ctrl+Shift+Enter │                                   │
 ├───────────────────────────────────────┼────────────────────┼───────────────────────────────────┤
 │ Put focus to Results                  │         Ctrl+Enter │ Except focus in Results/Source    │
 │ Move focus: Results >> Source >> Find │                Tab │                                   │
@@ -767,3 +768,5 @@ then
 
 GH_ISU_URL  = 'https://github.com/kvichans/cuda_find_in_files4/issues'
 ISUES_C     = _('Welcome to the plugin\'s GitHub page')
+
+FPATH_PICKING   = _('folders and files picking')
