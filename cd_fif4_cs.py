@@ -321,6 +321,9 @@ STD_VARS= [
     ('{t}'                  ,'"<tabs>"'
     ,_('To search in tabs') 
     ),
+    ('{p}'                  ,'???'
+    ,_('Folder(s) of the loaded project') 
+    ),
     ('{ed:FileName}'        ,'ed.get_filename()'
     ,_('Full path') 
     ),

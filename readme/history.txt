@@ -1,4 +1,9 @@
-﻿4.6.10 2020-05-04
+﻿4.6.11 2020-05-08
+added: New macro var "{p}" to search in project folders
+fixed: Now From can have one path with blanks
+fixed: Not run the command "Fast search" from menu
+
+4.6.10 2020-05-04
 added: "Сopy Results to new tab" is shown in menu "=" and has hotkey Ctrl+Shift+Enter
 added: ESC breaks only file picking (if picking is separated mode - see file_picking_stage option)
 fixed: Slow response to ESC if too many files are picking

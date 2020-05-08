@@ -2,7 +2,7 @@
 Authors:
     Andrey Kvichansky   (kvichans on github.com)
 Version:
-    '4.6.10 2020-05-04'
+    '4.6.11 2020-05-08'
 '''
 
 import  re, os, traceback, locale, itertools, codecs, time, datetime as dt #, types, json
@@ -1340,6 +1340,9 @@ class Fif4D:
                 return m.do_acts(ag, 'up_rslt')
             return []
 
+        if tag=='fast':                         # Fast
+            return m.do_acts(ag, 'di_find', 'fast')
+        
         if tag[:8]=='wk_sort:':                 # Set
             m.opts.wk_sort  = tag[8:]
             return d(fid=self.cid_what()
@@ -1980,6 +1983,9 @@ class Fif4D:
         if act=='repl':
             sval    = par
             if not sval:    return sval
+            if sval == '{p}':                                   # Project dirs
+                return _get_proj_dirs()
+                
             sval    = os.path.expanduser(sval)
             sval    = sval.replace('\\{', chr(1)).replace('\\}', chr(2))
             for dpth in range(3):               # 3 - max count of ref-jumps
@@ -2504,7 +2510,7 @@ class LexHelper:
 
     @staticmethod
     def filters(wk_opts, ed4lx, observer):
-        pass;                   log4fun=1
+        pass;                   log4fun=0
         pass;                   log__('wk_opts={}',(wk_opts)         ,__=(log4fun,)) if _log4mod>=0 else 0
         lexfltrs        = []
         if wk_opts.get('wk_sycm') or \
@@ -2926,7 +2932,7 @@ def fifwork(observer, ed4rpt, walkers, fragmer, frgfilters, reporter):
     reporter.show_results(ed4rpt)
     pass;                       work_end    = ptime()
     pass;                       print(f('report done: {:.2f} secs', work_end-search_end)) if _dev_kv else 0
-    pass;                       print(f('works  done: {:.2f} secs', work_end-work_start_t)) if _dev_kv else 0
+    pass;                       print(f('works4 done: {:.2f} secs', work_end-work_start_t)) if _dev_kv else 0
    #def fifwork
 
 
@@ -3578,6 +3584,8 @@ class Walker:
         if ';' in mask:
             return [f.strip() for f in mask.split(';')]
         mask    = mask.strip()
+        if os.path.isdir(mask):
+            return [mask]
         flds    = mask.split(' ')
         if '"' in mask:
             # Temporary replace all ' ' into "" to '·'
@@ -4161,6 +4169,24 @@ class Observer:
 ############################################
 #NOTE: misc tools
 
+def _get_proj_dirs():
+    pass;                      #log("??",())
+    pdirs = []
+    try:
+        import cuda_project_man as pman
+        nodes   = pman.global_project_info['nodes']
+        pass;                  #log("nodes={}",(nodes))
+        for nd in nodes:
+            p   = nd if os.path.isdir(nd) else os.path.dirname(nd)
+            p   = f'"{p}"' if ' ' in p else p
+            if p not in pdirs:
+                pdirs.append(p)
+    except:
+        pass;                  #log("ex",())
+        pdirs = []
+    pass;                      #log("pdirs={}",(pdirs))
+    return ' '.join(pdirs).strip()
+   #def _get_proj_dirs
 
 def div_orand(pttn, eol='EOL', word=False):
     word        = word and re.match(r'^[|&\w]+$', pttn)
