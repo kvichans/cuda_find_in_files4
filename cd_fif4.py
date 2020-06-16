@@ -2,10 +2,10 @@
 Authors:
     Andrey Kvichansky   (kvichans on github.com)
 Version:
-    '4.6.11 2020-05-08'
+    '4.6.12 2020-06-16'
 '''
 
-import  re, os, traceback, locale, itertools, codecs, time, datetime as dt #, types, json
+import  re, os, traceback, locale, itertools, codecs, time, collections, datetime as dt #, types, json
 from            pathlib         import Path
 from            fnmatch         import fnmatch
 from            collections     import namedtuple
@@ -848,14 +848,16 @@ class Fif4D:
                   ,'nav-to'):   return m.rslt_srcf_acts(aid, data, ag)
 
         if aid == 'xopts':
+            fid = ag.focused()
             dlg_fif4_xopts()
             ag.activate()
-            return []
+            return d(fid=fid)
             
         if aid == 'help':
+            fid = ag.focused()
             dlg_fif4_help(self)
             ag.activate()
-            return []
+            return d(fid=fid)
         
 #       if aid=='escape' or
         if aid=='in_reex' and scam=='s':
@@ -1815,9 +1817,8 @@ class Fif4D:
         M,m     = type(self),self
         scam    = data if data else ag.scam()
         fid     = ag.focused()
-        pass;                  #log("fid,scam,key,key_name={}",(fid,scam,key,get_const_name(key, module=cudatext_keys)))
+        pass;                  #log(  "fid,scam,key,key_name={}",(fid,scam,key,get_const_name(key, module=cudatext_keys)))
         pass;                   log__("fid,scam,key,key_name={}",(fid,scam,key,get_const_name(key, module=cudatext_keys))         ,__=(log4fun,M.log4cls)) if _log4mod>=0 else 0
-        pass;                  #log("fid,scam,key,key_name={}",(fid,scam,key,get_const_name(key, module=cudatext_keys)))
         pass;                  #return []
 
         # Local menu near cursor
@@ -1831,7 +1832,7 @@ class Fif4D:
         skey    = (scam,key)
         skef    = (scam,key,fid)
         pass;                   log__("fid,skey,skef={}",(fid,skey,skef)         ,__=(log4fun,M.log4cls)) if _log4mod>=0 else 0
-        pass;                  #log("fid,skey,skef={}",(fid,skey,skef))
+        pass;                  #log(  "fid,skey,skef={}",(fid,skey,skef))
         in_edct = fid in ('in_what', 'in_whaM', 'wk_incl', 'wk_excl', 'wk_fold')
         
         upd     = {}
@@ -2192,6 +2193,7 @@ class Fif4D:
         if act=='nav-to':                       # Open and select file/tab as srcf
             if not m.reporter:      return []
             if not m.srcf.fif_path: return []
+            pass;              #log("m.srcf.fif_path={}",(m.srcf.fif_path))
             tab_ed  = None
             path    = m.srcf.fif_path
             if path.startswith('tab:'):
@@ -2461,7 +2463,8 @@ class LexHelper:
                                 if tsid in rr_ids.values()}
                 pass;           log("th_sts=\n{}",pfw(th_sts,160))           if log4fun else 0
 #               raw_sts = {rr_ids[sid]:st for tsid,st in th_sts.items()
-                raw_sts = {sid:th_sts[rr_ids[sid]] for sid in raw_sts}
+#               raw_sts = {sid:th_sts[rr_ids[sid]] for sid in raw_sts}
+                raw_sts = {sid:th_sts[rr_ids[sid]] for sid in raw_sts if sid in rr_ids}
                 pass;           log("raw_sts=\n{}",pfw(raw_sts,160))         if log4fun else 0
 
             styles  = {sid:d(color_font =sats['color_font']
@@ -2881,7 +2884,7 @@ def fifwork(observer, ed4rpt, walkers, fragmer, frgfilters, reporter):
             if observer.need_break:
                 break#for fn
             if  prev_show_t+1 < ptime():
-#           if  prev_show_t+10 < ptime():
+
                 prev_show_t   = ptime()
                 reporter.show_results(ed4rpt) \
                     if reporter.stat(Reporter.FRST_FRGS) < DOING_FRAGS or \
@@ -2928,11 +2931,11 @@ def fifwork(observer, ed4rpt, walkers, fragmer, frgfilters, reporter):
     observer.dlg_status('msg', fin_msg)
     reporter.finish()
     pass;                       search_end    = ptime()
-    pass;                       print(f('search done: {:.2f} secs', search_end-work_start_t)) if _dev_kv else 0
+    pass;                       print(f('search done4: {:.2f} secs', search_end-work_start_t)) if _dev_kv else 0
     reporter.show_results(ed4rpt)
     pass;                       work_end    = ptime()
-    pass;                       print(f('report done: {:.2f} secs', work_end-search_end)) if _dev_kv else 0
-    pass;                       print(f('works4 done: {:.2f} secs', work_end-work_start_t)) if _dev_kv else 0
+    pass;                       print(f('report done4: {:.2f} secs', work_end-search_end)) if _dev_kv else 0
+    pass;                       print(f('works  done4: {:.2f} secs', work_end-work_start_t)) if _dev_kv else 0
    #def fifwork
 
 
@@ -2950,10 +2953,10 @@ class RFrg(namedtuple('RFrg', [
     ])):
     __slots__ = ()
     def __new__(cls, p='', f='', r=-1, cws=[], s='', e=False, st=None):
-        p   = p if p else f
+    #   p   = p if p else f
 #       f   = re.sub(r'^tab:\d+/', 'tab:', f) if f[:4]=='tab:' else f
         return super(RFrg, cls).__new__(cls, p if p else f, f, r, cws, s, e, st)
-   #class Frg
+   #class RFrg
 
 
 
@@ -3082,10 +3085,10 @@ class Reporter:
                 if  fn     != rfrg.p or \
                     frg.r   > rfrg.r:           # Will insert row info
                     ins_pos = len(self.rfrgs) - negpos
-                    break
+                    break#for negpos
                 if  frg.r  == rfrg.r:           # Will update the row info
                     old_fr  = rfrg
-                    break
+                    break#for negpos
                 #for negpos
             pass;               log__('old_fr,ins_pos,len(self.rfrgs)={}',(old_fr,ins_pos,len(self.rfrgs))         ,__=(log4fun,Reporter.log4cls)) if _log4mod>=0 else 0
             if False:pass
@@ -3095,7 +3098,7 @@ class Reporter:
                 old_fr.cws.append((frg.c, frg.w)) if frg.w else None
             else:
                 pass;           log('Err: fn, frg={}',(fn, frg))
-           #for frg            
+           #for frg
         pass;                   log__('frgs={} report=\n{}',frgs,('\n'.join(str(v) for v in self.rfrgs))         ,__=(log4fun,Reporter.log4cls)) if _log4mod>=0 else 0
        #def add_frg
        
@@ -3253,7 +3256,7 @@ class Reporter:
         trfm        = self.rp_opts['rp_trfm']
         ftim        = self.rp_opts['rp_time']
         shcw        = self.rp_opts['rp_shcw']
-        root        = self.observer.get_gstat()['fold']
+        root        = self.observer.get_gstat()['fold'].strip('"')
         relp        = self.rp_opts['rp_relp'] and os.path.isdir(root)
         finl        = trfm in (TRFM_PLL, TRFM_D_FLL)
         pass;                   log__('trfm,shcw,relp,finl,ftim,root={}',(trfm,shcw,relp,finl,ftim,root)         ,__=(log4fun,Reporter.log4cls)) if _log4mod>=0 else 0
@@ -3836,7 +3839,7 @@ class FSWalker:
             self.observer.need_break = False
 
         pass;                   
-        pass;                   print(f('picking done: {:.2f} secs', ptime()-picking_start)) if _dev_kv else 0
+        pass;                   print(f('picking done4: {:.2f} secs', ptime()-picking_start)) if _dev_kv else 0
         paths   = [tp[1] for tp in sorted(mtfps, reverse=(sort=='new'))] \
                     if sort else \
                   mtfps
@@ -3856,8 +3859,10 @@ class FSWalker:
         enco_s      = ops.get('enco', Walker.ENCO_DETD)
         if enco_s==Walker.ENCO_DETD:
             enco_s  = chardet.detect(open(path, mode='rb').read(4*1024))['encoding']
-#       ofile       = open(path, 'rt', encoding=enco_s)
-        pass;                   ofile   = open(path, 'rt', encoding=enco_s, buffering=1024)
+       #ofile       = open(path, 'rt', encoding=enco_s, buffering=1)    # 1=line buffering 
+        ofile       = open(path, 'rt', encoding=enco_s, buffering=1024)
+       #ofile       = open(path, 'rt', encoding=enco_s, buffering=1024*16)
+       #ofile       = open(path, 'rt', encoding=enco_s)
         return ofile
        #def path2body
     
@@ -4174,13 +4179,21 @@ def _get_proj_dirs():
     pdirs = []
     try:
         import cuda_project_man as pman
+        odict   = collections.OrderedDict                       # as dict from Py3.7(?)
         nodes   = pman.global_project_info['nodes']
         pass;                  #log("nodes={}",(nodes))
-        for nd in nodes:
-            p   = nd if os.path.isdir(nd) else os.path.dirname(nd)
-            p   = f'"{p}"' if ' ' in p else p
-            if p not in pdirs:
+        nodes   = [p if os.path.isdir(p) else os.path.dirname(p)
+                    for p in nodes]
+        nodes   = [*odict.fromkeys(nodes).keys()]               # Kill duplicates, save order
+        for p in nodes:                                         # Kill subfolders of others
+            is_ext = False
+            for p2 in nodes:
+                is_ext = p != p2 and p.startswith(p2)
+                if is_ext: break
+            if not is_ext: 
                 pdirs.append(p)
+        pdirs   = [f'"{p}"' if ' ' in p else p
+                    for p in pdirs]
     except:
         pass;                  #log("ex",())
         pdirs = []

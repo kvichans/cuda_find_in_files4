@@ -1,4 +1,7 @@
-﻿4.6.11 2020-05-08
+﻿4.6.12 2020-06-16
+fixed: rare error on Results with copy_styles
+
+4.6.11 2020-05-08
 added: New macro var "{p}" to search in project folders
 fixed: Now From can have one path with blanks
 fixed: Not run the command "Fast search" from menu
