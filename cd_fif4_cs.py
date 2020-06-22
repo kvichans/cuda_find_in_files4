@@ -1,19 +1,19 @@
 ﻿import re
-#try:    from    cuda_kv_base    import *        # as separated plugin
-#except: from     .cd_kv_base    import *        # as part of this plugin
 from              .cd_kv_base    import *        # as part of this plugin
 try:    _   = get_translation(__file__)
 except: _   = lambda p:p
 
 _t  = lambda key, key_tr, s_tr: s_tr if key==key_tr else key_tr
 
+DLG_CAP_BS  = _('Find in Files 4')
+
 FIF4_META_OPTS=[
     {   'cmt': re.sub(r'  +', r'', _t('separated_histories', _('separated_histories'), _(
-               '''Option allows to save separate search settings
+               '''The option allows to save separate search settings
                 (pattern, files mask, folders etc)
                 per each mentioned session or project.
                 Each item in the option is a pair (Prefix,RegEx).
-                RegEx is compared with the full path of session (project).
+                RegEx is compared with the full path of session (project) file.
                 First matched item is used.
                 Prefix is appended to keys.
                 Example. If session path includes "cudatext" then value 
@@ -105,7 +105,7 @@ FIF4_META_OPTS=[
 
     {   'cmt': re.sub(r'  +', r'', _t('lexers_to_filter', _('lexers_to_filter'), _(
                """List of source file lexers.
-                  For these lexers extra filters and info will work:
+                  For these lexers extra filters and info will work as:
                     Search by lexer tree path,
                     Search inside/outside of comments and/or literal strings.
                   Empty list - allow all lexers."""))),
@@ -140,6 +140,45 @@ FIF4_META_OPTS=[
                 Values for border sides: "solid", "dash", "2px", "dotted", "rounded", "wave"'''))),  #! Shift uses chr(160)
         'opt': 'mark_style',
         'def': {'borders': {'bottom': 'dotted'}},
+        'frm': 'json',
+        'chp': _('Results'),
+    },
+    {   'cmt': re.sub(r'  +', r'', _t('mark_fnd2rpl_style', _('mark_fnd2rpl_style'), _(
+               '''Style to mark found-to-replace fragment in the Results panel.
+                Full form:
+                   "mark_fnd2rpl_style":{
+                     "color_back":"", 
+                     "color_font":"",
+                     "font_bold":false, 
+                     "font_italic":false,
+                     "font_strikeout":false,
+                     "color_border":"", 
+                     "borders":{"left":"","right":"","bottom":"","top":""}
+                   },
+                Color values: "" - skip, "#RRGGBB" - hex-digits
+                Values for border sides: "solid", "dash", "2px", "dotted", "rounded", "wave"'''))),  #! Shift uses chr(160)
+        'opt': 'mark_fnd2rpl_style',
+        'def': {                                'font_strikeout':True,'color_font':'#606060'},
+#       'def': {'borders': {'bottom': 'dotted'},'font_strikeout':True},
+#       'def': {'borders': {'bottom': 'dotted'}                      ,'color_font':'#606060'},
+        'frm': 'json',
+        'chp': _('Results'),
+    },
+    {   'cmt': re.sub(r'  +', r'', _t('mark_replaced_style', _('mark_replaced_style'), _(
+               '''Style to mark replaced fragment in the Results panel.
+                Full form:
+                   "mark_replaced_style":{
+                     "color_back":"", 
+                     "color_font":"",
+                     "font_bold":false, 
+                     "font_italic":false,
+                     "color_border":"", 
+                     "borders":{"left":"","right":"","bottom":"","top":""}
+                   },
+                Color values: "" - skip, "#RRGGBB" - hex-digits
+                Values for border sides: "solid", "dash", "2px", "dotted", "rounded", "wave"'''))),  #! Shift uses chr(160)
+        'opt': 'mark_replaced_style',
+        'def': {'borders': {'bottom': 'solid'}},
         'frm': 'json',
         'chp': _('Results'),
     },
@@ -191,7 +230,7 @@ FIF4_META_OPTS=[
         'frm': 'bool',
         'chp': _('Results'),
     },
-    {   'cmt': _('If value>0, do not show all files, which sizes are bigger than this value (in Kb).'),
+    {   'cmt': _('If N>0, do not show all files, which sizes are bigger than this N (in Kb).'),
         'opt': 'dont_show_file_size_more(Kb)',
         'def': 1000,
         'frm': 'int',
@@ -294,7 +333,7 @@ fold_hi = f(_('Start folder(s).'
             '\n{} or {{t}} to search in tabs.'
 #           '\n{} to search in project folders (in short <p>).'
             ), Walker_ROOT_IS_TABS)
-dept_hi = _('How many folder levels to search.'
+dept_hi = _('Depth - how many folder levels to search.'
             '\nUse Ctrl+↑/↓ to change this option.'
             )
 brow_hi = _('Click or Ctrl+B'
@@ -355,62 +394,63 @@ STD_VARS= [
 ]
 
 DLG_HELP_KEYS = _t('DLG_HELP_KEYS', _('DLG_HELP_KEYS'), _(r'''
-┌───────────────────────────────────────┬────────────────────┬───────────────────────────────────┐
-│                Command                │       Hotkey       │              Comment              │
-╞═══════════════════════════════════════╪════════════════════╪═══════════════════════════════════╡
-│ Find                                  │              Alt+D │                                   │
-│ Find                                  │              Enter │ Except focus in multi-line "Find" │
-│                                       │                    │  or in Results or in Source       │
-│ Find                                  │                 F2 │                                   │
-│ Find as fast as posible               │           Shift+F2 │ Ignoring the slowing options      │
-├───────────────────────────────────────┼────────────────────┼───────────────────────────────────┤
-│ Go to next found fragment             │                 F3 │                                   │
-│ Go to prev found fragment             │           Shift+F3 │                                   │
-│ Go to next file(tab) found fragment   │            Ctrl+F3 │                                   │
-│ Go to prev file(tab) found fragment   │      Ctrl+Shift+F3 │                                   │
-│ Open found fragment in tab            │              Enter │ If focus in Results/Source        │
-│ Open found fragment and close dialog  │        Shift+Enter │ If focus in Results/Source        │
-│ Copy Results to new tab               │   Ctrl+Shift+Enter │                                   │
-├───────────────────────────────────────┼────────────────────┼───────────────────────────────────┤
-│ Put focus to Results                  │         Ctrl+Enter │ Except focus in Results/Source    │
-│ Move focus: Results >> Source >> Find │                Tab │                                   │
-│ Move focus: Results << Source << Find │          Shift+Tab │                                   │
-├───────────────────────────────────────┼────────────────────┼───────────────────────────────────┤
-│ Show history of search patterns       │              Alt+↓ │ If focus in "Find"                │
-│ Loop over all Depth values            │           Ctrl+↓/↑ │                                   │
-├───────────────────────────────────────┼────────────────────┼───────────────────────────────────┤
-│ Choose folder                         │             Ctrl+B │                                   │
-│ Choose file                           │       Ctrl+Shift+B │                                   │
-│ Use folder of the current file        │             Ctrl+U │                                   │
-│ To search in the current tab          │       Ctrl+Shift+U │                                   │
-│ To search in the current Source       │                F11 │                                   │
-│ To search in the current Source and   │                    │                                   │
-│   current lexer path                  │          Shift+F11 │                                   │
-│ Append newline char "§" to "Find"     │        Shift+Enter │ If focus in sigle-line "Find"     │
-├───────────────────────────────────────┼────────────────────┼───────────────────────────────────┤
-│ Fold/Unfold the caret branch          │             Ctrl+= │ If focus in Results               │
-│ Fold/Unfold all branches              │       Ctrl+Shift+= │ By state of the caret branch      │
-├───────────────────────────────────────┼────────────────────┼───────────────────────────────────┤
-│ Load preset #1/#2/../#9               │      Ctrl+1/2/../9 │ All presets via menu              │
-│ Create new preset                     │             Ctrl+S │                                   │
-│ Choose preset to apply                │              Alt+S │                                   │
-│ Restore prev/next executed parameters │            Alt+←/→ │                                   │
-├───────────────────────────────────────┼────────────────────┼───────────────────────────────────┤
-│ Append macro var to current field     │             Ctrl+A │ If focus in editable field        │
-│ Show fields after macros substitution │       Ctrl+Shift+A │                                   │
-├───────────────────────────────────────┼────────────────────┼───────────────────────────────────┤
-│ Expand/Shrink Results height          │       Ctrl+Alt+↓/↑ │                                   │
-│ Expand/Shrink dialog height           │      Shift+Alt+↓/↑ │                                   │
-│ Expand/Shrink dialog width            │      Shift+Alt+→/← │                                   │
-│ Expand/Shrink height of               │                    │                                   │
-│   multi-line "Find"                   │ Shift+Ctrl+Alt+↓/↑ │ If multi-line "Find" is visible   │
-├───────────────────────────────────────┼────────────────────┼───────────────────────────────────┤
-│ Show engine options                   │             Ctrl+E │                                   │
-│ Show dialog "Help"                    │             Ctrl+H │                                   │
-├───────────────────────────────────────┼────────────────────┼───────────────────────────────────┤
-│ Call CudaText's "Find" dialog         │             Ctrl+F │ And copy pattern and              │
-│ Call CudaText's "Replace" dialog      │             Ctrl+R │     search options                │
-└───────────────────────────────────────┴────────────────────┴───────────────────────────────────┘
+┌───────────────────────────────────────┬────────────────────┬────────────────────────────────────┐
+│                Command                │       Hotkey       │              Comment               │
+╞═══════════════════════════════════════╪════════════════════╪════════════════════════════════════╡
+│ Find                                  │              Alt+D │                                    │
+│ Find                                  │              Enter │ Except for focus in multi-line     │
+│                                       │                    │  Find or in Results or in Source   │
+│ Find                                  │                 F2 │                                    │
+│ Find as fast as posible               │           Shift+F2 │ Skipping the slowing options       │
+│ Replace                               │                 F4 │                                    │
+├───────────────────────────────────────┼────────────────────┼────────────────────────────────────┤
+│ Go to next found fragment             │                 F3 │                                    │
+│ Go to prev found fragment             │           Shift+F3 │                                    │
+│ Go to next file(tab) found fragment   │            Ctrl+F3 │                                    │
+│ Go to prev file(tab) found fragment   │      Ctrl+Shift+F3 │                                    │
+│ Open found fragment in tab            │              Enter │ If focus in Results/Source         │
+│ Open found fragment and close dialog  │        Shift+Enter │ If focus in Results/Source         │
+│ Copy Results to new tab               │   Ctrl+Shift+Enter │                                    │
+├───────────────────────────────────────┼────────────────────┼────────────────────────────────────┤
+│ Put focus to Results                  │         Ctrl+Enter │ Except for focus in Results/Source │
+│ Move focus: Results >> Source >> Find │                Tab │                                    │
+│ Move focus: Results << Source << Find │          Shift+Tab │                                    │
+├───────────────────────────────────────┼────────────────────┼────────────────────────────────────┤
+│ Show history of search patterns       │              Alt+↓ │ If focus in Find                   │
+│ Loop over all Depth values            │           Ctrl+↓/↑ │                                    │
+├───────────────────────────────────────┼────────────────────┼────────────────────────────────────┤
+│ Choose folder                         │             Ctrl+B │                                    │
+│ Choose file                           │       Ctrl+Shift+B │                                    │
+│ Use folder of the current file        │             Ctrl+U │                                    │
+│ To search in the current tab          │       Ctrl+Shift+U │                                    │
+│ To search in the current Source       │                F11 │                                    │
+│ To search in the current Source and   │                    │                                    │
+│   current lexer path                  │          Shift+F11 │                                    │
+│ Append newline char "§" to "Find"     │        Shift+Enter │ If focus in sigle-line Find        │
+├───────────────────────────────────────┼────────────────────┼────────────────────────────────────┤
+│ Fold/Unfold the caret branch          │             Ctrl+= │ If focus in Results                │
+│ Fold/Unfold all branches              │       Ctrl+Shift+= │ By state of the caret branch       │
+├───────────────────────────────────────┼────────────────────┼────────────────────────────────────┤
+│ Load preset #1/#2/../#9               │      Ctrl+1/2/../9 │ All presets available via menu     │
+│ Create new preset                     │             Ctrl+S │                                    │
+│ Choose preset to apply                │              Alt+S │                                    │
+│ Restore prev/next executed parameters │            Alt+←/→ │                                    │
+├───────────────────────────────────────┼────────────────────┼────────────────────────────────────┤
+│ Append macro-var to current field     │             Ctrl+A │ If focus in editable field         │
+│ Show fields after vars substitution   │       Ctrl+Shift+A │                                    │
+├───────────────────────────────────────┼────────────────────┼────────────────────────────────────┤
+│ Expand/Shrink Results height          │       Ctrl+Alt+↓/↑ │                                    │
+│ Expand/Shrink dialog height           │      Shift+Alt+↓/↑ │                                    │
+│ Expand/Shrink dialog width            │      Shift+Alt+→/← │                                    │
+│ Expand/Shrink height of               │                    │                                    │
+│   multi-line "Find"                   │ Shift+Ctrl+Alt+↓/↑ │ If multi-line Find is visible      │
+├───────────────────────────────────────┼────────────────────┼────────────────────────────────────┤
+│ Show engine options                   │             Ctrl+E │                                    │
+│ Show dialog "Help"                    │             Ctrl+H │                                    │
+├───────────────────────────────────────┼────────────────────┼────────────────────────────────────┤
+│ Call CudaText's "Find" dialog         │             Ctrl+F │ Pattern and search options         │
+│ Call CudaText's "Replace" dialog      │             Ctrl+R │ will be copied                     │
+└───────────────────────────────────────┴────────────────────┴────────────────────────────────────┘
 ''')).strip()
 
 DLG_HELP_FIND  = f(_t('DLG_HELP_FIND', _('DLG_HELP_FIND'), _(
@@ -441,8 +481,8 @@ Warning!
 
 There is infobar to the left of "Find" button.
 The infobar shows not trivial values of "{OTH4FND}".
-    ↓↓          Start with the newest files.
-    ↑↑          Start with the oldest files.
+    ↓↓          Start with the newest file.
+    ↑↑          Start with the oldest file.
     <5h         Skip file older than 5 hours.
     <4d         Skip file older than 4 days.
     <3w         Skip file older than 3 weeks.
@@ -465,7 +505,7 @@ Double-click on the infobar clears all values except encoding.
 
 ———————————————————————————————————————————————————————————————————————————————————————————— 
 Set special value "{tabs}" for field "{fold}" to search in tabs (opened documents).
-Fields "{incl}" and "{excl}" will be used to filter tab titles, in this case.
+Fields "{incl}" and "{excl}" will be used to filter tab titles, in this type of search.
 To search in all tabs fill "{incl}" with "*".
 See also: 
     Items of submenu "Scope".
@@ -492,20 +532,20 @@ Example.
 
 Also the values can filter lexer path if they are embraced with "[:" and ":]".
 The filter is path-like string with elements
-    >       path separator. Ex: "a>b>c" - node "c" is subnode of "b" and "b" is subnode of "a".
-    >>      recursive descent. Ex: "a>>c" - node "c" appears in branch "a".
+    >       path separator. E.g. "a>b>c" - node "c" is subnode of "b" and "b" is subnode of "a".
+    >>      recursive descent. E.g. "a>>c" - node "c" appears in branch "a".
     word    name of a node.
     *word   partial name of a node.
     word*   partial name of a node.
-Blanks around all "<" are not important. So "a>>b>c" and "a > > b > c" are same.
+Blanks around all "<" are not important. So "a>>b>c" and "a > > b > c" are the same.
 Lexer path is matched with a filter if some start segments of path are compatible 
-with all segments of the filter. Path "aa>bb>cc>dd" is matched with filters 
+with all segments of the filter. Path "aa>bb>cc>dd" is matched with filters:
     "aa"
     "*a"
     "*>b*"
     ">>cc"
     ">>cc>*d"
-and isnot matched with
+and is not matched with:
     "bb"
     "*>b"
     ">>c>dd"
@@ -556,72 +596,88 @@ Long-term searches can be interrupted by ESC.
 ).strip()
 
 
+DLG_HELP_RPLS  = f(_t('DLG_HELP_RPLS', _('DLG_HELP_RPLS'), _(
+r'''Plugin provides ...
+
+———————————————————————————————————————————————————————————————————————————————————————————— 
+String to replace (pattern) can include macro variable.
+Use Ctrl+A to view all variables, select and append one.
+In single-line control the newlines are shown as §.
+
+
+———————————————————————————————————————————————————————————————————————————————————————————— 
+Long-term replacements can be interrupted by ESC.
+'''))
+).strip()
+
+
 DLG_HELP_RESULTS  = _t('DLG_HELP_RESULTS', _('DLG_HELP_RESULTS'), _(
 r'''Only the options 
     "-N+M" (with lines above/below)
     "Show lexer path for all fragments"
-needs to be set before start of search.
-All other options immediately change the Results view.
+need to be set before the start of search.
+All other options immediately change Results view.
  
-Results options:
-┌────────────────────────────────────┬──────────────────────────────────────────────────┐
-│               Option               │                     Comment                      │
-╞════════════════════════════════════╪══════════════════════════════════════════════════╡
-│ "-N/+M" (with lines above/below)   │ See check-button "-N+M" near the search pattern. │
-│                                    │ Turn option on to show config dialog.            │
-├────────────────────────────────────┼──────────────────────────────────────────────────┤
-│ Show relative paths                │ The option immediately toggles between           │
-│                                    │   <c:/dir1/search-root/dir2>: #NN                │
-│                                    │   <c:/dir1/search-root/dir2/filename.ext>: #NN   │
-│                                    │ and                                              │
-│                                    │   <dir2>: #NN                                    │
-│                                    │   <dir2/filename.ext>: #NN                       │
-├────────────────────────────────────┼──────────────────────────────────────────────────┤
-│ Show modification time             │ If files are shown on separate lines             │
-│                                    │ (tree format is not "<path:r>:line")             │
-│                                    │ the option immediately toggles between           │
-│                                    │   <...filename.ext>: #NN                         │
-│                                    │ and                                              │
-│                                    │   <...filename.ext (1999.12.31 23:59)>: #NN      │
-├────────────────────────────────────┼──────────────────────────────────────────────────┤
-│ Format for Result tree             │ Full info about each fragment in one line.       │
-│   <path:r>:line                    │ Example                                          │
-│                                    │   <dir1/dir2/filename1.ext:12>: fragment line    │
-│                                    │   <dir1/dir3/filename2.ext:21>: fragment line    │
-├────────────────────────────────────┼──────────────────────────────────────────────────┤
-│ Format for Result tree             │ Separate line per each file.                     │
-│   <path>#N/<r>:line                │ Example                                          │
-│                                    │   <dir1/dir2/filename1.ext>: #1                  │
-│                                    │     <12>: fragment line                          │
-│                                    │   <dir1/dir3/filename2.ext>: #1                  │
-│                                    │     <21>: fragment line                          │
-├────────────────────────────────────┼──────────────────────────────────────────────────┤
-│ Format for Result tree             │ Separate line per each folder with files.        │
-│   <dir>#N/<file:r>:line            │ Example                                          │
-│                                    │   <dir1/dir2>: #1                                │
-│                                    │     <filename1.ext:12>: fragment line            │
-│                                    │   <dir1/dir3>: #1                                │
-│                                    │     <filename2.ext:21>: fragment line            │
-├────────────────────────────────────┼──────────────────────────────────────────────────┤
-│ Show lexer path for all fragments  │ Results include lines with lexer path.           │
-│                                    │ Example                                          │
-│                                    │   <filename.ext>: #1                             │
-│                                    │     <  >: path > to > fragment                   │
-│                                    │     <12>: fragment line                          │
-├────────────────────────────────────┼──────────────────────────────────────────────────┤
-│ Add lexer path to the statusbar    │ When you move caret in Results, or use commands  │
-│                                    │ "Go to next/prev found fragment", statusbar      │
-│                                    │ shows the path to current fragment’s file.       │
-│                                    │ If the option is on, then statusbar shows also   │
-│                                    │ the path in the document.                        │
-└────────────────────────────────────┴──────────────────────────────────────────────────┘
+Options to view Results:
+┌────────────────────────────────────┬───────────────────────────────────────────────────┐
+│               Option               │                     Comment                       │
+╞════════════════════════════════════╪═══════════════════════════════════════════════════╡
+│ "-N/+M" (with lines above/below)   │ See check-button "-N+M" above the search pattern. │
+│                                    │ Turn option off and on to show dialog             │
+│                                    │ to set N and M.                                   │
+├────────────────────────────────────┼───────────────────────────────────────────────────┤
+│ Show relative paths                │ The option immediately changes between            │
+│                                    │   <c:/dir1/search-root/dir2>: #NN                 │
+│                                    │   <c:/dir1/search-root/dir2/filename.ext>: #NN    │
+│                                    │ and                                               │
+│                                    │   <dir2>: #NN                                     │
+│                                    │   <dir2/filename.ext>: #NN                        │
+├────────────────────────────────────┼───────────────────────────────────────────────────┤
+│ Show modification time             │ If files are shown on separate lines              │
+│                                    │ (tree format is not "<path:r>:line")              │
+│                                    │ the option immediately changes between            │
+│                                    │   <...filename.ext>: #NN                          │
+│                                    │ and                                               │
+│                                    │   <...filename.ext (1999.12.31 23:59)>: #NN       │
+├────────────────────────────────────┼───────────────────────────────────────────────────┤
+│ Format for Result tree             │ Full info about each fragment in one line.        │
+│   <path:r>:line                    │ Example                                           │
+│                                    │   <dir1/dir2/filename1.ext:12>: fragment line     │
+│                                    │   <dir1/dir3/filename2.ext:21>: fragment line     │
+├────────────────────────────────────┼───────────────────────────────────────────────────┤
+│ Format for Result tree             │ Separate line per each file.                      │
+│   <path>#N/<r>:line                │ Example                                           │
+│                                    │   <dir1/dir2/filename1.ext>: #1                   │
+│                                    │     <12>: fragment line                           │
+│                                    │   <dir1/dir3/filename2.ext>: #1                   │
+│                                    │     <21>: fragment line                           │
+├────────────────────────────────────┼───────────────────────────────────────────────────┤
+│ Format for Result tree             │ Separate line per each folder with files.         │
+│   <dir>#N/<file:r>:line            │ Example                                           │
+│                                    │   <dir1/dir2>: #1                                 │
+│                                    │     <filename1.ext:12>: fragment line             │
+│                                    │   <dir1/dir3>: #1                                 │
+│                                    │     <filename2.ext:21>: fragment line             │
+├────────────────────────────────────┼───────────────────────────────────────────────────┤
+│ Show lexer path for all fragments  │ Results include lines with lexer path.            │
+│                                    │ Example                                           │
+│                                    │   <filename.ext>: #1                              │
+│                                    │     <  >: path > to > fragment                    │
+│                                    │     <12>: fragment line                           │
+├────────────────────────────────────┼───────────────────────────────────────────────────┤
+│ Add lexer path to the statusbar    │ When you move caret in Results, or use commands   │
+│                                    │ "Go to next/prev found fragment", statusbar       │
+│                                    │ shows the path to current fragment's file.        │
+│                                    │ If the option is on, then statusbar also shows    │
+│                                    │ the path to the current fragment in the document. │
+└────────────────────────────────────┴───────────────────────────────────────────────────┘
 
-To set the mark style of found fragmets, use the engine options dialog (Ctrl+E).
+To set the mark style of found fragmets use the engine options dialog (Ctrl+E).
 See "mark_style" in section "Results".
 
-How Results are shown, when files were sorted?
-Found fragments are always shown by the found order. 
-If tree format is "<path:r>: line", no problems. For other formats content of 
+How Results are shown when files were sorted?
+Found fragments are always shown by the selected method. 
+If tree format is "<path:r>: line" - no problem. For other formats content of 
 "folder lines" and "file lines" adapts (via folder merging) to show correct data. 
 In extreme cases format automatically sets to "<path:r>: line".
 ''')).strip()
@@ -629,7 +685,7 @@ In extreme cases format automatically sets to "<path:r>: line".
 DLG_HELP_SPEED  = f(_t('DLG_HELP_SPEED', _('DLG_HELP_SPEED'), _(
 r'''Some of the search parameters slightly decrease the search speed.
 Others reduce the speed dramatically.
-To perform optimal search, you need to consider these notes.
+To perform optimal search, you better consider these notes.
 
 1. The parameters 
     .*   {reex}
@@ -637,41 +693,41 @@ To perform optimal search, you need to consider these notes.
     "w"  {word}
 do not reduce the speed at all. 
 
-2. Using non-trivial setttings of "Sort collected files" or "Age of files" does not reduce 
-the speed, in practice.
+2. Using non-trivial setttings of "Sort collected files" or "Age of files" basically 
+does not reduce the speed.
 
-3. Appending context lines to Results ("-?+?") slightly decrease the speed.
+3. Appending context lines to Results ("-?+?") slightly decreases the speed.
 
-4. Multi-line pattern ("+") markedly decrease the speed.
+4. Multi-line pattern ("+") noticeably decreases the speed.
 
-5. Inappropriate "Encoding plan" can greatly reduce the speed if 
-too many files need to be read.
+5. Inappropriate "Encoding plan" can greatly reduce the speed if too many files need 
+to be read.
 
 6. The slowest search (the slowdown in dozens of times) occurs if 
     - any of "Syntax elements" is turned on,
     - option "Show lexer path for all fragments" is turned on,
     - lexer path filter is included in the "{incl}" or "{excl}" fields,
-    - styles are copied from disk file source lines to Results 
-        (search in tabs is also slowed but not too much).
+    - styles are copied from source lines from disk files to Results 
+        (note: copying styles from tabs is also slowed down but not as much).
 
-7. If engine option "copy_styles" is on and Results has a lot of lines then
-value of engine option "copy_styles_max_lines" is important. Extra time is directly 
-proportional to the value of the option. So default value 100 (coloring only the first 100 
-lines) is one of compromise values. 
+7. If engine option "copy_styles" is on and Results has a lot of lines then value of 
+engine option "copy_styles_max_lines" is important. Extra time is directly proportional 
+to the value of the option. So default value 100 (coloring only the first 100 lines) 
+should be well enough. 
 
 ———————————————————————————————————————————————————————————————————————————————————————————— 
 Special cases.
 
 If pattern is regular expresion (".*" is checked) then it can be indirectly multi-line.
-So in this case, to avoid guessing, plugin sees single-line or multi-line state, 
+So in this case, to avoid guessing, plugin checks for single-line or multi-line state
 to detect which search is needed.
 
-If pattern includes "|" or "&" (options "any_all_parts" is on) then 
-plugin sees newline in pattern ("§" for single-line state) to detect which search is needed:
+If pattern includes "|" or "&" (options "any_all_parts" is on) then plugin sees newline 
+in pattern ("§" for single-line state) to detect which search is needed:
     no newline - search into each line separately,
-    with newline - search in whole file.
+    with newline - search in whole file text.
 
-Huge files can also be involved in the search. For optimal memory usage you need:
+Huge files can also be involved in the search. For optimal memory usage you need to:
     - Turn off the appending context lines ("-N+M").
     - Turn off the multi-line pattern ("+") and remove newline character "§".
     - Turn off all "Syntax elements".
@@ -679,7 +735,7 @@ Huge files can also be involved in the search. For optimal memory usage you need
     - Ensure no lexer path filters are used.
     - Turn off engine option "copy_styles".
 Hint. Start "Fast search" (Shift+F2) to ignore all these options (except lexer path filters) 
-without turn them off.
+without manually turning them off.
 Also see engine options 
     - skip_file_size_more(Kb),
     - dont_show_file_size_more(Kb).
@@ -692,25 +748,16 @@ Also see engine options
 ).strip()
 
 DLG_HELP_TRICKS  = f(_t('DLG_HELP_TRICKS', _('DLG_HELP_TRICKS'), _(
-r'''How to replace found fragments in many files? Use plugin "Find in Files". 
-It is not died and will be supported permanently.
-The plugin has almost all search options of "Find in Files 4". There are not
-    - multi-line pattern,
-    - "Syntax elements" filters,
-    - "Encoding plan" (partially),
-    - "Lexer path" filter.
+r'''Shift+F2 starts the single search, which ignores slowing down options such as:
+    "Extra context lines",
+    "Syntax elements",
+    "Show lexer path for all fragments",
+    "copy_styles" (engine).
 
 ———————————————————————————————————————————————————————————————————————————————————————————— 
-Shift+F2 starts the single search, which ignores slowing down options:
-    - "Extra context lines",
-    - "Syntax elements",
-    - "Show lexer path for all fragments",
-    - "copy_styles" (engine).
-
-———————————————————————————————————————————————————————————————————————————————————————————— 
-Hold Shift-key when clicking ".*" ("Regular Expression") to toggle the option and also 
-escape/unescape all non-word characters in the pattern. It is guaranteed that search results 
-will not change because of that.
+Hold Shift-key when clicking ".*" ("Regular Expression") to change the option and also 
+escape/unescape all non-word characters in the pattern. It is guaranteed that the search 
+results will not change because of that.
 
 ———————————————————————————————————————————————————————————————————————————————————————————— 
 If 
@@ -720,8 +767,8 @@ then
 
 ———————————————————————————————————————————————————————————————————————————————————————————— 
 The field "{fold}" can contain many folders to search.
-Folder names must be independent, ie not included into each other.
-The field can also contains both folder mask(s) and {tabs}.
+Folder names must be independent (no parent-child pairs).
+The field can also contain both folder mask(s) and {tabs}.
 
 ———————————————————————————————————————————————————————————————————————————————————————————— 
 Use \§ to find the character §.
@@ -730,38 +777,31 @@ with a newline, this newline will be stripped from actual search string.
 
 ———————————————————————————————————————————————————————————————————————————————————————————— 
 Hotkeys Ctrl+1, ..., Ctrl+9 apply presets #1, ..., #9.
-Preset can store need options values.
-So you can use presets to quickly turn on/off the single option instead of using the menu.
+Preset can store needed options values.
+So you can use presets to quickly turn on/off the selected option instead of using the menu.
 Example.
-    Create preset #1 with only check on
+    Create preset #1 only with the check on
         [x]3 ' '            (No extra search options).
-    Create preset #2 with only check on
+    Create preset #2 only with the check on
         [x]3 '?/**/?'       ("Syntax elements/Outside of comments").
     Use Ctrl+1 to quickly clear extra search options without changing others search settings.
     Use Ctrl+2 to quickly set only "Outside of comments".
 
 ———————————————————————————————————————————————————————————————————————————————————————————— 
-You can use macros in any editable fields. For ex, "~ {{t}}" will be auto-replaced to "~ {tabs}". 
-To use the expression with brackets like "{{t}}", escape brackets with backslashes like "\{{t\}}" 
+You can use macro-vars in any editable fields. E.g. "~ {{t}}" will be auto-replaced to "~ {tabs}". 
+To search the expression with brackets like "{{t}}", type in brackets with backslashes like "\{{t\}}" 
 (or like "\{{t}}", if field doesn't have the outer bracket pair).
 
 Engine option 
     "use_selection_on_start"
-uses selected text from document for the field "Find what".
-Instead of this option, you can use macro variable
+uses selected text from document for the field "Find".
+Instead of this option, you can use macro-var
     {{ed:SelectedText}}.
-This way you can use selected text many times, not only at start.
+This way you can use selected text many times, not only at the start.
 
-The macro 
+The macro-var
     {{ed:CurrentWord}}
-allows to use part of document text without selection at all.
-
-———————————————————————————————————————————————————————————————————————————————————————————— 
-If 
-    search is finished and
-    you cannot close dialog in usual way ("Stop?" message appears) 
-then
-    hold Shift and click on "x" in titlebar. 
+provides the use of word from the document without selection at all.
 '''))
 , excl=EXC__CA[1:].replace('&', '').replace(':', '')
 , fold=FOL__CA[2:].replace('&', '').replace(':', '')

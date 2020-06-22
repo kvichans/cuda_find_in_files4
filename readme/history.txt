@@ -1,4 +1,7 @@
-﻿4.6.12 2020-06-16
+﻿4.7.01 2020-06-22
+added: Replace in files/tabs
+
+4.6.12 2020-06-16
 fixed: rare error on Results with copy_styles
 
 4.6.11 2020-05-08

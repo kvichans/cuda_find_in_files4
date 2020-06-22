@@ -2,7 +2,7 @@
 Authors:
     Andrey Kvichansky   (kvichans on github.com)
 Version:
-    '4.6.12 2020-06-16'
+    '4.7.01 2020-06-22'
 '''
 
 import  re, os, traceback, locale, itertools, codecs, time, collections, datetime as dt #, types, json
@@ -61,7 +61,7 @@ pass;                           _log4cls_TabsWalker         = -1
 pass;                           _log4cls_FSWalker           = -1
 pass;                               _log4fun_FSWalker_walk  = -1
 pass;                           _log4cls_Fragmer            = -1
-pass;                           _log4cls_Reporter           = 0
+pass;                           _log4cls_Reporter           = -1
 pass;                           _dev_kv                     =  get_opt('_dev_kv', False)
 pass;                           log("fif4 start",('')) if _log4mod>=0 or _dev_kv else 0
 
@@ -70,7 +70,9 @@ try:    _   = get_translation(__file__)
 except: _   = lambda p:p
 
 # Shorter names of usefull tools 
-d           = dict
+odict       = collections.OrderedDict                           # as dict from Py3.7(?)
+#d           = dict
+d           = dcta      # To use keys as attrs: o=dcta(a=b); x=o.a; o.a=x
 defdict     = lambda: defaultdict(int)
 mtime       = lambda f: dt.datetime.fromtimestamp(os.path.getmtime(f)) if os.path.exists(f) else 0
 msg_box     = lambda txt, flags=app.MB_OK: app.msg_box(txt, flags)
@@ -136,6 +138,8 @@ SKIP_FILE_SIZE  = 0
 ADV_LEXERS      = []
 FIF_LEXER       = []
 MARK_FIND_STYLE = {}
+MARK_FN2R_STYLE = {}
+MARK_REPL_STYLE = {}
 LPTH_FIND_STYLE = {}
 STATUS_HEIGHT   = 21
 STBR_H          = STATUS_HEIGHT
@@ -162,7 +166,8 @@ def reload_opts():                              #NOTE: reload_opts
    ,ADV_LEXERS      \
    ,FIF_LEXER       \
    ,MARK_FIND_STYLE \
-   ,LPTH_FIND_STYLE \
+   ,MARK_FN2R_STYLE \
+   ,MARK_REPL_STYLE \
    ,STBR_H          \
    ,STATUS_HEIGHT   \
    ,STATUS_STYLE    \
@@ -188,6 +193,8 @@ def reload_opts():                              #NOTE: reload_opts
     FIF_LEXER       = apx.choose_avail_lexer(lexers_l)
     ADV_LEXERS      = get_opt('lexers_to_filter'            , meta_def('lexers_to_filter'))
     MARK_FIND_STYLE = get_opt('mark_style'                  , meta_def('mark_style'))
+    MARK_FN2R_STYLE = get_opt('mark_fnd2rpl_style'          , meta_def('mark_fnd2rpl_style'))
+    MARK_REPL_STYLE = get_opt('mark_replaced_style'         , meta_def('mark_replaced_style'))
     LPTH_FIND_STYLE = get_opt('lex_path_style'              , meta_def('lex_path_style'))
     STATUS_HEIGHT   = get_opt('statusbar_height'            , meta_def('statusbar_height'))
     STATUS_HEIGHT   = max(STATUS_HEIGHT                     , meta_min('statusbar_height'))
@@ -219,22 +226,23 @@ def reload_opts():                              #NOTE: reload_opts
         V_L     = ['solid', 'dash', '2px', 'dotted', 'rounded', 'wave']
         shex2int= apx.html_color_to_int
         kwargs  = {}
-        if js.get('color_back'  , ''):   kwargs['color_bg']     = shex2int(js['color_back'])
-        if js.get('color_font'  , ''):   kwargs['color_font']   = shex2int(js['color_font'])
-#       kwargs[                                 'color_border'] = shex2int(js.get('color_border', '#000'))
-        if js.get('color_border', ''):   kwargs['color_border'] = shex2int(js['color_border'])
-        if js.get('font_bold'   , False):kwargs['font_bold']    = 1
-        if js.get('font_italic' , False):kwargs['font_italic']  = 1
+        if js.get('color_back'  , ''):      kwargs['color_bg']     = shex2int(js['color_back'])
+        if js.get('color_font'  , ''):      kwargs['color_font']   = shex2int(js['color_font'])
+        if js.get('color_border', ''):      kwargs['color_border'] = shex2int(js['color_border'])
+        if js.get('font_bold'   , False):   kwargs['font_bold']    = 1
+        if js.get('font_italic' , False):   kwargs['font_italic']  = 1
+        if js.get('font_strikeout',False):  kwargs['font_strikeout']=1
         jsbr    = js.get('borders', {})
-        if jsbr.get('left'  , ''):       kwargs['border_left']  = V_L.index(jsbr['left'  ])+1
-        if jsbr.get('right' , ''):       kwargs['border_right'] = V_L.index(jsbr['right' ])+1
-        if jsbr.get('bottom', ''):       kwargs['border_down']  = V_L.index(jsbr['bottom'])+1
-        if jsbr.get('top'   , ''):       kwargs['border_up']    = V_L.index(jsbr['top'   ])+1
+        if jsbr.get('left'  , ''):          kwargs['border_left']  = V_L.index(jsbr['left'  ])+1
+        if jsbr.get('right' , ''):          kwargs['border_right'] = V_L.index(jsbr['right' ])+1
+        if jsbr.get('bottom', ''):          kwargs['border_down']  = V_L.index(jsbr['bottom'])+1
+        if jsbr.get('top'   , ''):          kwargs['border_up']    = V_L.index(jsbr['top'   ])+1
         pass;                  #log("kwargs={}",(kwargs))
         return kwargs
        #def fit_mark_style_for_attr
     MARK_FIND_STYLE = fit_mark_style_for_attr(MARK_FIND_STYLE)
-    pass;                      #log("MARK_FIND_STYLE={}",(MARK_FIND_STYLE))
+    MARK_FN2R_STYLE = fit_mark_style_for_attr(MARK_FN2R_STYLE)
+    MARK_REPL_STYLE = fit_mark_style_for_attr(MARK_REPL_STYLE)
     LPTH_FIND_STYLE = fit_mark_style_for_attr(LPTH_FIND_STYLE)
 reload_opts()
 
@@ -275,7 +283,7 @@ def dlg_fif4_xopts():
           path_keys_info=FIF4_META_OPTS
         , subset        ='fif-df.'
         , how           =dict(only_for_ul=True, only_with_def=True, hide_fil=True, stor_json=CFG_FILE)
-        ).show(_('"Find in Files 4" options'))
+        ).show(f(_('[{}] Options'), DLG_CAP_BS))
     except Exception as ex:
         pass;                   log('ex={}',(ex))
 
@@ -286,6 +294,7 @@ def dlg_fif4_xopts():
 def dlg_fif4_help(fif):
     KEYS_TABLE  = DLG_HELP_KEYS
     TIPS_FIND   = DLG_HELP_FIND
+    TIPS_RPLS   = DLG_HELP_RPLS
     TIPS_RSLT   = DLG_HELP_RESULTS
     TIPS_FAST   = DLG_HELP_SPEED
     TIPS_TRCK   = DLG_HELP_TRICKS
@@ -293,22 +302,24 @@ def dlg_fif4_help(fif):
     c2m         = 'mac'==get_desktop_environment() #or True
     KEYS_TABLE  = KEYS_TABLE.replace('Ctrl+', 'Meta+') if c2m else KEYS_TABLE
     TIPS_FIND   = TIPS_FIND.replace( 'Ctrl+', 'Meta+') if c2m else TIPS_FIND
+    TIPS_RPLS   = TIPS_RPLS.replace( 'Ctrl+', 'Meta+') if c2m else TIPS_RPLS
     TIPS_RSLT   = TIPS_RSLT.replace( 'Ctrl+', 'Meta+') if c2m else TIPS_RSLT
     TIPS_FAST   = TIPS_FAST.replace( 'Ctrl+', 'Meta+') if c2m else TIPS_FAST
     TIPS_TRCK   = TIPS_TRCK.replace( 'Ctrl+', 'Meta+') if c2m else TIPS_TRCK
     
     page        = fget_hist('help.page', 0)
-    pags_its    = [_('Hotkeys'),_('Search'),_('Results'),_('Speed'),_('Tricks'),_('History')]
+    pags_its    = [_('Hotkeys'),_('Search'),_('Replace'),_('Results'),_('Speed'),_('Tricks'),_('History')]
     res,vals    = DlgAg(
-          form  =dict(cap=_('"Find in Files 4" help'), frame ='resize', w=850, h=600)
+          form  =dict(cap=f(_('[{}] Help'), DLG_CAP_BS), frame ='resize', w=850, h=600)
         , ctrls = d(
     pags=d(tp='pags',x=5,y=5 ,r=-5,b=-35,a='b.r>'   ,val=page       ,items=pags_its     ),
     keys=d(tp='memo',p='pags.0'         ,ali=ALI_CL ,val=KEYS_TABLE ,ro_mono_brd='1,1,1'),
     tips=d(tp='memo',p='pags.1'         ,ali=ALI_CL ,val=TIPS_FIND  ,ro_mono_brd='1,1,1'),
-    tipr=d(tp='memo',p='pags.2'         ,ali=ALI_CL ,val=TIPS_RSLT  ,ro_mono_brd='1,1,1'),
-    tipo=d(tp='memo',p='pags.3'         ,ali=ALI_CL ,val=TIPS_FAST  ,ro_mono_brd='1,1,1'),
-    tipt=d(tp='memo',p='pags.4'         ,ali=ALI_CL ,val=TIPS_TRCK  ,ro_mono_brd='1,1,1'),
-    hstt=d(tp='memo',p='pags.5'         ,ali=ALI_CL ,val=history    ,ro_mono_brd='1,1,1'),
+    tipe=d(tp='memo',p='pags.2'         ,ali=ALI_CL ,val=TIPS_RPLS  ,ro_mono_brd='1,1,1'),
+    tipr=d(tp='memo',p='pags.3'         ,ali=ALI_CL ,val=TIPS_RSLT  ,ro_mono_brd='1,1,1'),
+    tipo=d(tp='memo',p='pags.4'         ,ali=ALI_CL ,val=TIPS_FAST  ,ro_mono_brd='1,1,1'),
+    tipt=d(tp='memo',p='pags.5'         ,ali=ALI_CL ,val=TIPS_TRCK  ,ro_mono_brd='1,1,1'),
+    hstt=d(tp='memo',p='pags.6'         ,ali=ALI_CL ,val=history    ,ro_mono_brd='1,1,1'),
     isus=d(tp='lilb',x=5,y=-30  ,r=-5   ,a='..'     ,cap=ISUES_C    ,url=GH_ISU_URL     ),
        ), fid   = 'pags'
         , opts  = d(negative_coords_reflect=True)
@@ -441,7 +452,7 @@ class Fif4D:
     RSLT_H  = 100                               # Min height of Results 
     SRCF_H  = 100                               # Min height of Source
 
-    # Lambda methods (to simplify Tree)
+    # Lambda methods (to simplify CodeTree)
     cid_what    =  lambda self, only=False: \
         ('in_whaM'    if self.opts.vw.mlin else        'in_what') \
             if only or not self.last_fid else \
@@ -572,10 +583,12 @@ class Fif4D:
                ,fold_l=[]                       # History list of 'Start the folder(s)'
                ,incl_l=[]                       # History list of 'See  the files/subfolders'
                ,excl_l=[]                       # History list of 'Skip the files/subfolders'
+               ,repl_l=[]                       # History list of 'Replace with'
                )
             ,us_focus='in_what'                 # Start/Last focused control
             ,ps_pset=[]                         # List of presets
             ,vs_defs=[]                         # List of cusrom vars [{nm:'N', cm:'cmnt', bd:'str{VV}'}]
+            ,in_repl=''                         # What to find
             )
         pref    = prefix_for_opts()
         hi_opts = fget_hist([pref, 'opts'] if pref else 'opts', {})
@@ -636,7 +649,8 @@ class Fif4D:
                                                                      ,'wk_agef'
                                                                      ,'wk_skip'
                                                                      ,'wk_enco','wk_enco_ms'
-                                                                     ,'wk_sycm','wk_syst')]))
+                                                                     ,'wk_sycm','wk_syst'
+                                                                     ,'in_repl')]))
             m.opts.vw.mlin      = ag.val('vw_mlin')
             m.opts.rp_cntx      = ag.val('rp_cntx')
             m.opts.vw.rslt_h    = ag.cattr('di_rslt', 'h')
@@ -649,7 +663,8 @@ class Fif4D:
                                                                      ,'wk_agef'
                                                                      ,'wk_skip'
                                                                      ,'wk_enco','wk_enco_ms'
-                                                                     ,'wk_sycm','wk_syst')}
+                                                                     ,'wk_sycm','wk_syst'
+                                                                     ,'in_repl')}
                    ,'rp_cntx':m.opts.rp_cntx
                    ,'in_what':M.FIT_OPT4SL(
                               m.opts.in_what)
@@ -701,6 +716,7 @@ class Fif4D:
         hfm     = 5+vgp*6+30
         ok_c    = _('Create')                   if nps else _('Save')
         tit_c   = _('Create new preset')        if nps else _('View preset')
+        tit_c   = '['+DLG_CAP_BS+'] '+tit_c
         
         w_x     = m.ag.cattr('in_what', 'x') + 15 # 10 for check
 
@@ -804,8 +820,8 @@ class Fif4D:
        #def dlg_preset
 
 
-    @Dcrs.clear_st_msg(  1, 'help', 'wk_clea', 'di_menu', 'nf_frag', 'nf_frlp')   # aid in the list
-    @Dcrs.timing_to_stbr(1, 'di_find', 'up_rslt')           # aid in the list
+    @Dcrs.clear_st_msg(  1, 'help', 'wk_clea', 'di_menu', 'nf_frag', 'nf_frlp')     # aid in the list
+    @Dcrs.timing_to_stbr(1, 'di_find', 'up_rslt', 'di_rplc')                        # aid in the list
     def do_acts(self, ag, aid, data='', ops={}):        #NOTE: do_acts
         # help xopts call-find call-repl
         # in_reex in_case in_word
@@ -824,6 +840,8 @@ class Fif4D:
 
         # Copy values from form to m.opts
         m.vals_opts('v2o', ag)
+
+        m.stbr_act('')          # Clear status
 
         # Save used vals to history lists
         def upd_hist(cid_oid, ops_l, unicase, opt_v=None, agupd=True):
@@ -1326,6 +1344,78 @@ class Fif4D:
             return d(ctrls={cid:d(val=cval)}
                     ,fid=cid)
 
+        if aid=='rplc':                         #NOTE: Find and replace
+            if re.search(r'(^|[^\\])§', m.opts.in_what) \
+            or m.opts.vw.mlin:  return m.stbr_act(_('"Replace" is only for single-line Find pattern'))
+            if m.opts.rp_cntx:  return m.stbr_act(_('"Replace" is only for "-?+?" mode'))
+            if m.opts.wk_sycm \
+            or m.opts.wk_syst:  return m.stbr_act(_('"Replace" is for "Syntax elements" turned off'))
+            if m.opts.rp_lexa:  return m.stbr_act(_('"Replace" is for "Lexer path for all fragments" turned off'))
+            sep_h   = m.ag.cattr('pt', 'h')+10
+            f_xyw   = m.ag.fattrs(('x', 'y', 'w'))
+            attrs   = ('type', 'y', 'x', 'w', 'h', 'cap', 'a', 'val')
+            cids    = ('in_reex','in_case','in_word','di_i4o_','di_i4op'
+                      ,'in_wh_t','in_what'
+                      ,'wk_inc_','wk_incl','wk_exc_','wk_excl','wk_fol_','wk_fold','wk_dept')
+            ctrls   = odict([(cid, m.ag.cattrs(cid, attrs)) for cid in cids])
+            y_shft  = ctrls['wk_incl']['y'] - ctrls['in_what']['y']
+            for cid,cnt in ctrls.items():
+                if cnt['type']=='label' and cid[:3] in ('in_', 'wk_'):
+                    cnt['ex0']  = True          # Right aligned
+                if cnt['type'] in ('checkbutton', 'combo', 'combo_ro'):
+                    cnt['en']   = False         # RO
+                if cid=='di_i4o_':
+                    del cnt['w']
+                    cnt['r']    = -5-80-5
+                    cnt['props']= '1'           # Shape
+                if cid=='di_i4op':
+                    del cnt['w']
+                    cnt['r']    = -5-80-9
+                if cid[:3]=='wk_':
+                    cnt['y']   += y_shft
+                if cid=='wk_dept':
+                    cnt['items']= m.ag.cattr(cid, 'items', live=False)
+            ry      = ctrls['in_what']['y'] + y_shft
+            rx      = ctrls['in_what']['x']
+            pass;              #log("ctrls={}",pfw(ctrls))
+            def on_ok(ag_, cid, data):
+                if app.ID_YES!=msg_box(_('Replace all in files/tabs?')
+                                      , app.MB_YESNO+app.MB_ICONQUESTION):   return []
+            def do_key_down(ag_, key, data=''):
+                scam    = data if data else ag_.scam()
+                if (scam,key)==( 'c',ord('A')):
+                    vr_sgn  = m.var_acts('ask', _('With'))
+                    if not vr_sgn:  return []
+                    cval    = ag_.val('repl')+vr_sgn
+                    return      d(ctrls=d(repl=d(val=cval)))     # Ctrl+A
+                else:  return   []
+                return          False
+               #def do_key_down
+            ctrls.update(
+                rep_=d(tp='labl',tid='repl' ,x=5    ,r=rx-5 ,cap='>'+_('With:')
+              ),repl=d(tp='cmbx',y=ry       ,x=rx   ,r=-5   ,items=m.opts.vw.repl_l ,val=m.opts.in_repl ,a='r>' 
+              ),rplc=d(tp='bttn',y=  3      ,w=80   ,r=-5   ,cap=_('&Replace')      ,on=on_ok           ,a='>>' ,def_bt=True# &R Enter
+                        ))
+            pass;              #log("ctrls={}",pfw(ctrls))
+            bt,vs   = DlgAg(
+                  ctrls=ctrls
+                 ,form ={**f_xyw, **d(h=sep_h,h_max=sep_h  ,cap='['+DLG_CAP_BS+'] '+_('Replace') ,frame='resize'
+                        ,on_key_down=do_key_down)}
+                 ,fid  ='repl'
+                 ,opts =d(restore_position=False, negative_coords_reflect=True)
+#                ).gen_repro_code('repro_rplc.py').show()
+                 ).show()
+            m.ag.activate()
+            m.ag.update(fid=self.cid_what())
+            if bt!='rplc':  return []
+            m.opts.in_repl      = vs['repl']
+            m.opts.vw.repl_l    = add_to_history(m.opts.in_repl, m.opts.vw.repl_l, unicase=False)
+            return m.do_acts(ag, 'di_rplc')
+        
+        if aid=='di_rplc':                         #NOTE: Find and replace
+            m.work(ag, 'rplc')
+            return []
+
         pass;                   msg_box('??do '+aid)
         return d(fid=self.cid_what())
        #def do_acts
@@ -1550,6 +1640,8 @@ class Fif4D:
     ),d(tag='opts'      ,cap=_('Engine options.&..')
        ,key='Ctrl+E' 
     ),d(                 cap='-'
+    ),d(tag='rplc'      ,cap=_('Replace with...')
+       ,key='F4' 
     ),d(tag='fast'      ,cap=_('Fast search (ignore some options)')
        ,key='Shift+F2' 
     ),d(tag='rslt-to-tab',cap=_('Copy Results to new tab')
@@ -1680,7 +1772,7 @@ class Fif4D:
         
         m.last_fid  = m.opts.us_focus
         m.ag = DlgAg(
-            form    =dict(cap=_('Find in Files 4')+f' ({VERSION_V})'
+            form    =dict(cap=DLG_CAP_BS+f' ({VERSION_V})'
                          ,h=form_h,w=form_w             ,h_min0=form_h0,w_min0=form_w
                                                         ,h_min=form_h0,w_min=form_w
                          ,frame='resize'
@@ -1885,6 +1977,7 @@ class Fif4D:
         elif skey==('sc',ord('A')):                     upd=m.do_acts(ag, 'vr-sub')             # Ctrl+Shift+A
         
         # Find/Results/Source
+        elif skey==(  '',VK_F4):                        upd=m.do_acts(ag, 'rplc')               #       F4
         elif skey==(  '',VK_F2):                        upd=m.do_acts(ag, 'di_find')            #       F2
         elif skey==( 's',VK_F2):                        upd=m.do_acts(ag, 'di_find', 'fast')    # Shift+F2
         elif skef==('sc',187, 'di_rslt'):               upd=m.do_acts(ag, 'vi_fldi_ta')         # Ctrl+Shift+=  in rslt
@@ -1976,7 +2069,7 @@ class Fif4D:
                 if 'val' in cnt and ('{' in cnt['val'] or '~' in cnt['val']):
                     cnt['val']  = m.var_acts('repl', cnt['val'])
             DlgAg(ctrls=ctrls
-                 ,form ={**f_xyw, **d(h=sep_h,h_max=sep_h  ,cap='Expand all vars' ,frame='resize')}
+                 ,form ={**f_xyw, **d(h=sep_h,h_max=sep_h  ,cap='['+m.ag.fattr('cap')+'] '+'Expand all vars' ,frame='resize')}
                  ,opts ={'restore_position':False}
 #                ).gen_repro_code('repro_expand_vars.py').show()
                  ).show()
@@ -2239,6 +2332,8 @@ class Fif4D:
         " Start new search"
         M,m     = type(self),self
         pass;                   log4fun=0
+        pass;                  #log("m.opts={}",(m.opts))
+        pass;                  #return []
         pass;                  #log__('opts={}',(m.opts)         ,__=(log4fun,M.log4cls)) if _log4mod>=0 else 0
         
         def lock_act(how):
@@ -2268,6 +2363,8 @@ class Fif4D:
         wopts.wk_incl = m.var_acts('repl', wopts.wk_incl)
         wopts.wk_excl = m.var_acts('repl', wopts.wk_excl)
         wopts.wk_fold = m.var_acts('repl', wopts.wk_fold)
+        wopts.in_rplc = (data=='rplc')
+        wopts.in_repl = m.var_acts('repl', wopts.in_repl)
         pass;                  #log("wopts={}",pfw(wopts))
 
         # Inspect user values
@@ -2303,7 +2400,8 @@ class Fif4D:
             global COPY_STYLES_ROWS
             COPY_STYLES_ROWS_glb= COPY_STYLES_ROWS
             COPY_STYLES_ROWS    = 1<<32
-        if 'fast' in data:                      # To fast search
+        if(wopts.in_rplc                        # To replace in files
+        or 'fast' in data):                     # To fast search
             global COPY_STYLES
             COPY_STYLES_glb = COPY_STYLES
             rp_lexa_glb     = m.opts.rp_lexa
@@ -2325,17 +2423,18 @@ class Fif4D:
         need_body   = need_body or wopts.rp_cntx and 0!=(wopts.rp_cntb+wopts.rp_cnta)
         need_body   = need_body or not wopts.in_reex and '\n' in wopts.in_what
         need_body   = need_body or     wopts.in_reex and m.opts.vw.mlin     ##??
+#       need_body   = need_body or wopts.in_rplc
         m.observer  = Observer(
                         opts    =wopts
                        ,dlg_status=m.stbrProxy()
                        )
         m.reporter  = Reporter(
-                        rp_opts ={k:wopts[k] for k in m.opts if k[:3] in ('rp_',)}
+                        rp_opts =d({k:wopts[k] for k in m.opts if k[:3] in ('rp_',)})
                        ,ed4lx   =m.tl_edtr
                        ,observer=m.observer
                        )
         frgfilters  = LexHelper.filters(
-                        wk_opts ={k:wopts[k] for k in m.opts if k[:3] in ('wk_',)}
+                        wk_opts =d({k:wopts[k] for k in m.opts if k[:3] in ('wk_',)})
                        ,ed4lx   =m.tl_edtr
                        ,observer=m.observer
                        )
@@ -2344,13 +2443,13 @@ class Fif4D:
         need_body   = need_body or     frgfilters
         Walker.start_stat()
         walkers     = Walker.walkers(
-                        wk_opts ={k:wopts[k] for k in m.opts if k[:3] in ('wk_',)}
+                        wk_opts =d({k:wopts[k] for k in m.opts if k[:3] in ('wk_',)})
                        ,observer=m.observer
                        ,need_body=need_body
                        )
         fragmer     = Fragmer.fragmer_for(
-                        in_opts ={k:wopts[k] for k in m.opts if k[:3] in ('in_',)}
-                       ,rp_opts ={k:wopts[k] for k in m.opts if k[:3] in ('rp_',)}
+                        in_opts =d({k:wopts[k] for k in m.opts if k[:3] in ('in_',)})
+                       ,rp_opts =d({k:wopts[k] for k in m.opts if k[:3] in ('rp_',)})
                        ,observer=m.observer
                        ,need_body=need_body
                        )
@@ -2369,11 +2468,11 @@ class Fif4D:
         pass;                  #log("m.working={}",(m.working))
         if False:
 #       if _dev_kv:                             # UNSAFE work
-            fifwork(    m.observer, m.rslt, walkers, fragmer, frgfilters, m.reporter)
+            fifwork(    m.observer, m.rslt, walkers, fragmer, frgfilters, m.reporter, wopts.in_rplc)
         else:                                   # SAFE work: with lock/try/finally
             lock_act('lock')
             try:
-                fifwork(m.observer, m.rslt, walkers, fragmer, frgfilters, m.reporter)
+                fifwork(m.observer, m.rslt, walkers, fragmer, frgfilters, m.reporter, wopts.in_rplc)
             except Exception as ex:
                 log(traceback.format_exc()) 
                 msg_box(f'Internal Error:\n{ex}'
@@ -2382,7 +2481,7 @@ class Fif4D:
                         '\nSee Help (Ctrl+H) bottom link.'
                         '\n'
                         '\nNote.'
-                        '\nTo avoid error try to search with simpler options.'
+                        '\nTo avoid error, for now, try to search with simpler options.'
                         '\n"Fast search" (Shift+F2) is good for the first attempt.'
                         )
             finally:
@@ -2843,7 +2942,7 @@ def fit_enco(fn, enco_l, enco_ms):
     return enco_l
    #def fit_enco
     
-def fifwork(observer, ed4rpt, walkers, fragmer, frgfilters, reporter):
+def fifwork(observer, ed4rpt, walkers, fragmer, frgfilters, reporter, rplc=False):
     pass;                       log4fun=0
     pass;                      #log4fun=_log4fun_fifwork
     pass;                      #log__('observer,walkers,fragmer,reporter={}',(observer,walkers,fragmer,reporter)         ,__=(log4fun,)) if _log4mod>=0 else 0
@@ -2895,9 +2994,10 @@ def fifwork(observer, ed4rpt, walkers, fragmer, frgfilters, reporter):
             for enco_n,enco in enumerate(enco_l):
                 try:
                     pass;      #log("enco={}",(enco))
-                    body    = walker.path2body(fn, d(enco=enco))
+                    body,enc= walker.path2body_enc(fn, d(enco=enco))
+                    found   = False
                     pass;      #log__("type(body)={}",(type(body))         ,__=(log4fun,)) if _log4mod>=0 else 0
-                    for frgs in fragmer.provide_frag(body):
+                    for frgs in fragmer.provide_frag(body, build_new_body=rplc):
                         pass;  #log__("frgs={}",(frgs)         ,__=(log4fun,)) if _log4mod>=0 else 0
                         filter_ok   = True
                         for flt in frgfilters:
@@ -2907,7 +3007,10 @@ def fifwork(observer, ed4rpt, walkers, fragmer, frgfilters, reporter):
                         if not filter_ok:   continue#for frg
 
                         reporter.add_frg(fn, frgs)
+                        found   = True
                        #for frgs
+                    if found and rplc:
+                         walker.body2path(fragmer.get_new_body(), fn, enc)
                 except UnicodeError as ex:
                     print(f'Cannot read "{fn}": ({enco}) {ex}')     if enco_n==len(enco_l)-1 else 0
                     pass;      #print(_(f'Cannot read "{fn}": ({enco}) {ex}'))
@@ -2927,7 +3030,9 @@ def fifwork(observer, ed4rpt, walkers, fragmer, frgfilters, reporter):
         if observer.need_break:
             break#for walk
        #for walker
-    fin_msg = 'Search is stopped' if observer.need_break else 'Search complete'
+    fin_msg = (_('Replacements terminated') if observer.need_break else _('Replacements completed')) \
+                if rplc else \
+              (_('Search terminated')       if observer.need_break else _('Search completed'))
     observer.dlg_status('msg', fin_msg)
     reporter.finish()
     pass;                       search_end    = ptime()
@@ -2950,12 +3055,13 @@ class RFrg(namedtuple('RFrg', [
    ,'st'    # ([dict]) styles for the source line 
             #  [{c:start, ln:width
             #   , st:{color_font=intc, color_bg=intc, font_bold=01, font_italic=01}}]
+   ,'fnd'   # (bool) Find/Replace
     ])):
     __slots__ = ()
-    def __new__(cls, p='', f='', r=-1, cws=[], s='', e=False, st=None):
+    def __new__(cls, p='', f='', r=-1, cws=[], s='', e=False, st=None, fnd=True):
     #   p   = p if p else f
 #       f   = re.sub(r'^tab:\d+/', 'tab:', f) if f[:4]=='tab:' else f
-        return super(RFrg, cls).__new__(cls, p if p else f, f, r, cws, s, e, st)
+        return super(RFrg, cls).__new__(cls, p if p else f, f, r, cws, s, e, st, fnd)
    #class RFrg
 
 
@@ -3022,14 +3128,15 @@ class Reporter:
     
     def add_frg(self, fn, frgs):
         """ Smart appending new info to stored info. """
-        pass;                   log4fun= 0
+        pass;                   log4fun= 1
         pass;                   log__('',()         ,__=(log4fun,Reporter.log4cls)) if _log4mod>=0 else 0
         pass;                   log__('fn, frgs={}',(fn, frgs)         ,__=(log4fun,Reporter.log4cls)) if _log4mod>=0 else 0
         pass;                  #log('fn, frgs={}',(fn, frgs))
         pass;                  #log('self.rfrgs={}',(self.rfrgs))
         
-        self.stats[Reporter.FRST_FRGS] += 1
-        self.stats[Reporter.FRST_FILS].add(fn)
+        if frgs[0].fnd:                                 # Find counts, Replace skips
+            self.stats[Reporter.FRST_FRGS] += 1
+        self.stats[    Reporter.FRST_FILS].add(fn)
         if fn.startswith('tab:'):
             self.stats[Reporter.FRST_DIRS].add('tab:')
         else:
@@ -3065,7 +3172,7 @@ class Reporter:
             sts     = None
             if with_cp_sts and ed4lx:
                 sts = LexHelper.get_src_line_styles(ed4lx, wfrg.r)
-            return RFrg(f=fn, r=wfrg.r, cws=[(wfrg.c, wfrg.w)] if wfrg.w else [], s=wfrg.s, e=wfrg.e, st=sts)
+            return RFrg(f=fn, r=wfrg.r, cws=[(wfrg.c, wfrg.w)] if wfrg.w else [], s=wfrg.s, e=wfrg.e, st=sts, fnd=wfrg.fnd)
            #def newRF
 
         # 1. Only one series for each fn
@@ -3074,7 +3181,8 @@ class Reporter:
             if (not  self.rfrgs         or      # First
                fn != self.rfrgs[-1].f   or      # New fn
                frg.r==-1                or      # Spec frg
-               frg.r>self.rfrgs[-1].r   ):      # New row
+               frg.r>self.rfrgs[-1].r   or      # Spec frg
+               frg.fnd!=self.rfrgs[-1].fnd):    # Find/Replace
                 self.rfrgs.append(          newRF(fn, frg))
                 continue
             # Old fn
@@ -3128,7 +3236,7 @@ class Reporter:
                     node_ff     = dcta(tp='ff', subs=[node_fr], p=fr.p, f=fr.f, cnt=len(fr.cws) - (1 if fr.e else 0))
                     root       += [node_ff]
                 else:
-                    node_ff.cnt+= len(fr.cws) - (1 if fr.e else 0)
+                    node_ff.cnt+= (len(fr.cws) - (1 if fr.e else 0)) if fr.fnd else 0
                     node_fr.frs+= [fr]
             return root
         
@@ -3151,7 +3259,7 @@ class Reporter:
                 dirs.add(dp)
         pass;                   log__('natorder={}',(natorder)         ,__=(log4fun,Reporter.log4cls)) if _log4mod>=0 else 0
         
-        newFR   = lambda fp, fn, fr: RFrg(p=fp, f=fn, r=fr.r, cws=fr.cws, s=fr.s)
+        newFR   = lambda fp, fn, fr: RFrg(p=fp, f=fn, r=fr.r, cws=fr.cws, s=fr.s, fnd=fr.fnd)
         if natorder and \
            trfm == TRFM_D_FLL:  # <dirpath> #N/<filename(r:c:w)>: line
             root    = []
@@ -3174,11 +3282,11 @@ class Reporter:
                         dirs[dp]    = node_dr
                         root       += [node_dr]
                     else:
-                        node_dr.cnt+= len(fr.cws) - (1 if fr.e else 0)
+                        node_dr.cnt+= (len(fr.cws) - (1 if fr.e else 0)) if fr.fnd else 0
                         node_fr.frs+= [newFR(fr.f, fnm, fr)]
 #                       node_fr.frs+= [newFR(fr.f, fr)]
                 else:
-                    node_dr.cnt    += len(fr.cws) - (1 if fr.e else 0)
+                    node_dr.cnt    += (len(fr.cws) - (1 if fr.e else 0)) if fr.fnd else 0
                     node_fr.frs    += [newFR(fr.f, fnm, fr)]
 #                   node_fr.frs    += [newFR(fr.f, fr)]
             return root
@@ -3230,10 +3338,10 @@ class Reporter:
                         dirs[dp]    = node_dr
                         root       += [node_dr]
                     else:
-                        node_dr.cnt+= len(fr.cws) - (1 if fr.e else 0)
+                        node_dr.cnt+= (len(fr.cws) - (1 if fr.e else 0)) if fr.fnd else 0
                         node_fr.frs+= [newFR(fr.f, fnm, fr)]
                 else:
-                    node_dr.cnt    += len(fr.cws) - (1 if fr.e else 0)
+                    node_dr.cnt    += (len(fr.cws) - (1 if fr.e else 0)) if fr.fnd else 0
                     node_fr.frs    += [newFR(fr.f, fnm, fr)]
             return root
         
@@ -3306,6 +3414,7 @@ class Reporter:
 
         ltkns       = []                        # Copied source lex styles
         marks       = []                        # Found frags
+        marks_fnd   = []                        # Found frags
         lpths       = []                        # Included lex-path
         body        = [self.observer.opts_desc()]
         fit_ftim    = lambda f: ':'.join(str(mtime(f)).split(':')[:2]) # 2019-07-19 18:05:14.90 -> "2019-07-19 18:05"
@@ -3323,16 +3432,19 @@ class Reporter:
                     node2body(kid.subs, body, locs, 1+dpth)
                     continue
                 for rfrg in kid.frs:
-                    loc_cw_rcs      = [] if rfrg.cws else \
-                                      [( (0, 1000)                      # ed loc
-                                        ,((rfrg.r,0),(rfrg.r,0))        # src loc
-                                      )]
-                    locs[len(body)] = [rfrg.p, loc_cw_rcs]
+                    if not(self.observer.opts.in_rplc and rfrg.fnd):        # Save fnd for Find, !fnd for Replace
+                        loc_cw_rcs      = [] if rfrg.cws else \
+                                          [( (0, 1000)                      # ed loc
+                                            ,((rfrg.r,0),(rfrg.r,0))        # src loc
+                                          )]
+                        locs[len(body)] = [rfrg.p, loc_cw_rcs]
                     for c,w in rfrg.cws:
-                        loc_cw_rcs += [( (dpth+pfx_wth+c, w)            # ed loc
-                                        ,((rfrg.r,c),(rfrg.r,c+w))      # src loc
-                                      )]
+                        if not(self.observer.opts.in_rplc and rfrg.fnd):    # Save fnd for Find, !fnd for Replace
+                            loc_cw_rcs += [( (dpth+pfx_wth+c, w)            # ed loc
+                                            ,((rfrg.r,c),(rfrg.r,c+w))      # src loc
+                                          )]
                         marks.append(   (len(body), dpth+pfx_wth+c, w) )
+                        marks_fnd.append(rfrg.fnd)
 
                     fmt_vs  = dict(g=TAB*dpth, r=(1+rfrg.r if rfrg.r>=0 else ''), s=rfrg.s) # path has not r
 #                   fmt_vs  = dict(g=TAB*dpth, r=1+rfrg.r                       , s=rfrg.s)
@@ -3378,8 +3490,14 @@ class Reporter:
                     st              = ltkns_s[id_st]
                     ed_.attr(app.MARKERS_ADD_MANY, x=cls, y=rws, len=lns, **st)
             elif marks:
-                rws, cls, lns = list(zip(*marks))
-                ed_.attr(app.MARKERS_ADD_MANY, x=cls, y=rws, len=lns, **MARK_FIND_STYLE)
+                if self.observer.opts.in_rplc:  # Report about replacements
+                    rws, cls, lns   = list(zip(*[(l,c,w) for (l,c,w),fnd in zip(marks, marks_fnd) if     fnd]))
+                    ed_.attr(app.MARKERS_ADD_MANY, x=cls, y=rws, len=lns, **MARK_FN2R_STYLE)
+                    rws, cls, lns   = list(zip(*[(l,c,w) for (l,c,w),fnd in zip(marks, marks_fnd) if not fnd]))
+                    ed_.attr(app.MARKERS_ADD_MANY, x=cls, y=rws, len=lns, **MARK_REPL_STYLE)
+                else:                           # Report about searches
+                    rws, cls, lns   = list(zip(*marks))
+                    ed_.attr(app.MARKERS_ADD_MANY, x=cls, y=rws, len=lns, **MARK_FIND_STYLE)
             
             if lpths:
                 rws, cls, lns = list(zip(*lpths))
@@ -3674,12 +3792,25 @@ class TabsWalker:
        #def provide_path
        
        
-    def path2body(self, path, ops=None):
+    def body2path(self, body, path, ops=None):
+        if not path.startswith('tab:'): raise ValueError()
+        tab_id   = path[len('tab:'):].split('/')[0]
+        tab_ed   = apx.get_tab_by_id(tab_id)
+        if not tab_ed:                  raise ValueError()
+        tab_ed.replace(0,0                       # Start
+                      ,0,tab_ed.get_line_count() # After the End - to replace whole text
+                      ,body)
+        tab_ed.set_caret(0, 0)
+       #def body2path
+     
+    
+    def path2body_enc(self, path, ops=None):
+#   def path2body(self, path, ops=None):
         if not path.startswith('tab:'):  return ''
         tab_id   = path[len('tab:'):].split('/')[0]
         tab_ed   = apx.get_tab_by_id(tab_id)
-        return tab_ed.get_text_all() if tab_ed else ''
-       #def path2body
+        return (tab_ed.get_text_all() if tab_ed else ''), ''
+       #def path2body_enc
    #class TabsWalker
 
 
@@ -3848,13 +3979,18 @@ class FSWalker:
        #def provide_path
     
     
-    def path2body(self, path, ops=None):
+    def body2path(self, body, path, enc):
+        open(path, 'wt', encoding=enc).write(body)
+       #def body2path
+    
+    
+    def path2body_enc(self, path, ops=None):
         if self.need_body:
-            return FSWalker.get_filebody(path)
+            return FSWalker.get_filebody_enc(path)
 
         if open(path, mode='rb').read(4).startswith(codecs.BOM_UTF8):
             ofile   = open(path, 'rt', encoding='utf-8-sig')
-            return ofile
+            return ofile, 'utf-8-sig'
         
         enco_s      = ops.get('enco', Walker.ENCO_DETD)
         if enco_s==Walker.ENCO_DETD:
@@ -3863,12 +3999,16 @@ class FSWalker:
         ofile       = open(path, 'rt', encoding=enco_s, buffering=1024)
        #ofile       = open(path, 'rt', encoding=enco_s, buffering=1024*16)
        #ofile       = open(path, 'rt', encoding=enco_s)
-        return ofile
-       #def path2body
+        return ofile, enco_s
+       #def path2body_enc
     
     
     @staticmethod
     def get_filebody(fp, enco_l=None, enco_ms=None):
+        return FSWalker.get_filebody_enc(fp, enco_l, enco_ms)[0]
+
+    @staticmethod
+    def get_filebody_enc(fp, enco_l=None, enco_ms=None):
         pass;                   log4fun= 1
         enco_l  = FSWalker.enco_l   if enco_l  is None else enco_l  
         enco_ms = FSWalker.enco_ms  if enco_ms is None else enco_ms 
@@ -3879,7 +4019,7 @@ class FSWalker:
         
         if open(fp, mode='rb').read(4).startswith(codecs.BOM_UTF8):
             body    = open(fp, mode='rt', encoding='utf-8-sig', newline='').read()
-            return body
+            return body, 'utf-8-sig'
         enco_l  = [enc for enc in enco_l if enc]
         pass;                  #log__('enco_l={}',(enco_l)         ,__=(log4fun,FSWalker.log4cls)) if _log4mod>=0 else 0
         pass;                  #log('enco_l={}',(enco_l))
@@ -3900,7 +4040,7 @@ class FSWalker:
                 if enco_n == len(enco_l)-1:
                     print(f'Cannot read "{fp}" (encodings={enco_l}): {ex}')
            #for encd_n
-        return body
+        return body, enco_s
        #def get_filebody
        
    #class FSWalker
@@ -3908,15 +4048,16 @@ class FSWalker:
 
 
 class WFrg(namedtuple('WFrg', [
-    'r'     # Line number in source body
-   ,'c'     # Start position in line
-   ,'w'     # Width of fragment. If 0 then no fragment in line
-   ,'s'     # Source line
-   ,'e'     # End of other fragment
+    'r'     # (int) Line number in source body
+   ,'c'     # (int) Start position in line
+   ,'w'     # (int) Width of fragment. If 0 then no fragment in line
+   ,'s'     # (str) Source line
+   ,'e'     # (bool) End of other fragment
+   ,'fnd'   # (bool) Find/Replace
     ])):
     __slots__ = ()
-    def __new__(cls, r=-1, c=-1, w=0, s='', e=False):
-        return super(WFrg, cls).__new__(cls, r, c, w, s, e)
+    def __new__(cls, r=-1, c=-1, w=0, s='', e=False, fnd=True):
+        return super(WFrg, cls).__new__(cls, r, c, w, s, e, fnd)
    #class WFrg
 
 
@@ -3968,6 +4109,8 @@ class Fragmer:
 
     @staticmethod
     def fragmer_for(in_opts, rp_opts, observer, need_body):
+        pass;                  #log("in_opts={}",(in_opts))
+        pass;                  #log("rp_opts={}",(rp_opts))
         cntb    = rp_opts['rp_cntb'] if rp_opts['rp_cntx'] else 0
         cnta    = rp_opts['rp_cnta'] if rp_opts['rp_cntx'] else 0
         mlined  = '\n' in in_opts['in_what'] \
@@ -3983,6 +4126,7 @@ class Fragmer:
 
     class StrmFragmer:
         def __init__(self, in_opts, rp_opts, observer):
+            pass;              #log("in_opts={}",(in_opts))
             self.in_opts    = in_opts
             self.rp_opts    = rp_opts
             self.observer   = observer
@@ -3993,15 +4137,37 @@ class Fragmer:
            #def __init__
 
 
-        def provide_frag(self, itlines):            #NOTE: Stream walk
+        def get_new_body(self):
+            return '\n'.join(self.new_body)
+           #def get_new_body
+        
+            
+        def provide_frag(self, itlines, build_new_body=False):            #NOTE: Stream walk
+            pass;              #log("build_new_body={}, self.in_opts={}",build_new_body, self.in_opts)
             itlines = itlines.splitlines() if likesstr(itlines) else itlines
+            self.new_body   = [] if build_new_body else None
             for rw,line in enumerate(itlines):
+                found       = False
                 for mtch in self.pttn_r.finditer(line):
                     pass;      #log__("rw,cnta_lst(rw)={}",(rw,cnta_lst(rw))       ,__=(log4fun,Fragmer.log4cls))
                     self.stats[Fragmer.WKST_FRGS]   += 1
                     yield [ WFrg(r=rw, c=mtch.start(), w=mtch.end()-mtch.start(), s=line.strip('\r\n'))]
+                    found   = True
                    #for mtch
-               #for ln
+                if build_new_body:
+                    if found:
+                        new_line= self.pttn_r.sub(self.in_opts.in_repl, line)
+                        pass;  #log("    line={}",(line))
+                        pass;  #log("new_line={}",(new_line))
+                        shift   = 0
+                        for mtch in self.pttn_r.finditer(line):
+                            new_frg = mtch.expand(self.in_opts.in_repl)
+                            yield [ WFrg(r=rw, c=shift+mtch.start(), w=len(new_frg), s=new_line.strip('\r\n'), fnd=False)]
+                            shift  += len(new_frg) - (mtch.end()-mtch.start())
+                    else:
+                        new_line= line
+                    self.new_body.append(new_line.strip('\r\n'))
+               #for rw,line
            #def provide_frag
        #class StrmFragmer
 
@@ -4021,90 +4187,109 @@ class Fragmer:
            #def __init__
 
 
-        def walk_in_lines(self, lines):
-            " Yield fragments found into each line of the lines "
-            pass;               log4fun=1
-            pass;               log__("len(lines)={}",(len(lines))       ,__=(log4fun,Fragmer.log4cls)) if _log4mod>=0 else 0
-            cntb        = self.rp_opts['rp_cntb'] if self.rp_opts['rp_cntx'] else 0
-            cnta        = self.rp_opts['rp_cnta'] if self.rp_opts['rp_cntx'] else 0
-            for rw,line in enumerate(lines):
-                for mtch in self.pttn_r.finditer(line):
-                    pass;      #log__("rw,cnta_lst(rw)={}",(rw,cnta_lst(rw))       ,__=(log4fun,Fragmer.log4cls))
-                    if False:pass
-                    elif cntb==0 and cnta==0:
-                        self.stats[Fragmer.WKST_FRGS]   += 1
-                        yield [ WFrg(r=rw, c=mtch.start(), w=mtch.end()-mtch.start(), s=line)]
-                    elif cntb >0 and cnta==0:
-                        self.stats[Fragmer.WKST_FRGS]   += 1
-                        yield [*Fragmer.cntb_lst(cntb, rw, lines)
-                              , WFrg(r=rw, c=mtch.start(), w=mtch.end()-mtch.start(), s=line)]
-                    elif cntb==0 and cnta >0:
-                        self.stats[Fragmer.WKST_FRGS]   += 1
-                        yield [ WFrg(r=rw, c=mtch.start(), w=mtch.end()-mtch.start(), s=line)
-                              ,*Fragmer.cnta_lst(cnta, rw, lines)]
-                    else:
-                        self.stats[Fragmer.WKST_FRGS]   += 1
-                        yield [*Fragmer.cntb_lst(cntb, rw, lines)
-                              , WFrg(r=rw, c=mtch.start(), w=mtch.end()-mtch.start(), s=line)
-                              ,*Fragmer.cnta_lst(cnta, rw, lines)]
-                   #for mtch
-               #for ln
-           #def walk_in_lines
-    
-    
-        def walk_in_body(self, body):
-            pass;               log4fun=1
-            pass;               log__("body=\n{}",('\n'.join(f'{n:>3}|{l}' for n,l in enumerate(body.splitlines())))       ,__=(log4fun,Fragmer.log4cls)) if _log4mod>=0 else 0
-            cntb        = self.rp_opts['rp_cntb'] if self.rp_opts['rp_cntx'] else 0
-            cnta        = self.rp_opts['rp_cnta'] if self.rp_opts['rp_cntx'] else 0
-            lines       = body.splitlines()
+        def get_new_body(self):
+            return '\n'.join(self.new_body)
+           #def get_new_body
         
-            # Prepare lines positions in body
-            row_bgns    = list(mt.end() for mt in re.finditer('\r?\n', body))
-            row_bgns.insert(0, 0)
-            pass;               log__("row_bgns={}",(row_bgns)       ,__=(log4fun,Fragmer.log4cls)) if _log4mod>=0 else 0
-            row_bpos= list(enumerate(row_bgns))
-            pass;              #log("row_bgns={}",(row_bpos))
-            row_bpos.reverse()
-            pass;               log__("row_bpos={}",(row_bpos)       ,__=(log4fun,Fragmer.log4cls)) if _log4mod>=0 else 0
-            def to_rc(pos):
-                row_bpo = first_true(row_bpos, pred=lambda r_bp:pos>=r_bp[1])
-                return row_bpo[0], pos-row_bpo[1]
-        
-            # 
-            for mtch in self.pttn_r.finditer(body):
-                pass;           log__("mtch.start(),end()={}",(mtch.start(),mtch.end())       ,__=(log4fun,Fragmer.log4cls)) if _log4mod>=0 else 0
-                r_bgn,c_bgn = to_rc(mtch.start())
-                r_end,c_end = to_rc(mtch.end(  ))
-                if r_bgn==r_end:                    # Fragment into one line
-                    self.stats[Fragmer.WKST_FRGS]   += 1
-                    yield [* Fragmer.cntb_lst(cntb, r_bgn, lines)
-                          ,  WFrg(r=r_bgn, c=c_bgn, w=c_end            -c_bgn, s=lines[r_bgn])
-                          ,* Fragmer.cnta_lst(cnta, r_end, lines)]
-                else:                               # Fragment into more one lines
-                    self.stats[Fragmer.WKST_FRGS]   += 1
-                    yield [* Fragmer.cntb_lst(cntb, r_bgn, lines)
-                          ,  WFrg(r=r_bgn, c=c_bgn, w=len(lines[r_bgn])-c_bgn, s=lines[r_bgn], e=False)
-                          ,*[WFrg(r=r    , c=    0, w=len(lines[r    ])      , s=lines[r    ], e=True) for r in range(r_bgn+1, r_end)]
-                          ,  WFrg(r=r_end, c=    0, w=                  c_end, s=lines[r_end], e=True)
-                          ,* Fragmer.cnta_lst(cnta, r_end, lines)]
-           #def walk_in_body
-    
-    
-        def provide_frag(self, body):                  #NOTE: Body walk
+            
+        def provide_frag(self, body, build_new_body=False):     #NOTE: Body walk
             " Yield fragments in the body "
+            self.new_body   = [] if build_new_body else None
             pass;               log4fun=1
             pass;               log__("len(body)={}",(len(body))       ,__=(log4fun,Fragmer.log4cls)) if _log4mod>=0 else 0
             pass;              #log__("body=\n{}",(body)       ,__=(log4fun,Fragmer.log4cls))
             pass;              #log__("body=\n{}",('\n'.join(f'{n:>3} {l}' for n,l in enumerate(body.splitlines())))       ,__=(log4fun,Fragmer.log4cls))
         
+            def walk_in_lines(lines):
+                " Yield fragments found into each line of the lines "
+                pass;               log4fun=1
+                pass;               log__("len(lines)={}",(len(lines))       ,__=(log4fun,Fragmer.log4cls)) if _log4mod>=0 else 0
+                cntb        = self.rp_opts['rp_cntb'] if self.rp_opts['rp_cntx'] else 0
+                cnta        = self.rp_opts['rp_cnta'] if self.rp_opts['rp_cntx'] else 0
+                for rw,line in enumerate(lines):
+                    found   = False
+                    for mtch in self.pttn_r.finditer(line):
+                        pass;      #log__("rw,cnta_lst(rw)={}",(rw,cnta_lst(rw))       ,__=(log4fun,Fragmer.log4cls))
+                        if False:pass
+                        elif cntb==0 and cnta==0:
+                            self.stats[Fragmer.WKST_FRGS]   += 1
+                            yield [ WFrg(r=rw, c=mtch.start(), w=mtch.end()-mtch.start(), s=line)]
+                        elif cntb >0 and cnta==0:
+                            self.stats[Fragmer.WKST_FRGS]   += 1
+                            yield [*Fragmer.cntb_lst(cntb, rw, lines)
+                                  , WFrg(r=rw, c=mtch.start(), w=mtch.end()-mtch.start(), s=line)]
+                        elif cntb==0 and cnta >0:
+                            self.stats[Fragmer.WKST_FRGS]   += 1
+                            yield [ WFrg(r=rw, c=mtch.start(), w=mtch.end()-mtch.start(), s=line)
+                                  ,*Fragmer.cnta_lst(cnta, rw, lines)]
+                        else:
+                            self.stats[Fragmer.WKST_FRGS]   += 1
+                            yield [*Fragmer.cntb_lst(cntb, rw, lines)
+                                  , WFrg(r=rw, c=mtch.start(), w=mtch.end()-mtch.start(), s=line)
+                                  ,*Fragmer.cnta_lst(cnta, rw, lines)]
+                        found   = True
+                       #for mtch
+                    if build_new_body:
+                        if found:
+                            new_line= self.pttn_r.sub(self.in_opts.in_repl, line)
+                            shift   = 0
+                            for mtch in self.pttn_r.finditer(line):
+                                new_frg = mtch.expand(self.in_opts.in_repl)
+                                yield [ WFrg(r=rw, c=shift+mtch.start(), w=len(new_frg), s=new_line)]
+                                shift  += len(new_frg) - (mtch.end()-mtch.start())
+                        else:
+                            new_line= line
+                        self.new_body.append(new_line)
+                   #for ln
+               #def walk_in_lines
+    
+    
+            def walk_in_body(body):
+                pass;               log4fun=1
+                pass;               log__("body=\n{}",('\n'.join(f'{n:>3}|{l}' for n,l in enumerate(body.splitlines())))       ,__=(log4fun,Fragmer.log4cls)) if _log4mod>=0 else 0
+                cntb        = self.rp_opts['rp_cntb'] if self.rp_opts['rp_cntx'] else 0
+                cnta        = self.rp_opts['rp_cnta'] if self.rp_opts['rp_cntx'] else 0
+                lines       = body.splitlines()
+        
+                # Prepare lines positions in body
+                row_bgns    = list(mt.end() for mt in re.finditer('\r?\n', body))
+                row_bgns.insert(0, 0)
+                pass;               log__("row_bgns={}",(row_bgns)       ,__=(log4fun,Fragmer.log4cls)) if _log4mod>=0 else 0
+                row_bpos= list(enumerate(row_bgns))
+                pass;              #log("row_bgns={}",(row_bpos))
+                row_bpos.reverse()
+                pass;               log__("row_bpos={}",(row_bpos)       ,__=(log4fun,Fragmer.log4cls)) if _log4mod>=0 else 0
+                def to_rc(pos):
+                    row_bpo = first_true(row_bpos, pred=lambda r_bp:pos>=r_bp[1])
+                    return row_bpo[0], pos-row_bpo[1]
+        
+                # 
+                for mtch in self.pttn_r.finditer(body):
+                    pass;           log__("mtch.start(),end()={}",(mtch.start(),mtch.end())       ,__=(log4fun,Fragmer.log4cls)) if _log4mod>=0 else 0
+                    r_bgn,c_bgn = to_rc(mtch.start())
+                    r_end,c_end = to_rc(mtch.end(  ))
+                    if r_bgn==r_end:                    # Fragment into one line
+                        self.stats[Fragmer.WKST_FRGS]   += 1
+                        yield [* Fragmer.cntb_lst(cntb, r_bgn, lines)
+                              ,  WFrg(r=r_bgn, c=c_bgn, w=c_end            -c_bgn, s=lines[r_bgn])
+                              ,* Fragmer.cnta_lst(cnta, r_end, lines)]
+                    else:                               # Fragment into more one lines
+                        self.stats[Fragmer.WKST_FRGS]   += 1
+                        yield [* Fragmer.cntb_lst(cntb, r_bgn, lines)
+                              ,  WFrg(r=r_bgn, c=c_bgn, w=len(lines[r_bgn])-c_bgn, s=lines[r_bgn], e=False)
+                              ,*[WFrg(r=r    , c=    0, w=len(lines[r    ])      , s=lines[r    ], e=True) for r in range(r_bgn+1, r_end)]
+                              ,  WFrg(r=r_end, c=    0, w=                  c_end, s=lines[r_end], e=True)
+                              ,* Fragmer.cnta_lst(cnta, r_end, lines)]
+               #def walk_in_body
+    
+    
             mlined  = '\n' in self.in_opts['in_what'] \
                         or \
                       self.in_opts['in_reex'] and self.observer.opts.vw.mlin    ##??
             if mlined:
-                yield from self.walk_in_body(body)
+                yield from walk_in_body(body)
             else:
-                yield from self.walk_in_lines(body.splitlines())
+                yield from walk_in_lines(body.splitlines())
            #def provide_frag
        #class BodyFragmer:
 
@@ -4179,7 +4364,6 @@ def _get_proj_dirs():
     pdirs = []
     try:
         import cuda_project_man as pman
-        odict   = collections.OrderedDict                       # as dict from Py3.7(?)
         nodes   = pman.global_project_info['nodes']
         pass;                  #log("nodes={}",(nodes))
         nodes   = [p if os.path.isdir(p) else os.path.dirname(p)
@@ -4455,4 +4639,6 @@ ToDo
 [+][kv-kv][04oct19] Var submenu when click on "="
 [ ][kv-kv][08oct19]? Show % of work for files
 [ ][kv-kv][11nov19] DblClick==Enter in Results/Source
+[ ][kv-kv][16jun20] No results for search in tabs if titles with extension: 'name.ext • folder'
+[+][kv-kv][21jun20] Add var to Replace 'With:'
 '''
