@@ -3859,12 +3859,12 @@ class TabsWalker:
                           ,'\n'.join(body))
             tab_ed.set_caret(0, 0)
         else:
-#           tab_ed.set_prop(app.PROP_UNDO_GROUPED, True)
+            if app.app_api_version()>='1.0.348':    tab_ed.action(app.EDACTION_UNDOGROUP_BEGIN)
             for lnum, new_line in enumerate(body):
                 old_line    = tab_ed.get_text_line(lnum)
                 if new_line==old_line: continue
                 tab_ed.set_text_line(lnum, new_line)
-#           tab_ed.set_prop(app.PROP_UNDO_GROUPED, False)
+            if app.app_api_version()>='1.0.348':    tab_ed.action(app.EDACTION_UNDOGROUP_END)
        #def body2path
      
     
