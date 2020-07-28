@@ -1,4 +1,12 @@
-﻿4.7.01 2020-06-22
+﻿4.7.02 2020-07-28
+added: DoubleClick in Results and Source panels now is same as Enter (open source)
+added: New command =/Scope/"Cut last folder segment" (Ctrl+Shift+Up)
+added: New command =/"Emulate Replace with..." (Shift+F4) to show dialog "[FiF]Replace"
+added: F4 in dialog "[FiF]Replace" is same as Enter or click-button
+added: Shift+F4 in dialog "[FiF]Replace" run emulation: fill Results, no changes in files/tabs
+fixed: Now "Replace in tabs" changes lines not whole tab text
+
+4.7.01 2020-06-22
 added: Replace in files/tabs
 
 4.6.12 2020-06-16

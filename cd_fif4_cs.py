@@ -296,7 +296,7 @@ Walker_ROOT_IS_TABS= '<tabs>'                   # For user input word
 OTH4FND = _('Extra search options')
 OTH4RPT = _('Options to view Results')
 
-EDS_HINTS       = f(_('F3/{u}F3 - next/prev fragment, ^F3/^{u}F3 - next/prev file fragment, Enter - open.')
+EDS_HINTS       = f(_('F3/{u}F3 - next/prev fragment, ^F3/^{u}F3 - next/prev file fragment, Enter|DblClick - open.')
                         , u='\N{UPWARDS ARROW}')
 DEF_RSLT_BODY   = _('Results. ')+EDS_HINTS
 DEF_SRCF_BODY   = _('Source. ') +EDS_HINTS
@@ -332,6 +332,7 @@ fold_hi = f(_('Start folder(s).'
             '\n"~" is user home folder.'
             '\n{} or {{t}} to search in tabs.'
 #           '\n{} to search in project folders (in short <p>).'
+            '\nCtrl+Shift+Up - cut last folder segment.'
             ), Walker_ROOT_IS_TABS)
 dept_hi = _('Depth - how many folder levels to search.'
             '\nUse Ctrl+↑/↓ to change this option.'

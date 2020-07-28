@@ -2,7 +2,7 @@
 Authors:
     Andrey Kvichansky   (kvichans on github.com)
 Version:
-    '4.7.01 2020-06-22'
+    '4.7.02 2020-07-28'
 '''
 
 import  re, os, traceback, locale, itertools, codecs, time, collections, datetime as dt #, types, json
@@ -261,8 +261,8 @@ TRFMD2V     = dict([
 
 SEP4LEXPATH = ' > '
 # Not ASCII chars for code
-DDD         = '\N{HORIZONTAL ELLIPSIS}' 
-MDMD        = '\N{MIDDLE DOT}'*2 
+DDD         = '\N{HORIZONTAL ELLIPSIS}'
+MDMD        = '\N{MIDDLE DOT}'*2
 SORT_DN     = '\N{DOWNWARDS ARROW}'*2
 SORT_UP     = '\N{UPWARDS ARROW}'*2
 FF_EOL      = '\N{SECTION SIGN}'
@@ -821,17 +821,18 @@ class Fif4D:
 
 
     @Dcrs.clear_st_msg(  1, 'help', 'wk_clea', 'di_menu', 'nf_frag', 'nf_frlp')     # aid in the list
-    @Dcrs.timing_to_stbr(1, 'di_find', 'up_rslt', 'di_rplc')                        # aid in the list
+    @Dcrs.timing_to_stbr(1, 'di_find', 'up_rslt', 'di_rplc', 'di_emul')             # aid in the list
     def do_acts(self, ag, aid, data='', ops={}):        #NOTE: do_acts
         # help xopts call-find call-repl
         # in_reex in_case in_word
         # more-fh less-fh more-fw less-fw more-r less-r more-ml less-ml
         # addEOL hist vw_mlin wk_agef wk_enco_d rp_cntx
         # di_menu ps_prev ps_next ps_save ps_menu ps_move ps_remv_N ps_load_N
-        # ac_usec di_brow
+        # ac_usec di_brow fold_sh
         # nf_frag nf_frlp 
         # up_rslt di_find vi_fldi
         # on_rslt_crt go-next go-prev nav-to
+        # rplc emul di_rplc di_emul
         pass;                   log4fun= 1
         M,m     = type(self),self
         scam    = ag.scam()
@@ -1257,6 +1258,14 @@ class Fif4D:
                             os.path.expanduser(m.opts.wk_fold)
                            ,_('Initial search folder')))
         
+        if aid=='fold_sh':                      # Do folder shorter
+            if not (os.path.isdir(m.opts.wk_fold) or 
+                    os.path.isfile(m.opts.wk_fold)):return []
+            sgms    = m.opts.wk_fold.split(os.sep)      # ?
+            if len(sgms)<2:                         return []
+            sgms    = sgms[:-1]
+            return d(vals=d(wk_fold=os.sep.join(sgms)))
+        
         if aid=='up_rslt':                      # Update Results view
             m.reporter.show_results(
                 m.rslt
@@ -1344,13 +1353,17 @@ class Fif4D:
             return d(ctrls={cid:d(val=cval)}
                     ,fid=cid)
 
-        if aid=='rplc':                         #NOTE: Find and replace
+        if aid in ('rplc', 'emul'):             #NOTE: Find and replace
+            do_rplc = aid=='rplc'
+            do_emul = aid!='rplc'
             if re.search(r'(^|[^\\])§', m.opts.in_what) \
             or m.opts.vw.mlin:  return m.stbr_act(_('"Replace" is only for single-line Find pattern'))
             if m.opts.rp_cntx:  return m.stbr_act(_('"Replace" is only for "-?+?" mode'))
             if m.opts.wk_sycm \
             or m.opts.wk_syst:  return m.stbr_act(_('"Replace" is for "Syntax elements" turned off'))
             if m.opts.rp_lexa:  return m.stbr_act(_('"Replace" is for "Lexer path for all fragments" turned off'))
+            test    = m.do_acts(ag, 'test-oblig')
+            if test:            return test
             sep_h   = m.ag.cattr('pt', 'h')+10
             f_xyw   = m.ag.fattrs(('x', 'y', 'w'))
             attrs   = ('type', 'y', 'x', 'w', 'h', 'cap', 'a', 'val')
@@ -1379,22 +1392,40 @@ class Fif4D:
             rx      = ctrls['in_what']['x']
             pass;              #log("ctrls={}",pfw(ctrls))
             def on_ok(ag_, cid, data):
+                scam    = data if data else ag_.scam()
+                if do_rplc and scam=='s':           return ag_.hide('emul')
+                if do_emul:                         return ag_.hide('emul')
                 if app.ID_YES!=msg_box(_('Replace all in files/tabs?')
                                       , app.MB_YESNO+app.MB_ICONQUESTION):   return []
             def do_key_down(ag_, key, data=''):
                 scam    = data if data else ag_.scam()
-                if (scam,key)==( 'c',ord('A')):
+                if False:pass
+                elif do_rplc and (scam,key)==(  '',VK_F4):  ag_.hide('rplc')
+                elif do_rplc and (scam,key)==( 's',VK_F4):  ag_.hide('emul')
+                elif do_emul and (scam,key)==(  '',VK_F4):  pass
+                elif do_emul and (scam,key)==( 's',VK_F4):  ag_.hide('emul')
+                elif (scam,key)==( 'c',ord('A')):
                     vr_sgn  = m.var_acts('ask', _('With'))
-                    if not vr_sgn:  return []
+                    if not vr_sgn:                  return []
                     cval    = ag_.val('repl')+vr_sgn
                     return      d(ctrls=d(repl=d(val=cval)))     # Ctrl+A
-                else:  return   []
+                else:                               return []
                 return          False
                #def do_key_down
+            REPL_H  = _('Pattern to replace.\rRegExp found groups are \\1, \\2, ...')
+            RPLC_H  = _('Click or F4 - Start replacements'
+                      '\rShift+Click or Shift+F4 - Start emulation:'
+                      '\r  show report of replacements'
+                      '\r  and do not make changes.') \
+                            if do_rplc else \
+                      _('Click or Shift+F4 - Start emulation:'
+                      '\r  show report of replacements'
+                      '\r  and do not make changes.')
+            RPLC_C  = _('R&eplace') if do_rplc else _('&Emulate')
             ctrls.update(
-                rep_=d(tp='labl',tid='repl' ,x=5    ,r=rx-5 ,cap='>'+_('With:')
-              ),repl=d(tp='cmbx',y=ry       ,x=rx   ,r=-5   ,items=m.opts.vw.repl_l ,val=m.opts.in_repl ,a='r>' 
-              ),rplc=d(tp='bttn',y=  3      ,w=80   ,r=-5   ,cap=_('&Replace')      ,on=on_ok           ,a='>>' ,def_bt=True# &R Enter
+                rep_=d(tp='labl',tid='repl' ,x=5    ,r=rx-5 ,cap='>'+_('With:')     ,hint=REPL_H
+              ),repl=d(tp='cmbx',y=ry       ,x=rx   ,r=-5   ,items=m.opts.vw.repl_l ,val=m.opts.in_repl     ,a='r>' 
+              ),rplc=d(tp='bttn',y=  3      ,w=80   ,r=-5   ,cap=RPLC_C             ,hint=RPLC_H,on=on_ok   ,a='>>' ,def_bt=True# &R Enter
                         ))
             pass;              #log("ctrls={}",pfw(ctrls))
             bt,vs   = DlgAg(
@@ -1407,13 +1438,25 @@ class Fif4D:
                  ).show()
             m.ag.activate()
             m.ag.update(fid=self.cid_what())
-            if bt!='rplc':  return []
+            if bt not in ('rplc', 'emul'):  return []
             m.opts.in_repl      = vs['repl']
             m.opts.vw.repl_l    = add_to_history(m.opts.in_repl, m.opts.vw.repl_l, unicase=False)
-            return m.do_acts(ag, 'di_rplc')
+            return m.do_acts(ag, 'di_emul' if bt=='emul' else 'di_rplc')
         
-        if aid=='di_rplc':                         #NOTE: Find and replace
+        if aid=='di_rplc':                      #Find and replace
             m.work(ag, 'rplc')
+            return []
+        if aid=='di_emul':                      #Find and emulate replace
+            m.work(ag, 'emul')
+            return []
+
+        if aid=='test-oblig':                   #Control obligatory fields
+            if not m.opts.in_what:
+                m.stbr_act(f(_('Fill the field "{}"')   , m.caps['in_what']))   ;return d(fid=self.cid_what(True))
+            if not m.opts.wk_incl:
+                m.stbr_act(f(_('Fill the field "{}"')   , m.caps['wk_incl']))   ;return d(fid='wk_incl')
+            if not m.opts.wk_fold:
+                m.stbr_act(f(_('Fill the field "{}"')   , m.caps['wk_fold']))   ;return d(fid='wk_fold')
             return []
 
         pass;                   msg_box('??do '+aid)
@@ -1580,8 +1623,10 @@ class Fif4D:
         nm_scope= [(
     ),d(tag='a:di_brow'     ,cap=_('Choose start &folder')+DDD
        ,key='Ctrl+B'
-    ),d(tag='a:di_brow:file',cap=_('Choose fil&e to find in it')+DDD   
+    ),d(tag='a:di_brow:file',cap=_('Choose fil&e to find in it')+DDD
        ,key='Ctrl+Shift+B' 
+    ),d(tag='a:fold_sh'     ,cap=_('C&ut last folder segment')
+       ,key='Ctrl+Shift+Up' 
     ),d(                     cap='-'
     ),d(tag='a:ac_usec:fold',cap=_('Use folder of the &current file')
         ,en=bool(ed.get_filename())
@@ -1642,6 +1687,8 @@ class Fif4D:
     ),d(                 cap='-'
     ),d(tag='rplc'      ,cap=_('Replace with...')
        ,key='F4' 
+    ),d(tag='emul'      ,cap=_('Emulate Replace with...')
+       ,key='Shift+F4' 
     ),d(tag='fast'      ,cap=_('Fast search (ignore some options)')
        ,key='Shift+F2' 
     ),d(tag='rslt-to-tab',cap=_('Copy Results to new tab')
@@ -1748,6 +1795,8 @@ class Fif4D:
             if  ctrl['tp'] in ('chbt', 'bttn'):
                 ctrl['on']  = m.do_acts
 
+        ctrls['di_rslt']['on_click_dbl']    = lambda ag, aid, data='': m.do_acts(ag, 'nav-to')
+        ctrls['di_srcf']['on_click_dbl']    = lambda ag, aid, data='': m.do_acts(ag, 'nav-to')
         ctrls['di_rslt']['on_caret']        = lambda ag, aid, data='': \
             [] if app.timer_proc(app.TIMER_START_ONE, m.on_timer, M.TIMER_DELAY, tag='on_rslt_crt') else []
         ctrls['di_menu']['on_menu']         = m.do_menu
@@ -1962,6 +2011,7 @@ class Fif4D:
         elif skef==( 'a',VK_DOWN, 'in_whaM'):           upd=m.do_acts(ag, 'hist')               # Alt+DOWN    in mlined what
         elif skef==( 's',VK_ENTER,'in_what'):           upd=m.do_acts(ag, 'addEOL')             # Shift+Enter in slined what
 #       elif skey==('sa',ord('.')):                     upd=m.do_acts(ag, 'escape')             # Shift+Alt+.
+        elif skey==('sc',VK_UP):                        upd=m.do_acts(ag, 'fold_sh')            # Shift+Ctrl+UP
         elif skey==( 'c',VK_UP):                        upd=m.do_dept(ag, 'depU')               # Ctrl+UP
         elif skey==( 'c',VK_DOWN):                      upd=m.do_dept(ag, 'depD')               # Ctrl+DN
         elif skey==( 'c',ord('U')):                     upd=m.do_acts(ag, 'ac_usec', 'fold')    # Ctrl      +U
@@ -1978,6 +2028,7 @@ class Fif4D:
         
         # Find/Results/Source
         elif skey==(  '',VK_F4):                        upd=m.do_acts(ag, 'rplc')               #       F4
+        elif skey==( 's',VK_F4):                        upd=m.do_acts(ag, 'emul')               # Shift+F4
         elif skey==(  '',VK_F2):                        upd=m.do_acts(ag, 'di_find')            #       F2
         elif skey==( 's',VK_F2):                        upd=m.do_acts(ag, 'di_find', 'fast')    # Shift+F2
         elif skef==('sc',187, 'di_rslt'):               upd=m.do_acts(ag, 'vi_fldi_ta')         # Ctrl+Shift+=  in rslt
@@ -2178,7 +2229,7 @@ class Fif4D:
                                                 # is skipped after set_prop(PROP_LEXER_FILE)
             return 
         
-        if act=='on_rslt_fld':                   # Show Source and select fragment
+        if act=='on_rslt_fld':                  # Show Source and select fragment
             doall   = par
             fldi_l  = m.rslt.folding(app.FOLDING_GET_LIST)
             if not fldi_l:                      return []
@@ -2363,17 +2414,14 @@ class Fif4D:
         wopts.wk_incl = m.var_acts('repl', wopts.wk_incl)
         wopts.wk_excl = m.var_acts('repl', wopts.wk_excl)
         wopts.wk_fold = m.var_acts('repl', wopts.wk_fold)
-        wopts.in_rplc = (data=='rplc')
+        wopts.in_rplc = (data=='rplc' or data=='emul')
+        wopts.in_emul = (data=='emul')
         wopts.in_repl = m.var_acts('repl', wopts.in_repl)
         pass;                  #log("wopts={}",pfw(wopts))
 
         # Inspect user values
-        if not wopts.in_what:
-            m.stbr_act(f(_('Fill the field "{}"')           , m.caps['in_what']))   ;return d(fid=self.cid_what(True))
-        if not wopts.wk_incl:
-            m.stbr_act(f(_('Fill the field "{}"')           , m.caps['wk_incl']))   ;return d(fid='wk_incl')
-        if not wopts.wk_fold:
-            m.stbr_act(f(_('Fill the field "{}"')           , m.caps['wk_fold']))   ;return d(fid='wk_fold')
+        test    = m.do_acts(ag, 'test-oblig')
+        if test:                                                                     return test
         if 0 != wopts.wk_fold.count('"')%2:
             m.stbr_act(f(_('Fix quotes in the field "{}"')  , m.caps['wk_fold']))   ;return d(fid='wk_fold')
         if 0 != wopts.wk_incl.count('"')%2:
@@ -2466,13 +2514,16 @@ class Fif4D:
         
         # Main work
         pass;                  #log("m.working={}",(m.working))
+        rplc    =(RPLC_NO if not wopts.in_rplc else
+                  RPLC_DO if not wopts.in_emul else
+                  RPLC_EM)
         if False:
 #       if _dev_kv:                             # UNSAFE work
-            fifwork(    m.observer, m.rslt, walkers, fragmer, frgfilters, m.reporter, wopts.in_rplc)
+            fifwork(    m.observer, m.rslt, walkers, fragmer, frgfilters, m.reporter, rplc=rplc)
         else:                                   # SAFE work: with lock/try/finally
             lock_act('lock')
             try:
-                fifwork(m.observer, m.rslt, walkers, fragmer, frgfilters, m.reporter, wopts.in_rplc)
+                fifwork(m.observer, m.rslt, walkers, fragmer, frgfilters, m.reporter, rplc=rplc)
             except Exception as ex:
                 log(traceback.format_exc()) 
                 msg_box(f'Internal Error:\n{ex}'
@@ -2941,8 +2992,11 @@ def fit_enco(fn, enco_l, enco_ms):
                 enco_l  = [enco_ms[msk]]+enco_l
     return enco_l
    #def fit_enco
-    
-def fifwork(observer, ed4rpt, walkers, fragmer, frgfilters, reporter, rplc=False):
+   
+RPLC_NO = 0 
+RPLC_DO = 1 
+RPLC_EM = 2 
+def fifwork(observer, ed4rpt, walkers, fragmer, frgfilters, reporter, rplc=RPLC_NO):
     pass;                       log4fun=0
     pass;                      #log4fun=_log4fun_fifwork
     pass;                      #log__('observer,walkers,fragmer,reporter={}',(observer,walkers,fragmer,reporter)         ,__=(log4fun,)) if _log4mod>=0 else 0
@@ -2997,7 +3051,7 @@ def fifwork(observer, ed4rpt, walkers, fragmer, frgfilters, reporter, rplc=False
                     body,enc= walker.path2body_enc(fn, d(enco=enco))
                     found   = False
                     pass;      #log__("type(body)={}",(type(body))         ,__=(log4fun,)) if _log4mod>=0 else 0
-                    for frgs in fragmer.provide_frag(body, build_new_body=rplc):
+                    for frgs in fragmer.provide_frag(body, build_new_body=(rplc!=RPLC_NO)):
                         pass;  #log__("frgs={}",(frgs)         ,__=(log4fun,)) if _log4mod>=0 else 0
                         filter_ok   = True
                         for flt in frgfilters:
@@ -3009,7 +3063,7 @@ def fifwork(observer, ed4rpt, walkers, fragmer, frgfilters, reporter, rplc=False
                         reporter.add_frg(fn, frgs)
                         found   = True
                        #for frgs
-                    if found and rplc:
+                    if found and (rplc==RPLC_DO):
                          walker.body2path(fragmer.get_new_body(), fn, enc)
                 except UnicodeError as ex:
                     print(f'Cannot read "{fn}": ({enco}) {ex}')     if enco_n==len(enco_l)-1 else 0
@@ -3030,8 +3084,10 @@ def fifwork(observer, ed4rpt, walkers, fragmer, frgfilters, reporter, rplc=False
         if observer.need_break:
             break#for walk
        #for walker
-    fin_msg = (_('Replacements terminated') if observer.need_break else _('Replacements completed')) \
-                if rplc else \
+    fin_msg = (_('Emulation terminated')    if observer.need_break else _('Emulation completed')) \
+                if (rplc==RPLC_EM) else \
+              (_('Replacements terminated') if observer.need_break else _('Replacements completed')) \
+                if (rplc==RPLC_DO) else \
               (_('Search terminated')       if observer.need_break else _('Search completed'))
     observer.dlg_status('msg', fin_msg)
     reporter.finish()
@@ -3797,15 +3853,22 @@ class TabsWalker:
         tab_id   = path[len('tab:'):].split('/')[0]
         tab_ed   = apx.get_tab_by_id(tab_id)
         if not tab_ed:                  raise ValueError()
-        tab_ed.replace(0,0                       # Start
-                      ,0,tab_ed.get_line_count() # After the End - to replace whole text
-                      ,body)
-        tab_ed.set_caret(0, 0)
+        if tab_ed.get_line_count() != len(body):
+            tab_ed.replace(0,0                       # Start
+                          ,0,tab_ed.get_line_count() # After the End - to replace whole text
+                          ,'\n'.join(body))
+            tab_ed.set_caret(0, 0)
+        else:
+#           tab_ed.set_prop(app.PROP_UNDO_GROUPED, True)
+            for lnum, new_line in enumerate(body):
+                old_line    = tab_ed.get_text_line(lnum)
+                if new_line==old_line: continue
+                tab_ed.set_text_line(lnum, new_line)
+#           tab_ed.set_prop(app.PROP_UNDO_GROUPED, False)
        #def body2path
      
     
     def path2body_enc(self, path, ops=None):
-#   def path2body(self, path, ops=None):
         if not path.startswith('tab:'):  return ''
         tab_id   = path[len('tab:'):].split('/')[0]
         tab_ed   = apx.get_tab_by_id(tab_id)
@@ -3980,7 +4043,7 @@ class FSWalker:
     
     
     def body2path(self, body, path, enc):
-        open(path, 'wt', encoding=enc).write(body)
+        open(path, 'wt', encoding=enc).write('\n'.join(body))
        #def body2path
     
     
@@ -4138,13 +4201,15 @@ class Fragmer:
 
 
         def get_new_body(self):
-            return '\n'.join(self.new_body)
+            return self.new_body
+#           return '\n'.join(self.new_body)
            #def get_new_body
         
             
         def provide_frag(self, itlines, build_new_body=False):            #NOTE: Stream walk
             pass;              #log("build_new_body={}, self.in_opts={}",build_new_body, self.in_opts)
-            itlines = itlines.splitlines() if likesstr(itlines) else itlines
+            itlines = itlines.split('\n')  if likesstr(itlines) else itlines
+#           itlines = itlines.splitlines() if likesstr(itlines) else itlines
             self.new_body   = [] if build_new_body else None
             for rw,line in enumerate(itlines):
                 found       = False
@@ -4188,7 +4253,8 @@ class Fragmer:
 
 
         def get_new_body(self):
-            return '\n'.join(self.new_body)
+            return self.new_body
+#           return '\n'.join(self.new_body)
            #def get_new_body
         
             
@@ -4316,14 +4382,19 @@ class Observer:
 
     def opts_desc(self):
         what    = Fif4D.FIT_OPT4SL(self.opts.in_what)
+        repl    = self.opts.in_repl
         fnd     = Fif4D.I4OP_CA(self.opts, wo_enco=True ,wo_lexa=True).strip().replace('  ', ' ')
-        rpt    = (''
+        rpt     = (''
                 + (Fif4D.CNTX_CA(self.opts)[1:]+' ' if self.opts.rp_cntx else '')
                 + (Fif4D.LEXA_CA(self.opts)    +' ' if self.opts.rp_lexa else '')
                 + (_('styles ') if COPY_STYLES else '')
                 ).strip().replace('  ', ' ')
-        desc    = _('+Search')+f' "{what}"' \
-                + (_(' with')+f' [{fnd}]'          if fnd else '') \
+        desc    = _('+EMULATION: Replace')+f' "{what}" with "{repl}"' \
+                    if self.opts.in_rplc and self.opts.in_emul else \
+                  _('+Replace')+f' "{what}" with "{repl}"' \
+                    if self.opts.in_rplc else \
+                  _('+Search')+f' "{what}"'
+        desc   += (_(' when')+f' [{fnd}]'          if fnd else '') \
                 + (_('. Report with')+f' [{rpt}].' if rpt else '')
         return desc
        #def opts_desc
@@ -4638,7 +4709,9 @@ ToDo
 [ ][kv-kv][04oct19] Flicker on start if prev pattern has many lines
 [+][kv-kv][04oct19] Var submenu when click on "="
 [ ][kv-kv][08oct19]? Show % of work for files
-[ ][kv-kv][11nov19] DblClick==Enter in Results/Source
+[+][kv-kv][11nov19] DblClick==Enter in Results/Source
 [ ][kv-kv][16jun20] No results for search in tabs if titles with extension: 'name.ext • folder'
 [+][kv-kv][21jun20] Add var to Replace 'With:'
+[+][kv-kv][22jun20] Replace in tab: change line not whole text
+[+][kv-kv][13jul20] Replace: preview w/o changes
 '''

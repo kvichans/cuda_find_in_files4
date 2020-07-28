@@ -525,7 +525,7 @@ class DlgAg:
         """ Arrange and fill all: controls attrs, form attrs, focus.
             Params
                 ctrls   [(name, {k:v})] or {name:{k:v}} 
-                            NB! Only from 5.7 Python saves key sequence for dict.
+                            NB! Only from 3.7 Python saves key sequence for dict.
                                 The sequence is important for tab-order of controls.
                 form    {k:v}
                 vals    {name:v}
@@ -1436,6 +1436,7 @@ class DlgAg:
             out         += '}'
             return out
         srp     = f'# >>> exec(open(r"{rerpo_fn}", encoding="UTF-8").read())'
+        srp    += l+ 'from cudatext import *'
         srp    += l+ 'idd=dlg_proc(0, DLG_CREATE)'
         srp    += l
         cids    = []
@@ -1460,6 +1461,7 @@ class DlgAg:
             if not prC.get('focused', False):           prC.pop('focused', None)
             if prC.get('vis', True):                    prC.pop('vis', None)
             if prC.get('en', True):                     prC.pop('en', None)
+            if not prC.get('p', ''):                    prC.pop('p', None)
             name = prC['name']
             c_pr = self.ctrls[name].copy()
             c_pr = self._prepare_vl_it_cl(c_pr, c_pr, name)
