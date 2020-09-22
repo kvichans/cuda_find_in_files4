@@ -2,7 +2,7 @@
 Authors:
     Andrey Kvichansky   (kvichans on github.com)
 Version:
-    '4.7.02 2020-07-28'
+    '4.7.03 2020-07-31'
 '''
 
 import  re, os, traceback, locale, itertools, codecs, time, collections, datetime as dt #, types, json
@@ -266,6 +266,14 @@ MDMD        = '\N{MIDDLE DOT}'*2
 SORT_DN     = '\N{DOWNWARDS ARROW}'*2
 SORT_UP     = '\N{UPWARDS ARROW}'*2
 FF_EOL      = '\N{SECTION SIGN}'
+POS_CHAR    = 'XY'
+#LF_RT_AR    = '\N{LEFT RIGHT ARROW}'
+#UP_DN_AR    = '\N{UP DOWN ARROW}'
+POS_CHAR    = '\N{NORTH WEST ARROW TO CORNER}'
+SIZE_CHAR   = 'HW'
+#SIZE_CHAR   = UP_DN_AR+LF_RT_AR
+#SIZE_CHAR   = '\N{DOWNWARDS ARROW LEFTWARDS OF UPWARDS ARROW}'
+SIZE_CHAR   = '\N{SOUTH EAST ARROW TO CORNER}'
 
 ############################################
 ############################################
@@ -528,8 +536,10 @@ class Fif4D:
                             +(f(' from "{}" ',ps['wk_fold'].strip()[:20].strip())   if 'wk_fold' in ps else '')
                             +(f(' ({}) '    , Fif4D.DEPT_UL[ps['wk_dept']])         if 'wk_dept' in ps else '')
                             +( Fif4D.I4OP_CA(ps)                                                              )
-                            +(' XY '                                                if 'la_fmxy' in ps else '')
-                            +(' HW '                                                if 'la_fmwh' in ps else '')
+                            +(' '+POS_CHAR+' '                                      if 'la_fmxy' in ps else '')
+#                           +(' XY '                                                if 'la_fmxy' in ps else '')
+                            +(' '+SIZE_CHAR+' '                                     if 'la_fmwh' in ps else '')
+#                           +(' HW '                                                if 'la_fmwh' in ps else '')
                             +(']' if wnm else '')
                             ).replace('  ',' ').strip()
     
@@ -1169,9 +1179,10 @@ class Fif4D:
                                 ,rp_cntx=d(cap=m.cntx_ca())))
             if aid=='ps_menu':
                 ps_num = app.dlg_menu(app.MENU_LIST, '\n'.join([
-                      ps['nm']+'\t'+M.ZIP_PS4MENU(ps, False)+
-                      (f' [Ctrl+{nps}]' if nps<10 else '')
-                      for nps,ps in enumerate(m.opts.ps_pset, 1)]))
+                              ps['nm']+'\t'+M.ZIP_PS4MENU(ps, False)+
+                              (f' [Ctrl+{nps}]' if nps<10 else '')
+                              for nps,ps in enumerate(m.opts.ps_pset, 1)])
+                      ,   caption=_('Preset to apply'))
                 if ps_num is None: return []
                 aid  = 'ps_load_'+str(ps_num)
 
@@ -1399,17 +1410,21 @@ class Fif4D:
                                       , app.MB_YESNO+app.MB_ICONQUESTION):   return []
             def do_key_down(ag_, key, data=''):
                 scam    = data if data else ag_.scam()
+                upd     = {}
                 if False:pass
                 elif do_rplc and (scam,key)==(  '',VK_F4):  ag_.hide('rplc')
                 elif do_rplc and (scam,key)==( 's',VK_F4):  ag_.hide('emul')
                 elif do_emul and (scam,key)==(  '',VK_F4):  pass
                 elif do_emul and (scam,key)==( 's',VK_F4):  ag_.hide('emul')
-                elif (scam,key)==( 'c',ord('A')):
+                elif (scam,key)==( 'c',VK_DOWN):                # Ctrl+Dn
+                    upd     = d(vals=d(repl=ag_.val('in_what')))
+                elif (scam,key)==( 'c',ord('A')):               # Ctrl+A
                     vr_sgn  = m.var_acts('ask', _('With'))
                     if not vr_sgn:                  return []
                     cval    = ag_.val('repl')+vr_sgn
-                    return      d(ctrls=d(repl=d(val=cval)))     # Ctrl+A
+                    upd     = d(ctrls=d(repl=d(val=cval)))
                 else:                               return []
+                ag_.update(upd)
                 return          False
                #def do_key_down
             REPL_H  = _('Pattern to replace.\rRegExp found groups are \\1, \\2, ...')
@@ -4714,4 +4729,5 @@ ToDo
 [+][kv-kv][21jun20] Add var to Replace 'With:'
 [+][kv-kv][22jun20] Replace in tab: change line not whole text
 [+][kv-kv][13jul20] Replace: preview w/o changes
+[ ][kv-kv][13jul20] Replace: copy What to Replace by Ctrl+Dn
 '''
