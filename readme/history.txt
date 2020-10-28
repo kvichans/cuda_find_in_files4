@@ -1,4 +1,7 @@
-﻿4.7.03 2020-07-31
+﻿4.8.01 2020-10-28
+added: API to run with parameters (15 keys)
+
+4.7.03 2020-07-31
 added: Ctrl+Down to copy "Find" to "With" in dialog [FiF]Replace
 
 4.7.02 2020-07-28

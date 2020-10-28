@@ -2,7 +2,7 @@
 Authors:
     Andrey Kvichansky   (kvichans on github.com)
 Version:
-    '4.7.03 2020-07-31'
+    '4.8.01 2020-10-28'
 '''
 
 import  re, os, traceback, locale, itertools, codecs, time, collections, datetime as dt #, types, json
@@ -348,8 +348,37 @@ class Command:
 
 the_fif4    = None
 def show_fif4(run_opts=None):
+    """ Parameter run_opts can be dict as this
+            {'with': {   # Default values
+                'in_reex': False,
+                'in_case': False,
+                'in_word': False,
+                'in_what': '',      # What to find
+                'wk_fold': '',      # Start the folder(s)
+                'wk_incl': '',      # Mask(s) for files or subfolders
+                'wk_excl': '',      # Mask(s) to skipped files or subfolders
+                'wk_dept': 0,       # Depth of walk: 0=all, 1=root(s), 2=root(s)+1, ...
+                'wk_sort': '',      # Sort by date before use: new|old
+                'wk_skip': '',      # Skip hidden/binary files: -h|-b|-h-b
+                'wk_sycm': '',      # Only in/out syntax element "comment": in|ot
+                'wk_syst': '',      # Only in/out syntax element "string": in|ot
+                'rp_cntx': False,   # (Report) Catch fragments with extra lines
+                'rp_cntb': 0,       # (Report) Number extra lines before
+                'rp_cnta': 0,       # (Report) Number extra lines after
+            }}
+        Values for skipped keys will be set from dialog hystory.
+        
+        Example
+            from cuda_find_in_files4 import show_fif4
+            show_fif4({'with': {
+                'in_what': 'def',
+                'wk_fold': '.', 
+                'wk_incl': '*.py'
+            }})
+        
+    """
     global the_fif4
-    the_fif4    = the_fif4 if the_fif4 else Fif4D()
+    the_fif4    = the_fif4 if the_fif4 else Fif4D(run_opts)
     the_fif4.show(run_opts)
    #def show_fif4
 
@@ -555,6 +584,7 @@ class Fif4D:
     done_finds_pos  = 0                         # Pos of last loaded
     
     def __init__(self, run_opts=None):
+        """ Param run_opts - see show_fif4 """
         M,m     = type(self),self
         run_opts= run_opts if run_opts else {}
         m.ropts = run_opts
@@ -603,6 +633,9 @@ class Fif4D:
         pref    = prefix_for_opts()
         hi_opts = fget_hist([pref, 'opts'] if pref else 'opts', {})
         m.opts  = update_tree(m.opts, hi_opts)
+        pass;                  #log("run_opts={}",pfw(run_opts))
+        m.opts  = update_tree(m.opts, run_opts.get('with', {}))
+        pass;                  #log("m.opts={}",pfw(m.opts))
         
         # Upgrade
         m.opts.vw.what_l.remove('') if '' in m.opts.vw.what_l else 0
@@ -2040,6 +2073,10 @@ class Fif4D:
         elif ('c',ord('1'))<=skey<=('c',ord('9')):      upd=m.do_acts(ag, 'ps_load_'+ckey1)     # Ctrl+1..9
         elif skey==( 'c',ord('A')) and in_edct:         upd=m.do_acts(ag, 'vr-add')             # Ctrl+      A
         elif skey==('sc',ord('A')):                     upd=m.do_acts(ag, 'vr-sub')             # Ctrl+Shift+A
+#       elif skey==('a', 190):  
+#           pass;               log("m.opts.in_reex={}",(m.opts.in_reex))
+#           m.opts.in_reex  = not m.opts.in_reex;       upd=d(fid=self.cid_what())              # Alt+ю as Alt+.
+#           m.opts.in_reex  = not m.opts.in_reex;       upd=m.do_acts(ag, 'in_reex')            # Alt+ю as Alt+.
         
         # Find/Results/Source
         elif skey==(  '',VK_F4):                        upd=m.do_acts(ag, 'rplc')               #       F4
