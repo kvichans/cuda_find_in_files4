@@ -1,4 +1,4 @@
-﻿import re
+import re
 from              .cd_kv_base    import *        # as part of this plugin
 try:    _   = get_translation(__file__)
 except: _   = lambda p:p
@@ -399,10 +399,10 @@ DLG_HELP_KEYS = _t('DLG_HELP_KEYS', _('DLG_HELP_KEYS'), _(r'''
 │                Command                │       Hotkey       │              Comment               │
 ╞═══════════════════════════════════════╪════════════════════╪════════════════════════════════════╡
 │ Find                                  │              Alt+D │                                    │
-│ Find                                  │              Enter │ Except for focus in multi-line     │
-│                                       │                    │  Find or in Results or in Source   │
+│ Find                                  │              Enter │ If focus not in controls:          │
+│                                       │                    │   multi-line Find, Results, Source │
 │ Find                                  │                 F2 │                                    │
-│ Find as fast as posible               │           Shift+F2 │ Skipping the slowing options       │
+│ Find as fast as posible               │           Shift+F2 │ Skips all slow options             │
 │ Replace                               │                 F4 │                                    │
 ├───────────────────────────────────────┼────────────────────┼────────────────────────────────────┤
 │ Go to next found fragment             │                 F3 │                                    │
@@ -413,7 +413,7 @@ DLG_HELP_KEYS = _t('DLG_HELP_KEYS', _('DLG_HELP_KEYS'), _(r'''
 │ Open found fragment and close dialog  │        Shift+Enter │ If focus in Results/Source         │
 │ Copy Results to new tab               │   Ctrl+Shift+Enter │                                    │
 ├───────────────────────────────────────┼────────────────────┼────────────────────────────────────┤
-│ Put focus to Results                  │         Ctrl+Enter │ Except for focus in Results/Source │
+│ Put focus to Results                  │         Ctrl+Enter │ If focus not in Results/Source     │
 │ Move focus: Results >> Source >> Find │                Tab │                                    │
 │ Move focus: Results << Source << Find │          Shift+Tab │                                    │
 ├───────────────────────────────────────┼────────────────────┼────────────────────────────────────┤
@@ -430,9 +430,9 @@ DLG_HELP_KEYS = _t('DLG_HELP_KEYS', _('DLG_HELP_KEYS'), _(r'''
 │ Append newline char "§" to "Find"     │        Shift+Enter │ If focus in sigle-line Find        │
 ├───────────────────────────────────────┼────────────────────┼────────────────────────────────────┤
 │ Fold/Unfold the caret branch          │             Ctrl+= │ If focus in Results                │
-│ Fold/Unfold all branches              │       Ctrl+Shift+= │ By state of the caret branch       │
+│ Fold/Unfold all branches              │       Ctrl+Shift+= │ By state of the branch under caret │
 ├───────────────────────────────────────┼────────────────────┼────────────────────────────────────┤
-│ Load preset #1/#2/../#9               │      Ctrl+1/2/../9 │ All presets available via menu     │
+│ Load preset #1/#2/../#9               │      Ctrl+1/2/../9 │ All presets are available via menu │
 │ Create new preset                     │             Ctrl+S │                                    │
 │ Choose preset to apply                │              Alt+S │                                    │
 │ Restore prev/next executed parameters │            Alt+←/→ │                                    │
@@ -450,7 +450,7 @@ DLG_HELP_KEYS = _t('DLG_HELP_KEYS', _('DLG_HELP_KEYS'), _(r'''
 │ Show dialog "Help"                    │             Ctrl+H │                                    │
 ├───────────────────────────────────────┼────────────────────┼────────────────────────────────────┤
 │ Call CudaText's "Find" dialog         │             Ctrl+F │ Pattern and search options         │
-│ Call CudaText's "Replace" dialog      │             Ctrl+R │ will be copied                     │
+│ Call CudaText's "Replace" dialog      │             Ctrl+R │   will be copied                   │
 └───────────────────────────────────────┴────────────────────┴────────────────────────────────────┘
 ''')).strip()
 
