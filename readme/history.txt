@@ -1,4 +1,7 @@
-﻿4.8.01 2020-10-28
+4.8.02 2021-01-20
+fix: compatability with Python 3.9 (fix by Alexey)
+
+4.8.01 2020-10-28
 added: API to run with parameters (15 keys)
 
 4.7.03 2020-07-31
