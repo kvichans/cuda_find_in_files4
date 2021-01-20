@@ -1,8 +1,9 @@
-﻿''' Plugin for CudaText editor
+''' Plugin for CudaText editor
 Authors:
     Andrey Kvichansky   (kvichans on github.com)
+    Alexey, micro fixes (CudaText)
 Version:
-    '4.8.01 2020-10-28'
+    '4.8.02 2021-01-20'
 '''
 
 import  re, os, traceback, locale, itertools, codecs, time, collections, datetime as dt #, types, json
@@ -1742,10 +1743,10 @@ class Fif4D:
     ),d(tag='rslt-to-tab',cap=_('Copy Results to new tab')
        ,key='Ctrl+Shift+Enter'  ,en=m.rslt.get_line_count()>1
     ),d(                 cap='-'
-    ),(*mn_i4op
-    ),d(                 cap='-'
-    ),(*mn_rslt
-                    )]
+    ),*mn_i4op
+    ,d(                 cap='-'
+    ),*mn_rslt
+                  ]
             , aid, where, dx, dy
             , cmd4all=self.wnen_menu            # All nodes have same handler
         )
