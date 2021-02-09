@@ -1,4 +1,10 @@
-﻿4.8.01 2020-10-28
+﻿4.8.02 2021-02-09
+added: "(EMULATION)" to title of Replace dialog if one will emulate
+fixed: No acts for menu items "[Emulate] Replace with..."
+fixed: Bad replacing with "\0" in replace pattern
+fixed: Crash on search pattern with EOL (after *nix paste)
+
+4.8.01 2020-10-28
 added: API to run with parameters (15 keys)
 
 4.7.03 2020-07-31

@@ -2,7 +2,7 @@
 Authors:
     Andrey Kvichansky   (kvichans on github.com)
 Version:
-    '4.8.01 2020-10-28'
+    '4.8.02 2021-02-09'
 '''
 
 import  re, os, traceback, locale, itertools, codecs, time, collections, datetime as dt #, types, json
@@ -1460,7 +1460,9 @@ class Fif4D:
                 ag_.update(upd)
                 return          False
                #def do_key_down
-            REPL_H  = _('Pattern to replace.\rRegExp found groups are \\1, \\2, ...')
+            REPL_H  = _('Pattern to replace with.'
+                      '\rTo substitute found RegEx groups: \\1, \\2, ...'
+                      '\rTo substitute the entire match: \\g<0> or \\0')
             RPLC_H  = _('Click or F4 - Start replacements'
                       '\rShift+Click or Shift+F4 - Start emulation:'
                       '\r  show report of replacements'
@@ -1476,9 +1478,10 @@ class Fif4D:
               ),rplc=d(tp='bttn',y=  3      ,w=80   ,r=-5   ,cap=RPLC_C             ,hint=RPLC_H,on=on_ok   ,a='>>' ,def_bt=True# &R Enter
                         ))
             pass;              #log("ctrls={}",pfw(ctrls))
+            RPLC_C  = _('Replace') if do_rplc else _('Replace (EMULATION)')
             bt,vs   = DlgAg(
                   ctrls=ctrls
-                 ,form ={**f_xyw, **d(h=sep_h,h_max=sep_h  ,cap='['+DLG_CAP_BS+'] '+_('Replace') ,frame='resize'
+                 ,form ={**f_xyw, **d(h=sep_h,h_max=sep_h  ,cap='['+DLG_CAP_BS+'] '+RPLC_C ,frame='resize'
                         ,on_key_down=do_key_down)}
                  ,fid  ='repl'
                  ,opts =d(restore_position=False, negative_coords_reflect=True)
@@ -1487,7 +1490,7 @@ class Fif4D:
             m.ag.activate()
             m.ag.update(fid=self.cid_what())
             if bt not in ('rplc', 'emul'):  return []
-            m.opts.in_repl      = vs['repl']
+            m.opts.in_repl      = vs['repl'].replace(r'\0', r'\g<0>') if m.opts.in_reex else vs['repl']
             m.opts.vw.repl_l    = add_to_history(m.opts.in_repl, m.opts.vw.repl_l, unicase=False)
             return m.do_acts(ag, 'di_emul' if bt=='emul' else 'di_rplc')
         
@@ -1733,9 +1736,9 @@ class Fif4D:
     ),d(tag='opts'      ,cap=_('Engine options.&..')
        ,key='Ctrl+E' 
     ),d(                 cap='-'
-    ),d(tag='rplc'      ,cap=_('Replace with...')
+    ),d(tag='a:rplc'    ,cap=_('Replace with...')
        ,key='F4' 
-    ),d(tag='emul'      ,cap=_('Emulate Replace with...')
+    ),d(tag='a:emul'    ,cap=_('Emulate Replace with...')
        ,key='Shift+F4' 
     ),d(tag='fast'      ,cap=_('Fast search (ignore some options)')
        ,key='Shift+F2' 
@@ -2481,6 +2484,8 @@ class Fif4D:
         if 0 != wopts.wk_excl.count('"')%2:
             m.stbr_act(f(_('Fix quotes in the field "{}"')  , m.caps['wk_excl']))   ;return d(fid='wk_excl')
         if m.opts.in_reex:
+            if not m.opts.vw.mlin and '\n' in m.opts.in_what:
+                m.stbr_act(f(_('Fix EOL in the field "{}"') , m.caps['in_what']))   ;return d(fid=self.cid_what(True))
             try:
                 re.compile(m.opts.in_what)
             except Exception as ex:
@@ -4274,6 +4279,8 @@ class Fragmer:
                 if build_new_body:
                     if found:
                         new_line= self.pttn_r.sub(self.in_opts.in_repl, line)
+                        pass;  #log("  pttn_r={}",(self.pttn_r))
+                        pass;  #log(" in_repl={}",(self.in_opts.in_repl))
                         pass;  #log("    line={}",(line))
                         pass;  #log("new_line={}",(new_line))
                         shift   = 0
@@ -4767,4 +4774,10 @@ ToDo
 [+][kv-kv][22jun20] Replace in tab: change line not whole text
 [+][kv-kv][13jul20] Replace: preview w/o changes
 [ ][kv-kv][13jul20] Replace: copy What to Replace by Ctrl+Dn
+[ ][kv-kv][03nov20] Focus to pattern if empty results
+[ ][kv-kv][03nov20] New opt to change single/multylined patter only by command not by src selection
+[ ][kv-kv][03nov20] New (dlg field)|(pttn key): pattern "skip fragment"
+[+][ax-kv][07feb21] No menu acts to both Replace
+[ ][ax-kv][07feb21] Bad replace "\ba\w+" to "D\0"
+[ ][ax-kv][07feb21] pttn with EOL an end (linux pasting) breaks the search
 '''

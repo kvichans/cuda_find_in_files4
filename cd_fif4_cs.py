@@ -404,6 +404,7 @@ DLG_HELP_KEYS = _t('DLG_HELP_KEYS', _('DLG_HELP_KEYS'), _(r'''
 │ Find                                  │                 F2 │                                    │
 │ Find as fast as posible               │           Shift+F2 │ Skips all slow options             │
 │ Replace                               │                 F4 │                                    │
+│ Emulate Replace                       │           Shift+F4 │ Show replace report but no changes │
 ├───────────────────────────────────────┼────────────────────┼────────────────────────────────────┤
 │ Go to next found fragment             │                 F3 │                                    │
 │ Go to prev found fragment             │           Shift+F3 │                                    │
