@@ -1,8 +1,8 @@
-﻿''' Plugin for CudaText editor
+''' Plugin for CudaText editor
 Authors:
     Andrey Kvichansky   (kvichans on github.com)
 Version:
-    '4.8.02 2021-02-09'
+    '4.8.03 2021-03-03'
 '''
 
 import  re, os, traceback, locale, itertools, codecs, time, collections, datetime as dt #, types, json
@@ -1050,8 +1050,8 @@ class Fif4D:
             age_=d(tp='labl',tid='agef' ,x=  5  ,w= 50  ,cap='>'+_('Age:')                  ),
             agef=d(tp='edit',y= 5       ,x= 60  ,w= 75                          ,val=agef_n ),
             ageu=d(tp='cmbr',tid='agef' ,x=140  ,w=120  ,items=M.AGEF_UL        ,val=agef_ui),
-            okok=d(tp='bttn',y=35       ,x= 60  ,w= 75  ,cap='OK'   ,def_bt=True,on=CB_HIDE ),
-            nono=d(tp='bttn',y=35       ,x=140  ,w=120  ,cap='&All ages'        ,on=CB_HIDE ),
+            okok=d(tp='bttn',y=35       ,x= 60  ,w= 75  ,cap=_('OK')   ,def_bt=True,on=CB_HIDE ),
+            nono=d(tp='bttn',y=35       ,x=140  ,w=120  ,cap=_('&All ages')        ,on=CB_HIDE ),
                        )
                 ,form   =d(  h=65       ,w=265          ,cap=_('Search in files with the age (0 - in all)'))
                 ,fid    ='agef').show()
@@ -1112,9 +1112,9 @@ class Fif4D:
                     rsp[f'e{n}']=   d(tp='edit' ,y=0,r=0,w=0,vis=False)
                     rsp[f'c{n}']=   d(tp='bttn' ,y=0,r=0,w=0,vis=False)
                 return {**rsp, **d(
-                        addm=       d(tp='bttn' ,tid='okok' ,x=  5  ,w= 80  ,cap='&Add'                     ,on=on_add  ),
-                        remv=       d(tp='bttn' ,tid='okok' ,x= 90  ,w= 80  ,cap='&Remove'                  ,on=on_del  ),
-                        okok=       d(tp='bttn' ,y=-30      ,r= -5  ,w=125  ,cap='Save' ,def_bt=True        ,on=on_ok   ),
+                        addm=       d(tp='bttn' ,tid='okok' ,x=  5  ,w= 80  ,cap=_('&Add')                     ,on=on_add  ),
+                        remv=       d(tp='bttn' ,tid='okok' ,x= 90  ,w= 80  ,cap=_('&Remove')                  ,on=on_del  ),
+                        okok=       d(tp='bttn' ,y=-30      ,r= -5  ,w=125  ,cap=_('Save') ,def_bt=True        ,on=on_ok   ),
                 )}
             ret,vals= DlgAg(
                  ctrls  =cts()
