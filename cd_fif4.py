@@ -1,4 +1,4 @@
-''' Plugin for CudaText editor
+﻿''' Plugin for CudaText editor
 Authors:
     Andrey Kvichansky   (kvichans on github.com)
 Version:
@@ -154,6 +154,8 @@ W_EXCL_EDIT     = 150
 DOING_FRAGS     = 100
 GOTO_FIRST_FR   = False
 NSHOW_BIGGER    = 0
+REPL_X_SHIFT    = 0
+REPL_Y_SHIFT    = 0
 def reload_opts():                              #NOTE: reload_opts
     global          \
     WALK_F_PICKING  \
@@ -180,7 +182,9 @@ def reload_opts():                              #NOTE: reload_opts
    ,W_EXCL_EDIT     \
    ,DOING_FRAGS     \
    ,GOTO_FIRST_FR   \
-   ,NSHOW_BIGGER
+   ,NSHOW_BIGGER    \
+   ,REPL_X_SHIFT    \
+   ,REPL_Y_SHIFT    
     
     WALK_F_PICKING  = get_opt('file_picking_stage'          , meta_def('file_picking_stage'))
     WALK_DOWNTOP    = get_opt('from_deepest'                , meta_def('from_deepest'))
@@ -215,6 +219,8 @@ def reload_opts():                              #NOTE: reload_opts
     DOING_FRAGS     = max(DOING_FRAGS                       , meta_min('show_progress_fragments'))
     GOTO_FIRST_FR   = get_opt('goto_first_fragment'         , meta_def('goto_first_fragment'))
     NSHOW_BIGGER    = get_opt('dont_show_file_size_more(Kb)', meta_def('dont_show_file_size_more(Kb)'))
+    REPL_X_SHIFT    = get_opt('replace_x_shift'             , meta_def('replace_x_shift'))
+    REPL_Y_SHIFT    = get_opt('replace_y_shift'             , meta_def('replace_y_shift'))
     def fit_mark_style_for_attr(js:dict)->dict:
         """ Convert 
                 {"color_back":"", "color_font":"", "font_bold":false, "font_italic":false
@@ -1410,6 +1416,8 @@ class Fif4D:
             if test:            return test
             sep_h   = m.ag.cattr('pt', 'h')+10
             f_xyw   = m.ag.fattrs(('x', 'y', 'w'))
+            f_xyw['x']  += REPL_X_SHIFT
+            f_xyw['y']  += REPL_Y_SHIFT
             attrs   = ('type', 'y', 'x', 'w', 'h', 'cap', 'a', 'val')
             cids    = ('in_reex','in_case','in_word','di_i4o_','di_i4op'
                       ,'in_wh_t','in_what'

@@ -1,4 +1,8 @@
-﻿4.8.02 2021-02-09
+﻿4.8.03 2021-03-03
+added: Options to shift start pos of Replace sub-dialog
+fixed: i18n
+
+4.8.02 2021-02-09
 added: "(EMULATION)" to title of Replace dialog if one will emulate
 fixed: No acts for menu items "[Emulate] Replace with..."
 fixed: Bad replacing with "\0" in replace pattern
