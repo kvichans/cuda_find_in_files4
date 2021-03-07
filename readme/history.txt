@@ -1,4 +1,8 @@
-﻿4.8.03 2021-03-03
+﻿4.8.04 2021-03-06
+fixed: skip hidden files/dirs
+fixed: py 3.9 compatibility
+
+4.8.03 2021-03-03
 added: Options to shift start pos of Replace sub-dialog
 fixed: i18n
 

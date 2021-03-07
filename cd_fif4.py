@@ -2,7 +2,7 @@
 Authors:
     Andrey Kvichansky   (kvichans on github.com)
 Version:
-    '4.8.03 2021-03-03'
+    '4.8.04 2021-03-06'
 '''
 
 import  re, os, traceback, locale, itertools, codecs, time, collections, datetime as dt #, types, json
@@ -383,6 +383,11 @@ def show_fif4(run_opts=None):
             }})
         
     """
+#   lst1 = [1,2];   lst2 = [(*lst1,)]   ;print(f'lst2={lst2}')  # lst2=[(1, 2)]
+#   lst1 = [1,2];   lst2 = [*lst1]      ;print(f'lst2={lst2}')  # lst2=[1, 2]
+##  lst1 = [1,2];   lst2 = [(*lst1)]    ;print(f'lst2={lst2}')  # lst2=[1, 2]
+#   pass;                       return 
+
     global the_fif4
     the_fif4    = the_fif4 if the_fif4 else Fif4D(run_opts)
     the_fif4.show(run_opts)
@@ -1753,10 +1758,14 @@ class Fif4D:
     ),d(tag='rslt-to-tab',cap=_('Copy Results to new tab')
        ,key='Ctrl+Shift+Enter'  ,en=m.rslt.get_line_count()>1
     ),d(                 cap='-'
-    ),(*mn_i4op
-    ),d(                 cap='-'
-    ),(*mn_rslt
-                    )]
+#   ),(*mn_i4op,
+#   ),d(                 cap='-'
+#   ),(*mn_rslt,
+#                   )]
+    ),*mn_i4op
+     ,d(                 cap='-'
+    ),*mn_rslt
+                     ]
             , aid, where, dx, dy
             , cmd4all=self.wnen_menu            # All nodes have same handler
         )
@@ -4006,7 +4015,7 @@ class FSWalker:
         pass;                   log__('excls,excls_fo={}',(excls,excls_fo)         ,__=(log4fun,FSWalker.log4cls)) if _log4mod>=0 else 0
 
         binr    = 'b' in self.wk_opts.get('wk_skip', '')
-        hidn    = 'b' in self.wk_opts.get('wk_skip', '')
+        hidn    = 'h' in self.wk_opts.get('wk_skip', '')
         max_size= SKIP_FILE_SIZE*1024
         age_s   = self.wk_opts.get('wk_agef', '')   # \d+/(h|d|w|m|y)
         sort    = self.wk_opts.get('wk_sort', '')   # ''/'new'/'old'
@@ -4665,11 +4674,27 @@ def lru_search(pttn, src, flags=0):
 
 if os.name == 'nt':
     # For Windows use file attribute.
-    import ctypes
-    FILE_ATTRIBUTE_HIDDEN = 0x02
+#   import ctypes
+#   FILE_ATTRIBUTE_HIDDEN = 0x02
+    try:
+        import ctypes
+        FILE_ATTRIBUTE_HIDDEN = 0x02
+        warn_skip_hidden = False
+    except:
+        FILE_ATTRIBUTE_HIDDEN = 0   # To bypass ctypes problem
+        warn_skip_hidden = True
 def is_hidden_file(path:str)->bool:
     """ Cross platform hidden file/dir test  """
-    if os.name == 'nt':
+    global warn_skip_hidden
+    pass;                      #print(f"path={path}")
+#   if os.name == 'nt':
+#       # For Windows use file attribute.
+#       attrs   = ctypes.windll.kernel32.GetFileAttributesW(path)
+#       return bool(attrs & FILE_ATTRIBUTE_HIDDEN)
+    if os.name == 'nt' and warn_skip_hidden:
+        warn_skip_hidden = False
+        print(_('NOTE: Skipping option "skip hidden files/dirs". Pass the warning to app author.'))
+    if os.name == 'nt' and FILE_ATTRIBUTE_HIDDEN:
         # For Windows use file attribute.
         attrs   = ctypes.windll.kernel32.GetFileAttributesW(path)
         return bool(attrs & FILE_ATTRIBUTE_HIDDEN)
@@ -4786,6 +4811,6 @@ ToDo
 [ ][kv-kv][03nov20] New opt to change single/multylined patter only by command not by src selection
 [ ][kv-kv][03nov20] New (dlg field)|(pttn key): pattern "skip fragment"
 [+][ax-kv][07feb21] No menu acts to both Replace
-[ ][ax-kv][07feb21] Bad replace "\ba\w+" to "D\0"
+[+][ax-kv][07feb21] Bad replace "\ba\w+" to "D\0"
 [ ][ax-kv][07feb21] pttn with EOL an end (linux pasting) breaks the search
 '''
