@@ -296,11 +296,11 @@ FIF4_META_OPTS=[
         'chp': _('Dialog_layout'),
     },
 
-    {   'cmt': 'Full file path of log file (requires app restart).',
+    {   'cmt': _('Full file path of log file (requires app restart).'),
         'def': '',
         'frm': 'file',
         'opt': 'log_file',
-        'chp': 'Logging',
+        'chp': _('Logging'),
     },
     ]
 
