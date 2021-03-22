@@ -296,11 +296,11 @@ FIF4_META_OPTS=[
         'chp': _('Dialog_layout'),
     },
 
-    {   'cmt': 'Full file path of log file (requires app restart).',
+    {   'cmt': _('Full file path of log file (requires app restart).'),
         'def': '',
         'frm': 'file',
         'opt': 'log_file',
-        'chp': 'Logging',
+        'chp': _('Logging'),
     },
     ]
 
@@ -362,7 +362,8 @@ i4op_hi = f(_('{OTH4FND}. '
             '\nUse popup menu to change.'), OTH4FND=OTH4FND)
 WHA__CA = '>*'+_('&Find:')
 INC__CA = '>*'+_('F&iles:')
-EXC__CA = '>'+_('Ex&:')
+EXC__CA = '>'+_('Skip&:')
+#EXC__CA = '>'+_('Ex&:')
 FOL__CA = '>*'+_('F&rom:')
 what_hi = _('Pattern to find. '
             '\nIt can be multi-line. Newline is shown as "§".'

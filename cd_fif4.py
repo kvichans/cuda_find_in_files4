@@ -2,7 +2,7 @@
 Authors:
     Andrey Kvichansky   (kvichans on github.com)
 Version:
-    '4.8.04 2021-03-06'
+    '4.8.05 2021-03-22'
 '''
 
 import  re, os, traceback, locale, itertools, codecs, time, collections, datetime as dt #, types, json
@@ -873,13 +873,17 @@ class Fif4D:
         return ps
        #def dlg_preset
 
+    def do_resize(self, ag, aid='', data=''):
+        pass;                  #log("### aid={}",(aid))
+        M,m = type(self),self
+        return m.do_acts(ag, 'fit-fh')
 
     @Dcrs.clear_st_msg(  1, 'help', 'wk_clea', 'di_menu', 'nf_frag', 'nf_frlp')     # aid in the list
     @Dcrs.timing_to_stbr(1, 'di_find', 'up_rslt', 'di_rplc', 'di_emul')             # aid in the list
     def do_acts(self, ag, aid, data='', ops={}):        #NOTE: do_acts
         # help xopts call-find call-repl
         # in_reex in_case in_word
-        # more-fh less-fh more-fw less-fw more-r less-r more-ml less-ml
+        # more-fh less-fh more-fw less-fw more-r less-r more-ml less-ml fit-fh
         # addEOL hist vw_mlin wk_agef wk_enco_d rp_cntx
         # di_menu ps_prev ps_next ps_save ps_menu ps_move ps_remv_N ps_load_N
         # ac_usec di_brow fold_sh
@@ -943,6 +947,17 @@ class Fif4D:
                   ,'in_word'):                  # Fit focus only (val in opts already)
             return d(fid=self.cid_what())
 
+        if aid in ('fit-fh',):
+            f_h         = ag.fattr('h')
+            pt_h        = ag.cattr('pt', 'h')
+            r_h         = ag.cattr('di_rslt', 'h')
+            s_h         = 5 #ag.cattr('di_sptr', 'h')
+            pass;              #log("(f_h,pt_h,r_h,s_h)={}",(f_h,pt_h,r_h,s_h))
+            pass;              #log("(SRCF_H,f_h-pt_h-r_h-s_h)={}",(M.SRCF_H,f_h-pt_h-r_h-s_h))
+            dfv         = (f_h - pt_h - r_h - s_h) - M.SRCF_H   # Real and min Source height
+            if dfv > 0:    return []
+            return  d(ctrls=d(  di_rslt=d(h=r_h+dfv-s_h)
+                             ,  di_sptr=d(y=r_h+dfv)))
         if aid in ('more-fh', 'less-fh'
                   ,'more-fw', 'less-fw'):       # Change form size
             f_h ,f_w    = ag.fattrs(['h'     , 'w']                 ).values()
@@ -1895,6 +1910,7 @@ class Fif4D:
                          ,frame='resize'
                          ,on_key_down=m.do_key_down
                          ,on_close_query= lambda ag,key,data='': m.do_close_query(ag)
+                         ,on_resize=m.do_resize
                          )
         ,   ctrls   =ctrls
         ,   fid     =m.opts.us_focus

@@ -1,4 +1,7 @@
-﻿4.8.04 2021-03-06
+﻿4.8.05 2021-03-22
+fixed: fit Results/Source panels on dialog resizing by mouse
+
+4.8.04 2021-03-06
 fixed: skip hidden files/dirs
 fixed: py 3.9 compatibility
 
