@@ -6,6 +6,8 @@ except: _   = lambda p:p
 _t  = lambda key, key_tr, s_tr: s_tr if key==key_tr else key_tr
 
 DLG_CAP_BS  = _('Find in Files 4')
+DLG_RESIZE  = 'resize'
+DLG_MIN_MAX = 'resize, min-max'
 
 FIF4_META_OPTS=[
     {   'cmt': re.sub(r'  +', r'', _t('separated_histories', _('separated_histories'), _(
@@ -293,6 +295,16 @@ FIF4_META_OPTS=[
         'opt': 'replace_y_shift',
         'def': 0,
         'frm': 'int',
+        'chp': _('Dialog_layout'),
+    },
+
+    {   'cmt': _('Dialog title style'
+                 f'\nWaiting values: "{DLG_RESIZE}", "{DLG_MIN_MAX}"'
+                 '\nNote! Need to restart CudaText after changing'),
+        'opt': 'title_style',
+        'def': DLG_RESIZE,
+        'frm': 'str',
+#       'dct': {'resize':'resize' , 'resize+min-max':'resize+min-max'},
         'chp': _('Dialog_layout'),
     },
 
@@ -817,6 +829,10 @@ This way you can use selected text many times, not only at the start.
 The macro-var
     {{ed:CurrentWord}}
 provides the use of word from the document without selection at all.
+
+———————————————————————————————————————————————————————————————————————————————————————————— 
+How to avoid separate buttons (CudaText and FindInFiles) in the OS app switcher dialog?
+Set CudaText option ui_taskbar_mode to false.
 '''))
 , excl=EXC__CA[1:].replace('&', '').replace(':', '')
 , fold=FOL__CA[2:].replace('&', '').replace(':', '')

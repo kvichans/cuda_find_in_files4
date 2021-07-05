@@ -2,7 +2,7 @@
 Authors:
     Andrey Kvichansky   (kvichans on github.com)
 Version:
-    '4.8.05 2021-03-22'
+    '4.8.06 2021-07-05'
 '''
 
 import  re, os, traceback, locale, itertools, codecs, time, collections, datetime as dt #, types, json
@@ -62,7 +62,7 @@ pass;                           _log4cls_FSWalker           = -1
 pass;                               _log4fun_FSWalker_walk  = -1
 pass;                           _log4cls_Fragmer            = -1
 pass;                           _log4cls_Reporter           = -1
-pass;                           _dev_kv                     =  get_opt('_dev_kv', False)
+pass;                           _dev_kv                     = get_opt('_dev_kv', False)
 pass;                           log("fif4 start",('')) if _log4mod>=0 or _dev_kv else 0
 
 # i18n
@@ -156,6 +156,7 @@ GOTO_FIRST_FR   = False
 NSHOW_BIGGER    = 0
 REPL_X_SHIFT    = 0
 REPL_Y_SHIFT    = 0
+TITLE_STYLE     = DLG_RESIZE
 def reload_opts():                              #NOTE: reload_opts
     global          \
     WALK_F_PICKING  \
@@ -184,7 +185,8 @@ def reload_opts():                              #NOTE: reload_opts
    ,GOTO_FIRST_FR   \
    ,NSHOW_BIGGER    \
    ,REPL_X_SHIFT    \
-   ,REPL_Y_SHIFT    
+   ,REPL_Y_SHIFT    \
+   ,TITLE_STYLE
     
     WALK_F_PICKING  = get_opt('file_picking_stage'          , meta_def('file_picking_stage'))
     WALK_DOWNTOP    = get_opt('from_deepest'                , meta_def('from_deepest'))
@@ -221,6 +223,7 @@ def reload_opts():                              #NOTE: reload_opts
     NSHOW_BIGGER    = get_opt('dont_show_file_size_more(Kb)', meta_def('dont_show_file_size_more(Kb)'))
     REPL_X_SHIFT    = get_opt('replace_x_shift'             , meta_def('replace_x_shift'))
     REPL_Y_SHIFT    = get_opt('replace_y_shift'             , meta_def('replace_y_shift'))
+    TITLE_STYLE     = get_opt('title_style'                 , meta_def('title_style'))
     def fit_mark_style_for_attr(js:dict)->dict:
         """ Convert 
                 {"color_back":"", "color_font":"", "font_bold":false, "font_italic":false
@@ -1907,7 +1910,9 @@ class Fif4D:
             form    =dict(cap=DLG_CAP_BS+f' ({VERSION_V})'
                          ,h=form_h,w=form_w             ,h_min0=form_h0,w_min0=form_w
                                                         ,h_min=form_h0,w_min=form_w
-                         ,frame='resize'
+#                        ,frame='resize-min-max'
+#                        ,frame='resize'
+                         ,frame=TITLE_STYLE if TITLE_STYLE in (DLG_RESIZE, DLG_MIN_MAX) else DLG_RESIZE
                          ,on_key_down=m.do_key_down
                          ,on_close_query= lambda ag,key,data='': m.do_close_query(ag)
                          ,on_resize=m.do_resize

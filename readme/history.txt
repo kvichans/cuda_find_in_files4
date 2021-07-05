@@ -1,4 +1,7 @@
-﻿4.8.05 2021-03-22
+﻿4.8.06 2021-07-05
+added: Option title_style to change title (and border) style of main dialog
+
+4.8.05 2021-03-22
 fixed: fit Results/Source panels on dialog resizing by mouse
 
 4.8.04 2021-03-06
