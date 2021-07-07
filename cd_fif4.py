@@ -2,7 +2,7 @@
 Authors:
     Andrey Kvichansky   (kvichans on github.com)
 Version:
-    '4.8.06 2021-07-05'
+    '4.8.07 2021-07-07'
 '''
 
 import  re, os, traceback, locale, itertools, codecs, time, collections, datetime as dt #, types, json
@@ -410,7 +410,7 @@ def choose_preset_to_run():
               ]
     if not ps4run:  return msg_box(_('No presets to run'))
     ps_num  = min(fget_hist('ps_to_run', 0), len(ps4run)-1)
-    ps_num  = app.dlg_menu(app.MENU_LIST, '\n'.join([
+    ps_num  = app.dlg_menu(app.DMENU_LIST, '\n'.join([
                 ps['nm']+'\t'+M.ZIP_PS4MENU(ps, False)
                 for nps,ps in ps4run])
             ,   focused=ps_num
@@ -1101,7 +1101,7 @@ class Fif4D:
                 enc     = ms[msk]
                 enc_ind = [n for n,(nm,al,cm) in enumerate(ENCODINGS)
                             if enc==nm or enc in al.split(', ')][0] if enc else 0
-                enc_ind = app.dlg_menu(app.MENU_LIST
+                enc_ind = app.dlg_menu(app.DMENU_LIST
                         ,   '\n'.join([f('{}\t{}', nm+(f' ({al}) ' if al!='' else ''),  cm)  
                                         for nm,al,cm in ENCODINGS])
                         ,   focused=enc_ind
@@ -1175,7 +1175,7 @@ class Fif4D:
             encN    = [n for n,(nm,al,cm) in enumerate(encsNAC)
                         if enc==nm or enc in al.split(', ')]
             enc_ind = encN[0]   if encN else    len(encsNAC)
-            enc_ind = app.dlg_menu(app.MENU_LIST
+            enc_ind = app.dlg_menu(app.DMENU_LIST
                     ,   '\n'.join([f('{}\t{}', nm+(f' ({al}) ' if al!='' else ''),  cm)  
                                     for nm,al,cm in encsNAC] 
                                  +[DETECT_ENCO+' '+_('(analyze file content)')+'\t???'])
@@ -1240,7 +1240,7 @@ class Fif4D:
                         ,ctrls=d(di_i4op=d(cap=m.i4op_ca())
                                 ,rp_cntx=d(cap=m.cntx_ca())))
             if aid=='ps_menu':
-                ps_num = app.dlg_menu(app.MENU_LIST, '\n'.join([
+                ps_num = app.dlg_menu(app.DMENU_LIST, '\n'.join([
                               ps['nm']+'\t'+M.ZIP_PS4MENU(ps, False)+
                               (f' [Ctrl+{nps}]' if nps<10 else '')
                               for nps,ps in enumerate(m.opts.ps_pset, 1)])
@@ -2192,7 +2192,7 @@ class Fif4D:
             to_fld  = par
             vars_l  = [v['nm']+'\t'+v['bd'] for v in m.opts.vs_defs]
             vars_l += [vnm    +'\t'+vcm     for vnm,vev,vcm in STD_VARS]
-            var_i   = app.dlg_menu(app.MENU_LIST_ALT+app.MENU_NO_FULLFILTER # Filter only names
+            var_i   = app.dlg_menu(app.DMENU_LIST_ALT+app.MENU_NO_FULLFILTER # Filter only names
                         , '\n'.join(vars_l)
                         , caption=_('Append macro vars')+f' to "{to_fld}"' if to_fld else '')
             if var_i is None:   return None

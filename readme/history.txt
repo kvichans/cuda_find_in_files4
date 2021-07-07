@@ -1,4 +1,7 @@
-﻿4.8.06 2021-07-05
+﻿4.8.07 2021-07-07
+fixed: avoid deprecated menu actions MENU_*
+
+4.8.06 2021-07-05
 added: Option title_style to change title (and border) style of main dialog
 
 4.8.05 2021-03-22
