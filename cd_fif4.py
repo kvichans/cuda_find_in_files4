@@ -2192,7 +2192,7 @@ class Fif4D:
             to_fld  = par
             vars_l  = [v['nm']+'\t'+v['bd'] for v in m.opts.vs_defs]
             vars_l += [vnm    +'\t'+vcm     for vnm,vev,vcm in STD_VARS]
-            var_i   = app.dlg_menu(app.DMENU_LIST_ALT+app.MENU_NO_FULLFILTER # Filter only names
+            var_i   = app.dlg_menu(app.DMENU_LIST_ALT+app.DMENU_NO_FULLFILTER # Filter only names
                         , '\n'.join(vars_l)
                         , caption=_('Append macro vars')+f' to "{to_fld}"' if to_fld else '')
             if var_i is None:   return None
