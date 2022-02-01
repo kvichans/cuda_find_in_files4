@@ -2,7 +2,7 @@
 Authors:
     Andrey Kvichansky   (kvichans on github.com)
 Version:
-    '4.8.07 2021-07-07'
+    '4.8.08 2022-02-01'
 '''
 
 import  re, os, traceback, locale, itertools, codecs, time, collections, datetime as dt #, types, json
@@ -154,6 +154,7 @@ W_EXCL_EDIT     = 150
 DOING_FRAGS     = 100
 GOTO_FIRST_FR   = False
 NSHOW_BIGGER    = 0
+STORE_RESULTS   = False
 REPL_X_SHIFT    = 0
 REPL_Y_SHIFT    = 0
 TITLE_STYLE     = DLG_RESIZE
@@ -184,6 +185,7 @@ def reload_opts():                              #NOTE: reload_opts
    ,DOING_FRAGS     \
    ,GOTO_FIRST_FR   \
    ,NSHOW_BIGGER    \
+   ,STORE_RESULTS   \
    ,REPL_X_SHIFT    \
    ,REPL_Y_SHIFT    \
    ,TITLE_STYLE
@@ -221,6 +223,7 @@ def reload_opts():                              #NOTE: reload_opts
     DOING_FRAGS     = max(DOING_FRAGS                       , meta_min('show_progress_fragments'))
     GOTO_FIRST_FR   = get_opt('goto_first_fragment'         , meta_def('goto_first_fragment'))
     NSHOW_BIGGER    = get_opt('dont_show_file_size_more(Kb)', meta_def('dont_show_file_size_more(Kb)'))
+    STORE_RESULTS   = get_opt('store_results'               , meta_def('store_results'))
     REPL_X_SHIFT    = get_opt('replace_x_shift'             , meta_def('replace_x_shift'))
     REPL_Y_SHIFT    = get_opt('replace_y_shift'             , meta_def('replace_y_shift'))
     TITLE_STYLE     = get_opt('title_style'                 , meta_def('title_style'))
@@ -316,7 +319,7 @@ def dlg_fif4_help(fif):
     TIPS_FAST   = DLG_HELP_SPEED
     TIPS_TRCK   = DLG_HELP_TRICKS
     history     = open(os.path.dirname(__file__)+os.sep+r'readme'+os.sep+f('history.txt'), encoding='utf-8').read()
-    c2m         = 'mac'==get_desktop_environment() #or True
+    c2m         = 'mac'==DESKTOP #or True
     KEYS_TABLE  = KEYS_TABLE.replace('Ctrl+', 'Meta+') if c2m else KEYS_TABLE
     TIPS_FIND   = TIPS_FIND.replace( 'Ctrl+', 'Meta+') if c2m else TIPS_FIND
     TIPS_RPLS   = TIPS_RPLS.replace( 'Ctrl+', 'Meta+') if c2m else TIPS_RPLS
@@ -431,6 +434,10 @@ WK_ENCO_DPLN= [DEF_LOC_ENCO, 'utf8', DETECT_ENCO]
 
 dict2hist   = lambda dct: ','.join(f'{n}:{v}' for v,n in Counter(v for v in dct.values()).items())
 
+DESKTOP     = get_desktop_environment()
+cut_amp     = lambda cap: cap.replace('&', '') \
+                            if 'win'!=DESKTOP and re.search(r'&\W') else \
+                          cap
 
 
 class Fif4D:
@@ -475,7 +482,7 @@ class Fif4D:
        #class Dcrs
 
     USERHOME        = os.path.expanduser('~')
-
+    
     AGEF_CP = _('A&ge of files')
     AGEF_L1 = [  'h',          'd',         'w',          'm',           'y'        ]
     AGEF_U1 = [_('h'),       _('d'),      _('w'),       _('m'),        _('y')       ]
@@ -516,7 +523,7 @@ class Fif4D:
     CNTX_CA     = lambda opts: \
         f('&-{}+{}',        opts.rp_cntb, opts.rp_cnta) if opts.rp_cntx else \
           '&-?+?'
-    cntx_ca     = lambda self: Fif4D.CNTX_CA(self.opts)
+    cntx_ca     = lambda self: cut_amp(Fif4D.CNTX_CA(self.opts))
     
     SORT_CA     = lambda opts: '' if opts.wk_sort is None else \
         SORT_DN         if  opts.wk_sort=='new' else \
@@ -596,6 +603,7 @@ class Fif4D:
     
     done_finds      = []                        # Params of executed searches
     done_finds_pos  = 0                         # Pos of last loaded
+    done_rslts      = []                        # Results of executed searches
     
     def __init__(self, run_opts=None):
         """ Param run_opts - see show_fif4 """
@@ -642,7 +650,7 @@ class Fif4D:
             ,us_focus='in_what'                 # Start/Last focused control
             ,ps_pset=[]                         # List of presets
             ,vs_defs=[]                         # List of cusrom vars [{nm:'N', cm:'cmnt', bd:'str{VV}'}]
-            ,in_repl=''                         # What to find
+            ,in_repl=''                         # What to replace
             )
         pref    = prefix_for_opts()
         hi_opts = fget_hist([pref, 'opts'] if pref else 'opts', {})
@@ -888,7 +896,7 @@ class Fif4D:
         # in_reex in_case in_word
         # more-fh less-fh more-fw less-fw more-r less-r more-ml less-ml fit-fh
         # addEOL hist vw_mlin wk_agef wk_enco_d rp_cntx
-        # di_menu ps_prev ps_next ps_save ps_menu ps_move ps_remv_N ps_load_N
+        # di_menu ps_prev ps_next ps_prvr ps_nxtr ps_save ps_menu ps_move ps_remv_N ps_load_N
         # ac_usec di_brow fold_sh
         # nf_frag nf_frlp 
         # up_rslt di_find vi_fldi
@@ -1224,18 +1232,23 @@ class Fif4D:
                     m.opts.ps_pset[nw_num]  = m.opts.ps_pset[nw_num],   \
                                               m.opts.ps_pset[ps_num]
                 return []
-            if aid in ('ps_prev', 'ps_next'):
+            if aid in ('ps_prev', 'ps_next', 'ps_prvr', 'ps_nxtr'):
                 if not M.done_finds:                    return m.stbr_act(_('No yet executed searches'))
+                upd_rslt        = STORE_RESULTS and aid in ('ps_prvr', 'ps_nxtr')
                 new_pos         = M.done_finds_pos \
-                                + (-1 if aid=='ps_prev' else 1)
+                                + (-1 if aid in ('ps_prev', 'ps_prvr') else 1)
                 if not (0<=new_pos<len(M.done_finds)):  return m.stbr_act(_('No more executed searches')+f' ({len(M.done_finds)})')
                 M.done_finds_pos= new_pos
                 ps              = M.done_finds[M.done_finds_pos]
                 for k in ps:
-                    m.opts[k]   = ps[k]
+                    if k[0] != '_':
+                        m.opts[k]   = ps[k]
+                rslt            = ps.get('_rslt') if upd_rslt else ''
                 m.stbr_act(f(_('Executed parameters ({}/{}) is restored'), 1+M.done_finds_pos, len(M.done_finds)))
                 M.done_finds_pos= 1 if 1==len(M.done_finds) else M.done_finds_pos
                 pass;          #log("M.done_finds_pos={}",(M.done_finds_pos))
+                if rslt:
+                    m.rslt.set_text_all(rslt)
                 return d(vals=m.vals_opts('o2v')
                         ,ctrls=d(di_i4op=d(cap=m.i4op_ca())
                                 ,rp_cntx=d(cap=m.cntx_ca())))
@@ -1878,6 +1891,8 @@ class Fif4D:
                         if cnt['tp'] in ('cmbx', 'cmbr')    and 'cap' in ctrls[icids[icnt-1]]})
         m.caps  = {k:v.strip(' :*|\\/>*').replace('&', '') for (k,v) in m.caps.items()}
         for ctrl in ctrls.values():
+            if  'cap' in ctrl:
+                ctrl['cap'] = cut_amp(ctrl['cap'])              # "Сrutch" for Mac-Laz promlem with accelerators
             if  ctrl['tp'] in ('chbt', 'bttn'):
                 ctrl['on']  = m.do_acts
 
@@ -2111,6 +2126,8 @@ class Fif4D:
         elif skey==( 'a',ord('S')):                     upd=m.do_acts(ag, 'ps_menu')            # Alt+S
         elif skey==( 'a',VK_LEFT):                      upd=m.do_acts(ag, 'ps_prev')            # Alt+LF
         elif skey==( 'a',VK_RIGHT):                     upd=m.do_acts(ag, 'ps_next')            # Alt+RT
+        elif skey==('sca',VK_LEFT):                     upd=m.do_acts(ag, 'ps_prvr')            # Shift+Ctrl+Alt+LF
+        elif skey==('sca',VK_RIGHT):                    upd=m.do_acts(ag, 'ps_nxtr')            # Shift+Ctrl+Alt+RT
         elif ('c',ord('1'))<=skey<=('c',ord('9')):      upd=m.do_acts(ag, 'ps_load_'+ckey1)     # Ctrl+1..9
         elif skey==( 'c',ord('A')) and in_edct:         upd=m.do_acts(ag, 'vr-add')             # Ctrl+      A
         elif skey==('sc',ord('A')):                     upd=m.do_acts(ag, 'vr-sub')             # Ctrl+Shift+A
@@ -2533,7 +2550,8 @@ class Fif4D:
             m.stbr_act(_('Set not included folders'))                               ;return d(fid='wk_fold')
 
         # Save params
-        M.done_finds    = append_to_history(m.vals_opts('as_ps'), M.done_finds)
+        done_ps         = m.vals_opts('as_ps')
+        M.done_finds    = append_to_history(done_ps, M.done_finds)
         M.done_finds_pos= len(M.done_finds)
 
         m.rslt_srcf_acts('set-no-src')
@@ -2632,6 +2650,8 @@ class Fif4D:
                         )
             finally:
                 lock_act('unlock')
+        if STORE_RESULTS:
+            done_ps['_rslt']    = m.rslt.get_text_all()
         m.working   = False
 
 #       m.observer  = None
@@ -4834,4 +4854,5 @@ ToDo
 [+][ax-kv][07feb21] No menu acts to both Replace
 [+][ax-kv][07feb21] Bad replace "\ba\w+" to "D\0"
 [ ][ax-kv][07feb21] pttn with EOL an end (linux pasting) breaks the search
+[ ][kv-kv][24sep21] Store (in mem) last search param sets WITH results 
 '''

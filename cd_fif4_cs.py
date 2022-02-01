@@ -238,6 +238,15 @@ FIF4_META_OPTS=[
         'frm': 'int',
         'chp': _('Results'),
     },
+    {   'cmt': _t('store_results', _('store_results')
+              , _('Store executed parameters with found results.'
+                '\nUse Alt+LF/RT to switch executed parameters only.'
+                '\nUse Shift+Ctrl+Alt+LF/RT to switch executed parameters and stored results.')),
+        'opt': 'store_results',
+        'def': False,
+        'frm': 'bool',
+        'chp': _('Results'),
+    },
 
     {   'cmt': _('Height of dialog grid cell (min 25).'),
         'opt': 'vertical_gap',

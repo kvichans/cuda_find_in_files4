@@ -1,4 +1,9 @@
-﻿4.8.07 2021-07-07
+﻿4.8.08 2022-02-01
+added: Engine option "store_results". Store executed parameters with found results.
+added: Hotkeys Shift+Ctrl+Alt+LF/RT to show prev/next Results.
+fixed: Removed some dialog Alt+ accelerators for non-Windows OS.
+
+4.8.07 2021-07-07
 fixed: avoid deprecated menu actions MENU_*
 
 4.8.06 2021-07-05
