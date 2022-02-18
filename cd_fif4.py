@@ -2,7 +2,7 @@
 Authors:
     Andrey Kvichansky   (kvichans on github.com)
 Version:
-    '4.8.08 2022-02-01'
+    '4.8.09 2022-02-18'
 '''
 
 import  re, os, traceback, locale, itertools, codecs, time, collections, datetime as dt #, types, json
@@ -436,9 +436,8 @@ dict2hist   = lambda dct: ','.join(f'{n}:{v}' for v,n in Counter(v for v in dct.
 
 DESKTOP     = get_desktop_environment()
 cut_amp     = lambda cap: cap.replace('&', '') \
-                            if 'win'!=DESKTOP and re.search(r'&\W') else \
+                            if 'win'!=DESKTOP and re.search(r'&\W', cap) else \
                           cap
-
 
 class Fif4D:
     pass;                       log4cls=_log4cls_Fif4D
