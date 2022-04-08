@@ -2,7 +2,7 @@
 Authors:
     Andrey Kvichansky   (kvichans on github.com)
 Version:
-    '4.8.09 2022-02-18'
+    '4.8.11 2022-04-08'
 '''
 
 import  re, os, traceback, locale, itertools, codecs, time, collections, datetime as dt #, types, json
@@ -2455,6 +2455,7 @@ class Fif4D:
                 tab_ed.focus()  if tab_ed else 0
             elif os.path.isfile(path):
                 app.file_open(path)
+                app.app_idle(True) # ax: helps to scroll to caret in tab_ed.set_caret below
                 tab_ed  = ed
             if not tab_ed:          return []
             srcf_cr = m.srcf.get_carets()[0]
@@ -2906,10 +2907,11 @@ class LexHelper:
     def get_src_line_styles(ed4lx, row):
         pass;                   log4fun=0
         pass;                   log("ed4lx, row={}",(ed4lx, row)) if log4fun else 0
+        sts     = []
         tkns    = ed4lx.get_token(app.TOKEN_LIST_SUB, row, row)
+        if not tkns: return sts
         lex     = ed4lx.get_prop(app.PROP_LEXER_POS, f'0,{row}')  # One lexer for file?
         pass;                   log("lex, tkns={}",(lex, tkns)) if log4fun else 0
-        sts     = []
         for tkn in tkns:
             # {'style':'Symbol', 'x1':25, 'x2':26, 'y1':2, 'y2':3} 
             #   y1<=row<=y2
