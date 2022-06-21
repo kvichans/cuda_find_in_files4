@@ -2,7 +2,7 @@
 Authors:
     Andrey Kvichansky   (kvichans on github.com)
 Version:
-    '4.8.11 2022-04-08'
+    '4.8.12 2022-06-21'
 '''
 
 import  re, os, traceback, locale, itertools, codecs, time, collections, datetime as dt #, types, json
@@ -81,6 +81,12 @@ ptime       = time.monotonic#time.process_time
 # Std tools
 def first_true(iterable, default=False, pred=None):return next(filter(pred, iterable), default) # 10.1.2. Itertools Recipes
 
+_set_text_all_text  = ''
+def set_text_all(to_ed, text):
+    global _set_text_all_text
+    if  _set_text_all_text  != text:
+        _set_text_all_text   = text
+        to_ed.set_text_all(    text)
 
 _statusbar       = None
 def use_statusbar(st):
@@ -1247,7 +1253,8 @@ class Fif4D:
                 M.done_finds_pos= 1 if 1==len(M.done_finds) else M.done_finds_pos
                 pass;          #log("M.done_finds_pos={}",(M.done_finds_pos))
                 if rslt:
-                    m.rslt.set_text_all(rslt)
+#                   m.rslt.set_text_all(rslt)
+                    set_text_all(m.rslt,rslt)
                 return d(vals=m.vals_opts('o2v')
                         ,ctrls=d(di_i4op=d(cap=m.i4op_ca())
                                 ,rp_cntx=d(cap=m.cntx_ca())))
@@ -2309,7 +2316,8 @@ class Fif4D:
             if os.path.isfile(path) and os.path.getsize(path)>NSHOW_BIGGER*1024>0:
                 m.srcf.set_prop(app.PROP_LEXER_FILE, '')
                 m.srcf.set_prop(app.PROP_RO, False)
-                m.srcf.set_text_all('The Source file is too big.\nSee engine option "dont_show_file_size_more(Kb)".') 
+#               m.srcf.set_text_all('The Source file is too big.\nSee engine option "dont_show_file_size_more(Kb)".') 
+                set_text_all(m.srcf,'The Source file is too big.\nSee engine option "dont_show_file_size_more(Kb)".') 
                 m.srcf.set_prop(app.PROP_RO, True)
                 m.srcf.fif_ready_tree   = False
                 m.srcf.fif_lexer        = ''
@@ -2328,7 +2336,8 @@ class Fif4D:
                 lexer   = app.lexer_proc(app.LEXER_DETECT, path)
             m.srcf.set_prop(app.PROP_LEXER_FILE, '')
             m.srcf.set_prop(app.PROP_RO, False)
-            m.srcf.set_text_all(text) 
+#           m.srcf.set_text_all(text) 
+            set_text_all(m.srcf,text) 
             m.srcf.set_prop(app.PROP_LEXER_FILE, lexer) if lexer else 0
             m.srcf.set_prop(app.PROP_RO, True)
             m.srcf.fif_ready_tree   = False
@@ -2465,7 +2474,8 @@ class Fif4D:
         if act=='set-no-src':
             m.srcf.set_prop(app.PROP_LEXER_FILE, '')
             m.srcf.set_prop(app.PROP_RO, False)
-            m.srcf.set_text_all('')
+#           m.srcf.set_text_all('')
+            set_text_all(m.srcf,'')
             m.srcf.set_prop(app.PROP_RO, True)
             m.srcf.fif_ready_tree   = False
             m.srcf.fif_path         = ''
@@ -3061,7 +3071,8 @@ class LexHelper:
                 return (None, lex)
             pass;              #log__('fn body=\n{}',(FSWalker.get_filebody(fn))         ,__=(log4fun,)) if _log4mod>=0 else 0
             if ed4lx.loaded_file != fn:
-                ed4lx.set_text_all(FSWalker.get_filebody(fn))
+#               ed4lx.set_text_all(FSWalker.get_filebody(fn))
+                set_text_all(ed4lx,FSWalker.get_filebody(fn))
                 ed4lx.loaded_file       = fn
                 ed4lx.fif_ready_scan    = False
                 ed4lx.fif_ready_tree    = False
@@ -3123,7 +3134,8 @@ def fifwork(observer, ed4rpt, walkers, fragmer, frgfilters, reporter, rplc=RPLC_
     observer.dlg_status('fils', [DDD])
     observer.dlg_status('frgs', [DDD])
     ed4rpt.set_prop(app.PROP_RO, False)
-    ed4rpt.set_text_all('')
+#   ed4rpt.set_text_all('')
+    set_text_all(ed4rpt,'')
     ed4rpt.set_prop(app.PROP_RO, True)
 #   ed4rpt.action(app.EDACTION_LEXER_SCAN, 0)
     app.app_idle()
@@ -3645,7 +3657,8 @@ class Reporter:
         # Put text to ed and set live marks
         ed_.attr(app.MARKERS_DELETE_ALL)
         ed_.set_prop(app.PROP_RO         ,False)
-        ed_.set_text_all('\n'.join(body))
+#       ed_.set_text_all('\n'.join(body))
+        set_text_all(ed_,'\n'.join(body))
         ed_.set_prop(app.PROP_RO         ,True)
         
         pass;                  #log("?? marks")

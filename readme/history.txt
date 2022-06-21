@@ -1,4 +1,7 @@
-﻿4.8.08 2022-02-01
+﻿4.8.12 2022-06-21
+fixed: Skip unnecessary text replacing in Results and Source panes.
+
+4.8.08 2022-02-01
 added: Engine option "store_results". Store executed parameters with found results.
 added: Hotkeys Shift+Ctrl+Alt+LF/RT to show prev/next Results.
 fixed: Removed some dialog Alt+ accelerators for non-Windows OS.
