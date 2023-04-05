@@ -34,3 +34,29 @@ section=commands
 caption=&Find in Files 4\&View and edit extra options...
 method=dlg_fif_opts
 menu=op
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;; cuda_b_plugin ;;;;;;;;;;;;
+
+[item5]
+section=commands
+caption=B Plugin\Open console
+method=open_console
+
+[item6]
+section=commands
+caption=B Plugin\Close console
+method=close_console
+
+[item10]
+section=commands
+caption=B Plugin\Config
+method=config
+menu=o
+; menu=o hide this menu
+
+[bottombar1]
+hint=R Console
+icon={dir}/b_icon.png
+method=open_console
