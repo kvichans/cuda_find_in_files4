@@ -1,10 +1,10 @@
 [info]
-version=4.6.03
-title=Find in Files 4
+version=0.1.0
+title=Find in Files X
 desc=Gives dialog to search for multiple files containing some string/regex, like in file managers.
 type=cudatext-plugin
-subdir=cuda_find_in_files4
-homepage=https://github.com/kvichans/cuda_find_in_files4
+subdir=cuda_find_in_filesX
+homepage=https://github.com/jackusay/cuda_find_in_filesX
 api=1.0.302
 
 ;[item400]
@@ -13,25 +13,25 @@ api=1.0.302
 
 [item1]
 section=commands
-caption=&Find in Files 4\&Find in files...
+caption=&Find in Files X\&Find in files...
 method=show_dlg
 
 [item2]
 section=commands
-caption=&Find in Files 4\Find in current &tab...
+caption=&Find in Files X\Find in current &tab...
 method=show_dlg_and_find_in_tab
 ;menu=0
 
 [item3]
 section=commands
-caption=&Find in Files 4\Find by &preset...
+caption=&Find in Files X\Find by &preset...
 method=choose_preset_to_run
 ;menu=0
 
 
 [item25]
 section=commands
-caption=&Find in Files 4\&View and edit extra options...
+caption=&Find in Files X\&View and edit extra options...
 method=dlg_fif_opts
 menu=op
 
@@ -41,22 +41,22 @@ menu=op
 
 [item5]
 section=commands
-caption=B Plugin\Open console
+caption=X Plugin\Open console
 method=open_console
 
 [item6]
 section=commands
-caption=B Plugin\Close console
+caption=X Plugin\Close console
 method=close_console
 
 [item10]
 section=commands
-caption=B Plugin\Config
+caption=X Plugin\Config
 method=config
 menu=o
 ; menu=o hide this menu
 
 [bottombar1]
-hint=R Console
+hint=X Console
 icon={dir}/b_icon.png
 method=open_console
