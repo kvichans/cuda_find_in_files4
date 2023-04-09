@@ -5,6 +5,10 @@ Version:
     '4.8.12 2022-06-21'
 '''
 
+# 2023-04-09
+# add some comment and logx
+# authors: jackusay
+
 import  re, os, traceback, locale, itertools, codecs, time, collections, datetime as dt #, types, json
 from            pathlib         import Path
 from            fnmatch         import fnmatch
@@ -69,6 +73,10 @@ pass;                           log("fif4 start",('')) if _log4mod>=0 or _dev_kv
 try:    _   = get_translation(__file__)
 except: _   = lambda p:p
 
+def logx(x):
+    print(x)
+    pass
+
 # Shorter names of usefull tools 
 odict       = collections.OrderedDict                           # as dict from Py3.7(?)
 #d           = dict
@@ -87,6 +95,7 @@ def set_text_all(to_ed, text):
     if  _set_text_all_text  != text:
         _set_text_all_text   = text
         to_ed.set_text_all(    text)
+    logx("set_text_all show all text in file")
 
 _statusbar       = None
 def use_statusbar(st):
@@ -897,6 +906,7 @@ class Fif4D:
     @Dcrs.clear_st_msg(  1, 'help', 'wk_clea', 'di_menu', 'nf_frag', 'nf_frlp')     # aid in the list
     @Dcrs.timing_to_stbr(1, 'di_find', 'up_rslt', 'di_rplc', 'di_emul')             # aid in the list
     def do_acts(self, ag, aid, data='', ops={}):        #NOTE: do_acts
+        logx(f"do_acts: {aid}")
         # help xopts call-find call-repl
         # in_reex in_case in_word
         # more-fh less-fh more-fw less-fw more-r less-r more-ml less-ml fit-fh
@@ -1366,7 +1376,8 @@ class Fif4D:
             return []
 
         if aid=='di_find':                      # Start new search
-            m.stbr_act('')
+            logx("aid=='di_find'")
+            m.stbr_act('')                      # Clear status
             upd = self.work(ag, 'fast' if scam=='s' else data)
             if not upd and GOTO_FIRST_FR: m.do_acts(ag, 'go-next-fr')
             return upd
@@ -2019,6 +2030,7 @@ class Fif4D:
 
 
     def show(self, run_opts=None):
+        logx("open fif window")
         M,m     = type(self),self
         run_opts= run_opts if run_opts else {}
         m.ropts = run_opts
@@ -2054,7 +2066,8 @@ class Fif4D:
             m.ag.update(vals=m.vals_opts('o2v'))
             app.timer_proc(app.TIMER_START_ONE, m.on_timer, M.TIMER_DELAY, tag='di_find')
 
-        m.ag.show(on_exit=m.on_exit, onetime=False)
+        m.ag.show(on_exit=m.on_exit, onetime=False, modal=False)
+        logx("close fif window")
        #def show
     STBR_FRGS = 11
     STBR_FILS = 12
@@ -2168,6 +2181,9 @@ class Fif4D:
        #def do_key_down
 
     def var_acts(self, act, par=None):
+        #run all hit times
+        logx(f"var_acts: {act}")
+        #logx(STD_VARS) useless, STD_VARS show variable name, no variable itself
         M,m = type(self),self
         
         if act in ('new', 'edit'):
@@ -2215,6 +2231,7 @@ class Fif4D:
             to_fld  = par
             vars_l  = [v['nm']+'\t'+v['bd'] for v in m.opts.vs_defs]
             vars_l += [vnm    +'\t'+vcm     for vnm,vev,vcm in STD_VARS]
+            #logx(f"vars_l: {vars_l}")
             var_i   = app.dlg_menu(app.DMENU_LIST_ALT+app.DMENU_NO_FULLFILTER # Filter only names
                         , '\n'.join(vars_l)
                         , caption=_('Append macro vars')+f' to "{to_fld}"' if to_fld else '')
@@ -2242,6 +2259,7 @@ class Fif4D:
                  ).show()
 
         if act=='repl':
+            logx(f"par: {par}")
             sval    = par
             if not sval:    return sval
             if sval == '{p}':                                   # Project dirs
@@ -2249,7 +2267,7 @@ class Fif4D:
                 
             sval    = os.path.expanduser(sval)
             sval    = sval.replace('\\{', chr(1)).replace('\\}', chr(2))
-            for dpth in range(3):               # 3 - max count of ref-jumps
+            for dpth in range(3):               # 3 - max count of ref-jumps  #???
                 chngd   = False
                 for v in m.opts.vs_defs:
                     if v['nm']  not in sval: continue#for
@@ -2262,6 +2280,7 @@ class Fif4D:
                 sval        = sval.replace(vnm      , eval(vev))
                 if '{'      not in sval: return sval
             sval    = sval.replace(chr(1), '{').replace(chr(2), '}')
+            logx(f"sval: {sval}")
             return sval
             
        #def var_acts
@@ -2275,6 +2294,7 @@ class Fif4D:
               ,'tim' :M.STBR_TIM}
         return lambda fld, val: m.stbr_act(val, prx[fld]) if fld in prx else None
         
+    #when open window, auto run many time
     def stbr_act(self, val='', tag=None, opts={}):
         M,m = type(self),self
         tag = M.STBR_MSG if tag is None else tag
@@ -2298,9 +2318,10 @@ class Fif4D:
           })                     # Last user changes
        #def on_exit
 
-
+    #when open window, auto run many time
 #   @Dcrs.timing_to_stbr(0, 'on_rslt_crt')
     def rslt_srcf_acts(self, act, par=None, ag=None):
+        logx(f"rslt_srcf_acts: {act}")
         #   load-srcf
         #   on_rslt_crt
         #   src-lex-path
@@ -2369,14 +2390,20 @@ class Fif4D:
                 m.rslt.set_caret(0, fldi_d[0])
 
         if act=='on_rslt_crt':                  # Show Source and select fragment
-            m.stbr_act('')
+            m.stbr_act('')                      # Clear status
             if not m.rslt or not m.reporter:return []
             if not m.observer:              return []
             if m.rslt.igno_sel and \
                m.rslt.get_text_sel():       return []   # Skip selecting
             m.rslt.igno_sel  = True                     # To igno user sel only
             crt         = m.rslt.get_carets()[0]        # Use only first caret
+            logx(f"crt: {crt}") #crt is caret of rslt! no cudatext editor!
+              #ex:(5, 2, -1, -1); explain:(col, row, -1, -1)
+            
             frg_info    = m.reporter.get_fragment_location_by_caret(crt[1], crt[0])
+            logx(f"frg_info: {frg_info}") #caret of rslt convert to cudatext ex:('tab:2/a.md', (75, 53), (75, 56))
+              #explain: begin(row, col), end(row, col)
+            
             pass;               log__("frg_info={}",(frg_info)         ,__=(log4fun,M.log4cls)) if _log4mod>=0 else 0
             pass;              #log("frg_info={}",(frg_info))
             prev_fi     = m._prev_frgi[0] if m._prev_frgi else ''
@@ -2456,14 +2483,17 @@ class Fif4D:
             if not m.reporter:      return []
             if not m.srcf.fif_path: return []
             pass;              #log("m.srcf.fif_path={}",(m.srcf.fif_path))
+            logx("only seconed jump will run to here")
             tab_ed  = None
             path    = m.srcf.fif_path
             if path.startswith('tab:'):
                 tab_id  = int(path.split('/')[0].split(':')[1])
+                logx(f"tab_id: {tab_id}")
                 tab_ed  = apx.get_tab_by_id(tab_id)
                 tab_ed.focus()  if tab_ed else 0
             elif os.path.isfile(path):
                 app.file_open(path)
+                #logx(f"path: {path}") useless?
                 app.app_idle(True) # ax: helps to scroll to caret in tab_ed.set_caret below
                 tab_ed  = ed
             if not tab_ed:          return []
@@ -2498,8 +2528,9 @@ class Fif4D:
         return not self.working
        #def do_close_query
     
-
+    #run search evey time when you click find button
     def work(self, ag, data):
+        logx("Fif4D's work: do work")
         " Start new search"
         M,m     = type(self),self
         pass;                   log4fun=0
@@ -2678,12 +2709,14 @@ class Fif4D:
         if wopts.wk_fold == Walker.ROOT_IS_TABS:
             COPY_STYLES_ROWS= COPY_STYLES_ROWS_glb
 
+        logx("do work  end.")
         return []
        #def work
    #class Fif4D
 
 
 def get_word_at_caret(ed_=ed):
+    logx("get_word_at_caret") #show nothing
     sel_text    = ed_.get_text_sel()
     if sel_text:    return sel_text;
     c_crt, r_crt= ed_.get_carets()[0][:2]
@@ -3124,6 +3157,7 @@ RPLC_NO = 0
 RPLC_DO = 1 
 RPLC_EM = 2 
 def fifwork(observer, ed4rpt, walkers, fragmer, frgfilters, reporter, rplc=RPLC_NO):
+    logx("do noclass.fifwork")
     pass;                       log4fun=0
     pass;                      #log4fun=_log4fun_fifwork
     pass;                      #log__('observer,walkers,fragmer,reporter={}',(observer,walkers,fragmer,reporter)         ,__=(log4fun,)) if _log4mod>=0 else 0
@@ -3160,6 +3194,7 @@ def fifwork(observer, ed4rpt, walkers, fragmer, frgfilters, reporter, rplc=RPLC_
                 observer.dlg_status('frgs', [reporter.stat(Reporter.FRST_FRGS)
                                             ,fragmer.stats[ Fragmer.WKST_FRGS]] if frgfilters else
                                             [reporter.stat(Reporter.FRST_FRGS)])
+                #time?
                 observer.dlg_status('tim',  f('({})', Fif4D.dur2msg(ptime()-work_start_t)))
                 app.app_idle()
             if observer.need_break:
@@ -3225,6 +3260,7 @@ def fifwork(observer, ed4rpt, walkers, fragmer, frgfilters, reporter, rplc=RPLC_
     pass;                       work_end    = ptime()
     pass;                       print(f('report done4: {:.2f} secs', work_end-search_end)) if _dev_kv else 0
     pass;                       print(f('works  done4: {:.2f} secs', work_end-work_start_t)) if _dev_kv else 0
+    logx("fifwork end")
    #def fifwork
 
 
@@ -3264,6 +3300,7 @@ class Reporter:
     
     
     def __init__(self, rp_opts, ed4lx, observer):
+        logx("initial Reporter")
         pass;                  #log__("rp_opts={}",(rp_opts)        ,__=(_log4cls_Reporter,))
         
         self.stats      = [0, set(), set(), 0]
@@ -3284,6 +3321,9 @@ class Reporter:
                                                 #           (src_b_rc, src_e_rc)    # src frag bgn/end
                                                 #          )
                                                 #         ])}
+             #r_locs: ['tab:2/a.md', [((20, 4), ((71, 11), (71, 15))), ((34, 4), ((71, 25), (71, 29)))]]
+             #crt: (24, 2, 20, 2) rslt
+             #frg_info: ('tab:2/a.md', (71, 11), (71, 15)) cudatext
        #def __init__
 
     
@@ -3403,6 +3443,7 @@ class Reporter:
     
     
     def build_tree(self, trfm):
+        logx("Reporter's build_tree")
         pass;                   log4fun=0
         pass;                   log__('trfm={}, self.rfrgs=\n{}',trfm, pfw(self.rfrgs,60)         ,__=(log4fun,Reporter.log4cls)) if _log4mod>=0 else 0
         if trfm == TRFM_PLL:    # <path(r:c:w)>: line
@@ -3536,6 +3577,7 @@ class Reporter:
        #def build_tree
     
     def show_results(self, ed_:app.Editor, rp_opts=None):   #NOTE: results
+        logx("Reporter's show_results")
         """ Prepare results to show in the ed_ """
         pass;                   log4fun=0
         self.rp_opts    = rp_opts if rp_opts else self.rp_opts
@@ -3559,7 +3601,12 @@ class Reporter:
         pass;                   tree = tree if tree else self.build_tree(TRFM_PLL)
         pass;                   finl = trfm in                          (TRFM_PLL, TRFM_D_FLL)
         pass;                   log__('tree\n={}',(pfw(tree,100))         ,__=(log4fun,Reporter.log4cls))
+        #tree is result list, with a lot syntax
+        #logx(f"tree: {tree}")
 
+        #self.rfrgs is result list, with a lot syntax; tree != self.rfrgs
+        #logx(f"self.rfrgs: {self.rfrgs}") 
+        
         # Calc critical aggr-vals (width)
         wagvs       = defdict()                 # {p|r|c|w:max_width}
         for rfrg in self.rfrgs:
@@ -3661,6 +3708,10 @@ class Reporter:
         set_text_all(ed_,'\n'.join(body))
         ed_.set_prop(app.PROP_RO         ,True)
         
+        #body show result without syntax
+        #logx(f"body: {body}")
+        logx(ed.get_filename())
+        
         pass;                  #log("?? marks")
         if -1==-1 and app.app_api_version()>='1.0.310':# app 1.88.8
             if ltkns:
@@ -3725,6 +3776,7 @@ class Reporter:
     def get_fragment_location_by_caret(self, crt_row, crt_col):
         pass;                   log4fun=1
         r_locs      = self.locs.get(crt_row)
+        logx(f"r_locs: {r_locs}")
         pass;                  #log("r_locs={}",(r_locs))
         if not r_locs:              return  ('',None,None)
         fi,cw_rcs   = r_locs
