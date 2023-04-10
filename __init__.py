@@ -1,2 +1,1 @@
-from .cd_fif4 import *
-
+from .bottom_panel import *

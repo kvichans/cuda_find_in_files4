@@ -1,6 +1,8 @@
 #click bottombar icon [R] (or from plugin menu), will show console.
 #click [R] again will close console.
 
+from .cd_fif4 import *
+
 import sys
 import datetime
 import os
@@ -32,6 +34,14 @@ def str_to_bool(s):
     return s=='1'
 
 class Command:
+
+	###### from cd_fif4 #######
+    def dlg_fif_opts(self):             return dlg_fif4_xopts()
+    def show_dlg(self):                 return show_fif4()
+    def show_dlg_and_find_in_tab(self): return show_fif4(d(work='in_tab'))
+    def choose_preset_to_run(self):     return choose_preset_to_run()
+	###########################
+
     title_side = 'R Objects'
     title_console = 'R Console'
     h_side = None

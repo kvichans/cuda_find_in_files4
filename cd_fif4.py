@@ -364,11 +364,11 @@ def dlg_fif4_help(fif):
 
 
 
-class Command:
-    def dlg_fif_opts(self):             return dlg_fif4_xopts()
-    def show_dlg(self):                 return show_fif4()
-    def show_dlg_and_find_in_tab(self): return show_fif4(d(work='in_tab'))
-    def choose_preset_to_run(self):     return choose_preset_to_run()
+# class Command:
+    # def dlg_fif_opts(self):             return dlg_fif4_xopts()
+    # def show_dlg(self):                 return show_fif4()
+    # def show_dlg_and_find_in_tab(self): return show_fif4(d(work='in_tab'))
+    # def choose_preset_to_run(self):     return choose_preset_to_run()
    #class Command:
 
 
