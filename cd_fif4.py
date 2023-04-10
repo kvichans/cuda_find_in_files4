@@ -3713,9 +3713,10 @@ class Reporter:
         logx(ed.get_filename())
         
         pass;                  #log("?? marks")
-        if -1==-1 and app.app_api_version()>='1.0.310':# app 1.88.8
+        if -1==-1 and app.app_api_version()>='1.0.310':# app 1.88.8 
             if ltkns:
                 ltkns   = merge_markers(ltkns, marks, MARK_FIND_STYLE)
+                    # `marks` merges with self.rfrgs.st style. maybe rfrgs.st is original text lexer style?
                 ltkns_s = {}
                 ltkns_a = {}
                 for rw, cl, ln, st in ltkns:
