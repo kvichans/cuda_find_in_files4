@@ -94,7 +94,6 @@ class Bpanel:
         #ed.cmd(cmds.cmd_HideBottomPanel) #it works
         app.app_proc(app.PROC_SHOW_BOTTOMPANEL_SET, False) #it also works
         
-        self.bottom_ed.insert( 0, 0, "ssss1\n" )
         
         # for h in ed_handles():
             # e = Editor(h)
@@ -190,9 +189,9 @@ class Bpanel:
         
         body = ['aaaaaaaaaaaaaa+Search "code". Report with [styles].', '\t<tab:4/a1.md>: #8', '\t\t< 92>: ## Code', '\t\t< 94>: Inline `code`', '\t\t< 96>: Indented code', '\t\t< 99>:     line 1 of code', '\t\t<100>:     line 2 of code', '\t\t<101>:     line 3 of code', '\t\t<104>: Block code "fences"', '\t\t<220>:         { some code, part of Definition 2 }']
         body2 = ['bbbbbbbbbbbbb+Search "code2". Report with [styles].', '\t<tab:4/a12.md>: #8', '\t\t< 92>: ## Code2', '\t\t< 94>: Inline `code`', '\t\t< 96>: Indented code', '\t\t< 99>:     line 1 of code', '\t\t<100>:     line 2 of code', '\t\t<101>:     line 3 of code', '\t\t<104>: Block code "fences"', '\t\t<220>:         { some code, part of Definition 2 }']
-        self.bottom_ed.set_text_all( "\n".join(body) )
+        #self.bottom_ed.set_text_all( "\n".join(body) )
         #self.bottom_ed.insert( 0, 0, "\n")
-        self.bottom_ed.insert( 0, 0, "\n".join(body2)+"\n" )
+        #self.bottom_ed.insert( 0, 0, "\n".join(body2)+"\n" )
                 
         #self.bottom_ed.folding(app.FOLDING_ADD, item_x=-1, item_y=1, item_y2=3)
         #self.bottom_ed.folding(FOLDING_FOLD_ALL, item_y=1, item_y2=3)

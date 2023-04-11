@@ -2074,7 +2074,8 @@ class Fif4D:
             m.ag.update(vals=m.vals_opts('o2v'))
             app.timer_proc(app.TIMER_START_ONE, m.on_timer, M.TIMER_DELAY, tag='di_find')
 
-        m.ag.show(on_exit=m.on_exit, onetime=False, modal=False)
+        m.ag.show(on_exit=m.on_exit, onetime=False, modal=False) 
+            #modal=False so window will not block main editor
         logx("close fif window")
        #def show
     STBR_FRGS = 11
@@ -3762,7 +3763,7 @@ class Reporter:
         print("Reporter's show_results in fif.py")
         
         logx(f"bpanel.bottom_ed in fif: {bpanel.bottom_ed}")
-        bpanel.bottom_ed.insert( 0, 0, "aaaa12345hhhh\n" )
+        bpanel.bottom_ed.insert( 0, 0, '\n'.join(body) + "\n" )
        #def show_results
        
     
