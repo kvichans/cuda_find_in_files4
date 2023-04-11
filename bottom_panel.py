@@ -25,6 +25,8 @@ fn_config = os.path.join(app.app_path(app.APP_DIR_SETTINGS), 'cuda_x_helper.ini'
 #HOMEDIR = os.path.expanduser('~')
 INPUT_H = 26
 
+bottom_panel = Editor #editor
+
 def bool_to_str(v):
     return '1' if v else '0'
 
@@ -148,40 +150,40 @@ class Command:
             'a_b': ('break', '['),
             'font_size': cur_font_size,
             })
-        self.memo = Editor(app.dlg_proc(h, app.DLG_CTL_HANDLE, index=n))
-        self.memo.set_prop(app.PROP_FOLD_ALWAYS, True)
-        self.memo.set_prop(app.PROP_LEXER_FILE, "Search results") #python is useless, bc it can't create folding
+        bottom_panel = Editor(app.dlg_proc(h, app.DLG_CTL_HANDLE, index=n))
+        bottom_panel.set_prop(app.PROP_FOLD_ALWAYS, True)
+        bottom_panel.set_prop(app.PROP_LEXER_FILE, "Search results") #python is useless, bc it can't create folding
         
         #check api ===Editor.set_prop===
-        #self.memo.set_prop(PROP_RO, True)
-        # self.memo.set_prop(PROP_CARET_VIRTUAL, False)
-        # self.memo.set_prop(PROP_UNPRINTED_SHOW, False)
-        # self.memo.set_prop(PROP_MARGIN, 2000)
-        # self.memo.set_prop(PROP_MARGIN_STRING, '')
-        # self.memo.set_prop(PROP_LAST_LINE_ON_TOP, False)
-        # self.memo.set_prop(PROP_HILITE_CUR_LINE, False)
-        # self.memo.set_prop(PROP_HILITE_CUR_COL, False)
-        # self.memo.set_prop(PROP_MODERN_SCROLLBAR, True)
-        # self.memo.set_prop(PROP_MINIMAP, False)
-        # self.memo.set_prop(PROP_MICROMAP, False)
-        # self.memo.set_prop(PROP_COLOR, (COLOR_ID_TextBg, color_memo_back))
-        # self.memo.set_prop(PROP_COLOR, (COLOR_ID_TextFont, color_memo_font))
+        #bottom_panel.set_prop(PROP_RO, True)
+        # bottom_panel.set_prop(PROP_CARET_VIRTUAL, False)
+        # bottom_panel.set_prop(PROP_UNPRINTED_SHOW, False)
+        # bottom_panel.set_prop(PROP_MARGIN, 2000)
+        # bottom_panel.set_prop(PROP_MARGIN_STRING, '')
+        # bottom_panel.set_prop(PROP_LAST_LINE_ON_TOP, False)
+        # bottom_panel.set_prop(PROP_HILITE_CUR_LINE, False)
+        # bottom_panel.set_prop(PROP_HILITE_CUR_COL, False)
+        # bottom_panel.set_prop(PROP_MODERN_SCROLLBAR, True)
+        # bottom_panel.set_prop(PROP_MINIMAP, False)
+        # bottom_panel.set_prop(PROP_MICROMAP, False)
+        # bottom_panel.set_prop(PROP_COLOR, (COLOR_ID_TextBg, color_memo_back))
+        # bottom_panel.set_prop(PROP_COLOR, (COLOR_ID_TextFont, color_memo_font))
         
-        # self.memo.set_text_all("""['+Search "code". Report with [styles].', 
+        # bottom_panel.set_text_all("""['+Search "code". Report with [styles].', 
         # '\t<tab:4/a1.md>: #8', 
         # '\t\t< 92>: ## Code', 
         # '\t\t< 94>: Inline `code`', '\t\t< 96>: Indented code', '\t\t< 99>:     line 1 of code', '\t\t<100>:     line 2 of code', '\t\t<101>:     line 3 of code', '\t\t<104>: Block code "fences"', '\t\t<220>:         { some code, part of Definition 2 }']""")
         
         body = ['+Search "code". Report with [styles].', '\t<tab:4/a1.md>: #8', '\t\t< 92>: ## Code', '\t\t< 94>: Inline `code`', '\t\t< 96>: Indented code', '\t\t< 99>:     line 1 of code', '\t\t<100>:     line 2 of code', '\t\t<101>:     line 3 of code', '\t\t<104>: Block code "fences"', '\t\t<220>:         { some code, part of Definition 2 }']
         body2 = ['+Search "code2". Report with [styles].', '\t<tab:4/a12.md>: #8', '\t\t< 92>: ## Code2', '\t\t< 94>: Inline `code`', '\t\t< 96>: Indented code', '\t\t< 99>:     line 1 of code', '\t\t<100>:     line 2 of code', '\t\t<101>:     line 3 of code', '\t\t<104>: Block code "fences"', '\t\t<220>:         { some code, part of Definition 2 }']
-        self.memo.set_text_all( "\n".join(body) )
-        #self.memo.insert( 0, 0, "\n")
-        self.memo.insert( 0, 0, "\n".join(body2)+"\n" )
+        bottom_panel.set_text_all( "\n".join(body) )
+        #bottom_panel.insert( 0, 0, "\n")
+        bottom_panel.insert( 0, 0, "\n".join(body2)+"\n" )
                 
-        #self.memo.folding(app.FOLDING_ADD, item_x=-1, item_y=1, item_y2=3)
-        #self.memo.folding(FOLDING_FOLD_ALL, item_y=1, item_y2=3)
-        #self.memo.folding(FOLDING_FOLD_ALL)
-        #self.memo.decor(DECOR_SET, line=2)
+        #bottom_panel.folding(app.FOLDING_ADD, item_x=-1, item_y=1, item_y2=3)
+        #bottom_panel.folding(FOLDING_FOLD_ALL, item_y=1, item_y2=3)
+        #bottom_panel.folding(FOLDING_FOLD_ALL)
+        #bottom_panel.decor(DECOR_SET, line=2)
 
         # self.input.set_prop(PROP_ONE_LINE, True)
         # self.input.set_prop(PROP_GUTTER_ALL, True)

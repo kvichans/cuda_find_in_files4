@@ -8,7 +8,7 @@ Version:
 # 2023-04-09
 # authors: jackusay
 
-from            .bottom_panel   import *
+from            .bottom_panel   import bpanel
 
 import  re, os, traceback, locale, itertools, codecs, time, collections, datetime as dt #, types, json
 from            pathlib         import Path
@@ -3753,7 +3753,7 @@ class Reporter:
                 ed_.attr(    app.MARKERS_ADD, x=cl, y=rw, len=ln, **LPTH_FIND_STYLE)
         pass;                  #log("ok marks")
         print("Reporter's show_results in fif.py")
-		
+        bpanel.insert( 0, 0, "aaaa12345hhhh\n" )
        #def show_results
        
     
