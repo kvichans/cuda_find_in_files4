@@ -42,8 +42,8 @@ class Command:
     def choose_preset_to_run(self):     return choose_preset_to_run()
 	###########################
 
-    title_side = 'R Objects'
-    title_console = 'R Console'
+    title_side = 'X Objects'
+    title_console = 'X Console'
     h_side = None
     h_console = None
 
