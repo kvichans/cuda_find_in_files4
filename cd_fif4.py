@@ -2266,7 +2266,7 @@ class Fif4D:
                  ).show()
 
         if act=='repl':
-            logx(f"par: {par}")
+            #logx(f"par: {par}")
             sval    = par
             if not sval:    return sval
             if sval == '{p}':                                   # Project dirs
@@ -2287,7 +2287,7 @@ class Fif4D:
                 sval        = sval.replace(vnm      , eval(vev))
                 if '{'      not in sval: return sval
             sval    = sval.replace(chr(1), '{').replace(chr(2), '}')
-            logx(f"sval: {sval}")
+            #logx(f"sval: {sval}")
             return sval
             
        #def var_acts
@@ -2404,11 +2404,11 @@ class Fif4D:
                m.rslt.get_text_sel():       return []   # Skip selecting
             m.rslt.igno_sel  = True                     # To igno user sel only
             crt         = m.rslt.get_carets()[0]        # Use only first caret
-            logx(f"crt: {crt}") #crt is caret of rslt! no cudatext editor!
+            #logx(f"crt: {crt}") #crt is caret of rslt! no cudatext editor!
               #ex:(5, 2, -1, -1); explain:(col, row, -1, -1)
             
             frg_info    = m.reporter.get_fragment_location_by_caret(crt[1], crt[0])
-            logx(f"frg_info: {frg_info}") #caret of rslt convert to cudatext ex:('tab:2/a.md', (75, 53), (75, 56))
+            #logx(f"frg_info: {frg_info}") #caret of rslt convert to cudatext ex:('tab:2/a.md', (75, 53), (75, 56))
               #explain: begin(row, col), end(row, col)
             
             pass;               log__("frg_info={}",(frg_info)         ,__=(log4fun,M.log4cls)) if _log4mod>=0 else 0
@@ -3759,7 +3759,9 @@ class Reporter:
                 ed_.attr(    app.MARKERS_ADD, x=cl, y=rw, len=ln, **LPTH_FIND_STYLE)
         pass;                  #log("ok marks")
         print("Reporter's show_results in fif.py")
-        #bpanel.insert( 0, 0, "aaaa12345hhhh\n" )
+        
+        logx(f"bottom_ed in fif: {bottom_ed}")
+        bottom_ed.insert( 0, 0, "aaaa12345hhhh\n" )
        #def show_results
        
     
