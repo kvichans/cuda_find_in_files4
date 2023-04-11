@@ -365,15 +365,16 @@ def dlg_fif4_help(fif):
    #def dlg_fif4_help
 
 
-bpanel = Bpanel()
+bpanel = Bpanel() #ok
 class Command:
     def dlg_fif_opts(self):             return dlg_fif4_xopts()
     def show_dlg(self):                 return show_fif4()
     def show_dlg_and_find_in_tab(self): return show_fif4(d(work='in_tab'))
     def choose_preset_to_run(self):     return choose_preset_to_run()
 
+    #bpanel = Bpanel() #error; same error as below
     # def __init__(self):
-       # bpanel = Bpanel()
+       # bpanel = Bpanel() #error; to bpanel.open_console(), 'bpanel' is not defined
     def open_console(self):                   return bpanel.open_console()
     def close_console(self):                   return bpanel.close_console()
    #class Command:
@@ -3760,8 +3761,8 @@ class Reporter:
         pass;                  #log("ok marks")
         print("Reporter's show_results in fif.py")
         
-        logx(f"bottom_ed in fif: {bottom_ed}")
-        bottom_ed.insert( 0, 0, "aaaa12345hhhh\n" )
+        logx(f"bpanel.bottom_ed in fif: {bpanel.bottom_ed}")
+        bpanel.bottom_ed.insert( 0, 0, "aaaa12345hhhh\n" )
        #def show_results
        
     

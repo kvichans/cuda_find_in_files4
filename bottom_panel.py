@@ -28,7 +28,6 @@ fn_config = os.path.join(app.app_path(app.APP_DIR_SETTINGS), 'cuda_x_helper.ini'
 #HOMEDIR = os.path.expanduser('~')
 INPUT_H = 26
 
-bottom_ed = None #editor
 
 def bool_to_str(v):
     return '1' if v else '0'
@@ -52,12 +51,17 @@ class Bpanel:
     title_console = 'X Console'
     h_side = None
     h_console = None
+    
+    bottom_ed = None
 
     def __init__(self):
 
         try:
             self.font_size = int(app.ini_read(fn_config, 'op', 'font_size', '9'))
             print("in Bpanel Class in bottom_panel.py")
+            #logx(f"111: {self.bottom_ed}")
+            self.init_forms()
+            #logx(f"222: {self.bottom_ed}")
             pass
         except:
             pass
@@ -90,7 +94,7 @@ class Bpanel:
         #ed.cmd(cmds.cmd_HideBottomPanel) #it works
         app.app_proc(app.PROC_SHOW_BOTTOMPANEL_SET, False) #it also works
         
-        bottom_ed.insert( 0, 0, "ssss1\n" )
+        self.bottom_ed.insert( 0, 0, "ssss1\n" )
         
         # for h in ed_handles():
             # e = Editor(h)
@@ -159,42 +163,41 @@ class Bpanel:
             'font_size': cur_font_size,
             })
         
-        global bottom_ed
-        bottom_ed = Editor(app.dlg_proc(h, app.DLG_CTL_HANDLE, index=n))
-        bottom_ed.set_prop(app.PROP_FOLD_ALWAYS, True)
-        bottom_ed.set_prop(app.PROP_LEXER_FILE, "Search results") #python is useless, bc it can't create folding
-        logx(f"bottom_ed in bottom_panel.py: {bottom_ed}")
+        self.bottom_ed = Editor(app.dlg_proc(h, app.DLG_CTL_HANDLE, index=n))
+        self.bottom_ed.set_prop(app.PROP_FOLD_ALWAYS, True)
+        self.bottom_ed.set_prop(app.PROP_LEXER_FILE, "Search results") #python is useless, bc it can't create folding
+        logx(f"bottom_ed in bottom_panel.py: {self.bottom_ed}")
         
         #check api ===Editor.set_prop===
-        #bottom_ed.set_prop(PROP_RO, True)
-        # bottom_ed.set_prop(PROP_CARET_VIRTUAL, False)
-        # bottom_ed.set_prop(PROP_UNPRINTED_SHOW, False)
-        # bottom_ed.set_prop(PROP_MARGIN, 2000)
-        # bottom_ed.set_prop(PROP_MARGIN_STRING, '')
-        # bottom_ed.set_prop(PROP_LAST_LINE_ON_TOP, False)
-        # bottom_ed.set_prop(PROP_HILITE_CUR_LINE, False)
-        # bottom_ed.set_prop(PROP_HILITE_CUR_COL, False)
-        # bottom_ed.set_prop(PROP_MODERN_SCROLLBAR, True)
-        # bottom_ed.set_prop(PROP_MINIMAP, False)
-        # bottom_ed.set_prop(PROP_MICROMAP, False)
-        # bottom_ed.set_prop(PROP_COLOR, (COLOR_ID_TextBg, color_memo_back))
-        # bottom_ed.set_prop(PROP_COLOR, (COLOR_ID_TextFont, color_memo_font))
+        #self.bottom_ed.set_prop(PROP_RO, True)
+        # self.bottom_ed.set_prop(PROP_CARET_VIRTUAL, False)
+        # self.bottom_ed.set_prop(PROP_UNPRINTED_SHOW, False)
+        # self.bottom_ed.set_prop(PROP_MARGIN, 2000)
+        # self.bottom_ed.set_prop(PROP_MARGIN_STRING, '')
+        # self.bottom_ed.set_prop(PROP_LAST_LINE_ON_TOP, False)
+        # self.bottom_ed.set_prop(PROP_HILITE_CUR_LINE, False)
+        # self.bottom_ed.set_prop(PROP_HILITE_CUR_COL, False)
+        # self.bottom_ed.set_prop(PROP_MODERN_SCROLLBAR, True)
+        # self.bottom_ed.set_prop(PROP_MINIMAP, False)
+        # self.bottom_ed.set_prop(PROP_MICROMAP, False)
+        # self.bottom_ed.set_prop(PROP_COLOR, (COLOR_ID_TextBg, color_memo_back))
+        # self.bottom_ed.set_prop(PROP_COLOR, (COLOR_ID_TextFont, color_memo_font))
         
-        # bottom_ed.set_text_all("""['+Search "code". Report with [styles].', 
+        # self.bottom_ed.set_text_all("""['+Search "code". Report with [styles].', 
         # '\t<tab:4/a1.md>: #8', 
         # '\t\t< 92>: ## Code', 
         # '\t\t< 94>: Inline `code`', '\t\t< 96>: Indented code', '\t\t< 99>:     line 1 of code', '\t\t<100>:     line 2 of code', '\t\t<101>:     line 3 of code', '\t\t<104>: Block code "fences"', '\t\t<220>:         { some code, part of Definition 2 }']""")
         
         body = ['aaaaaaaaaaaaaa+Search "code". Report with [styles].', '\t<tab:4/a1.md>: #8', '\t\t< 92>: ## Code', '\t\t< 94>: Inline `code`', '\t\t< 96>: Indented code', '\t\t< 99>:     line 1 of code', '\t\t<100>:     line 2 of code', '\t\t<101>:     line 3 of code', '\t\t<104>: Block code "fences"', '\t\t<220>:         { some code, part of Definition 2 }']
         body2 = ['bbbbbbbbbbbbb+Search "code2". Report with [styles].', '\t<tab:4/a12.md>: #8', '\t\t< 92>: ## Code2', '\t\t< 94>: Inline `code`', '\t\t< 96>: Indented code', '\t\t< 99>:     line 1 of code', '\t\t<100>:     line 2 of code', '\t\t<101>:     line 3 of code', '\t\t<104>: Block code "fences"', '\t\t<220>:         { some code, part of Definition 2 }']
-        bottom_ed.set_text_all( "\n".join(body) )
-        #bottom_ed.insert( 0, 0, "\n")
-        bottom_ed.insert( 0, 0, "\n".join(body2)+"\n" )
+        self.bottom_ed.set_text_all( "\n".join(body) )
+        #self.bottom_ed.insert( 0, 0, "\n")
+        self.bottom_ed.insert( 0, 0, "\n".join(body2)+"\n" )
                 
-        #bottom_ed.folding(app.FOLDING_ADD, item_x=-1, item_y=1, item_y2=3)
-        #bottom_ed.folding(FOLDING_FOLD_ALL, item_y=1, item_y2=3)
-        #bottom_ed.folding(FOLDING_FOLD_ALL)
-        #bottom_ed.decor(DECOR_SET, line=2)
+        #self.bottom_ed.folding(app.FOLDING_ADD, item_x=-1, item_y=1, item_y2=3)
+        #self.bottom_ed.folding(FOLDING_FOLD_ALL, item_y=1, item_y2=3)
+        #self.bottom_ed.folding(FOLDING_FOLD_ALL)
+        #self.bottom_ed.decor(DECOR_SET, line=2)
 
         # self.input.set_prop(PROP_ONE_LINE, True)
         # self.input.set_prop(PROP_GUTTER_ALL, True)
