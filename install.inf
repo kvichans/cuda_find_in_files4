@@ -58,5 +58,5 @@ menu=o
 
 [bottombar1]
 hint=X Console
-icon={dir}/b_icon.png
+icon={dir}/x_icon.png
 method=open_console

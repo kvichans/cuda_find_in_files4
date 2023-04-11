@@ -1,5 +1,5 @@
-#click bottombar icon [R] (or from plugin menu), will show console.
-#click [R] again will close console.
+#click bottombar icon [X] (or from plugin menu), will show console.
+#click [X] again will close console.
 
 from .cd_fif4 import *
 
@@ -16,8 +16,8 @@ import cudatext_keys as keys
 import cudatext_cmd as cmds
 from cudatext import *
 
-fn_icon = os.path.join(os.path.dirname(__file__), 'b_icon.png')
-fn_config = os.path.join(app_path(APP_DIR_SETTINGS), 'cuda_b_helper.ini')
+fn_icon = os.path.join(os.path.dirname(__file__), 'x_icon.png')
+fn_config = os.path.join(app_path(APP_DIR_SETTINGS), 'cuda_x_helper.ini')
 MAX_BUFFER = 100*1000
 IS_WIN = os.name=='nt'
 IS_MAC = sys.platform=='darwin'
