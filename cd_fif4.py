@@ -8,7 +8,8 @@ Version:
 # 2023-04-09
 # authors: jackusay
 
-from            .bottom_panel   import bpanel
+from            .bottom_panel   import *
+
 
 import  re, os, traceback, locale, itertools, codecs, time, collections, datetime as dt #, types, json
 from            pathlib         import Path
@@ -364,12 +365,17 @@ def dlg_fif4_help(fif):
    #def dlg_fif4_help
 
 
+bpanel = Bpanel()
+class Command:
+    def dlg_fif_opts(self):             return dlg_fif4_xopts()
+    def show_dlg(self):                 return show_fif4()
+    def show_dlg_and_find_in_tab(self): return show_fif4(d(work='in_tab'))
+    def choose_preset_to_run(self):     return choose_preset_to_run()
 
-# class Command:
-    # def dlg_fif_opts(self):             return dlg_fif4_xopts()
-    # def show_dlg(self):                 return show_fif4()
-    # def show_dlg_and_find_in_tab(self): return show_fif4(d(work='in_tab'))
-    # def choose_preset_to_run(self):     return choose_preset_to_run()
+    # def __init__(self):
+       # bpanel = Bpanel()
+    def open_console(self):                   return bpanel.open_console()
+    def close_console(self):                   return bpanel.close_console()
    #class Command:
 
 
@@ -3753,7 +3759,7 @@ class Reporter:
                 ed_.attr(    app.MARKERS_ADD, x=cl, y=rw, len=ln, **LPTH_FIND_STYLE)
         pass;                  #log("ok marks")
         print("Reporter's show_results in fif.py")
-        bpanel.insert( 0, 0, "aaaa12345hhhh\n" )
+        #bpanel.insert( 0, 0, "aaaa12345hhhh\n" )
        #def show_results
        
     

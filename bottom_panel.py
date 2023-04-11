@@ -1,7 +1,7 @@
 #click bottombar icon [X] (or from plugin menu), will show console.
 #click [X] again will close console.
 
-from .cd_fif4 import *
+#from .cd_fif4 import *
 
 import sys
 import datetime
@@ -25,7 +25,7 @@ fn_config = os.path.join(app.app_path(app.APP_DIR_SETTINGS), 'cuda_x_helper.ini'
 #HOMEDIR = os.path.expanduser('~')
 INPUT_H = 26
 
-bottom_panel = Editor #editor
+#bottom_panel = Editor #editor
 
 def bool_to_str(v):
     return '1' if v else '0'
@@ -33,14 +33,17 @@ def bool_to_str(v):
 def str_to_bool(s):
     return s=='1'
 
-class Command:
+# class Command:
 
-	###### from cd_fif4 #######
-    def dlg_fif_opts(self):             return dlg_fif4_xopts()
-    def show_dlg(self):                 return show_fif4()
-    def show_dlg_and_find_in_tab(self): return show_fif4(d(work='in_tab'))
-    def choose_preset_to_run(self):     return choose_preset_to_run()
-	###########################
+    ###### from cd_fif4 #######
+    # def dlg_fif_opts(self):             return dlg_fif4_xopts()
+    # def show_dlg(self):                 return show_fif4()
+    # def show_dlg_and_find_in_tab(self): return show_fif4(d(work='in_tab'))
+    # def choose_preset_to_run(self):     return choose_preset_to_run()
+    ###########################
+
+#bottom panel
+class Bpanel:
 
     title_side = 'X Objects'
     title_console = 'X Console'
