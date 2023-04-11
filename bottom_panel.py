@@ -49,6 +49,7 @@ class Command:
 
         try:
             self.font_size = int(app.ini_read(fn_config, 'op', 'font_size', '9'))
+            print("in command in bottom_panel.py")
             pass
         except:
             pass
@@ -148,11 +149,12 @@ class Command:
             'font_size': cur_font_size,
             })
         self.memo = Editor(app.dlg_proc(h, app.DLG_CTL_HANDLE, index=n))
+        self.memo.set_prop(app.PROP_FOLD_ALWAYS, True)
+        self.memo.set_prop(app.PROP_LEXER_FILE, "Search results") #python is useless, bc it can't create folding
         
         #check api ===Editor.set_prop===
         #self.memo.set_prop(PROP_RO, True)
         # self.memo.set_prop(PROP_CARET_VIRTUAL, False)
-        self.memo.set_prop(app.PROP_FOLD_ALWAYS, True)
         # self.memo.set_prop(PROP_UNPRINTED_SHOW, False)
         # self.memo.set_prop(PROP_MARGIN, 2000)
         # self.memo.set_prop(PROP_MARGIN_STRING, '')
@@ -173,14 +175,13 @@ class Command:
         body = ['+Search "code". Report with [styles].', '\t<tab:4/a1.md>: #8', '\t\t< 92>: ## Code', '\t\t< 94>: Inline `code`', '\t\t< 96>: Indented code', '\t\t< 99>:     line 1 of code', '\t\t<100>:     line 2 of code', '\t\t<101>:     line 3 of code', '\t\t<104>: Block code "fences"', '\t\t<220>:         { some code, part of Definition 2 }']
         body2 = ['+Search "code2". Report with [styles].', '\t<tab:4/a12.md>: #8', '\t\t< 92>: ## Code2', '\t\t< 94>: Inline `code`', '\t\t< 96>: Indented code', '\t\t< 99>:     line 1 of code', '\t\t<100>:     line 2 of code', '\t\t<101>:     line 3 of code', '\t\t<104>: Block code "fences"', '\t\t<220>:         { some code, part of Definition 2 }']
         self.memo.set_text_all( "\n".join(body) )
-        self.memo.insert( 0, 0, "\n")
-        self.memo.insert( 0, 0, "\n".join(body2) )
+        #self.memo.insert( 0, 0, "\n")
+        self.memo.insert( 0, 0, "\n".join(body2)+"\n" )
                 
         #self.memo.folding(app.FOLDING_ADD, item_x=-1, item_y=1, item_y2=3)
         #self.memo.folding(FOLDING_FOLD_ALL, item_y=1, item_y2=3)
         #self.memo.folding(FOLDING_FOLD_ALL)
         #self.memo.decor(DECOR_SET, line=2)
-        self.memo.set_prop(app.PROP_LEXER_FILE, "Search results") #python is useless, bc it can't create folding
 
         # self.input.set_prop(PROP_ONE_LINE, True)
         # self.input.set_prop(PROP_GUTTER_ALL, True)
@@ -198,12 +199,13 @@ class Command:
         return h
 
 
+
     def config(self):
 
         ini_write(fn_config, 'op', 'max_history', str(self.max_history))
         ini_write(fn_config, 'op', 'font_size', str(self.font_size))
         #ini_write(fn_config, 'op', 'dark_colors', bool_to_str(self.dark_colors))
-        ini_write(fn_config, 'op', 'show_toolbar_small', bool_to_str(self.show_toolbar_small))
+        #ini_write(fn_config, 'op', 'show_toolbar_small', bool_to_str(self.show_toolbar_small))
 
         file_open(fn_config)
         
