@@ -13,10 +13,13 @@ from threading import Thread, Lock
 
 import cudatext     as app
 import cudatext_cmd as cmds
-from cudatext import *
+from cudatext import ed
+from cudatext import Editor
+#from cudatext import *
+  #in app/py/cudatext.py 
 
 fn_icon = os.path.join(os.path.dirname(__file__), 'x_icon.png')
-fn_config = os.path.join(app_path(APP_DIR_SETTINGS), 'cuda_x_helper.ini')
+fn_config = os.path.join(app.app_path(app.APP_DIR_SETTINGS), 'cuda_x_helper.ini')
 #IS_WIN = os.name=='nt'
 #IS_MAC = sys.platform=='darwin'
 #HOMEDIR = os.path.expanduser('~')
@@ -45,7 +48,8 @@ class Command:
     def __init__(self):
 
         try:
-            self.font_size = int(ini_read(fn_config, 'op', 'font_size', '9'))
+            self.font_size = int(app.ini_read(fn_config, 'op', 'font_size', '9'))
+            pass
         except:
             pass
 
@@ -53,7 +57,7 @@ class Command:
     def init_forms(self):
         
         self.h_console = self.init_console_form()
-        app_proc(PROC_BOTTOMPANEL_ADD_DIALOG, (self.title_console, self.h_console, fn_icon))
+        app.app_proc(app.PROC_BOTTOMPANEL_ADD_DIALOG, (self.title_console, self.h_console, fn_icon))
 
 
     def open_console(self):
@@ -62,20 +66,20 @@ class Command:
         if not self.h_console:
             self.init_forms()
 
-        dlg_proc(self.h_console, DLG_CTL_FOCUS, name='input')
+        app.dlg_proc(self.h_console, app.DLG_CTL_FOCUS, name='input')
 
-        app_proc(PROC_BOTTOMPANEL_ACTIVATE, (self.title_console, True)) #True - set focus
+        app.app_proc(app.PROC_BOTTOMPANEL_ACTIVATE, (self.title_console, True)) #True - set focus
         
-        print( ed.get_prop(PROP_TAB_TITLE) )
+        print( ed.get_prop(app.PROP_TAB_TITLE) )
 
     def close_console(self):
         
         # useless
-        #app_proc(PROC_BOTTOMPANEL_REMOVE, (self.title_console, False)) #False - unset focus?
+        #app.app_proc(PROC_BOTTOMPANEL_REMOVE, (self.title_console, False)) #False - unset focus?
         
         # ed_self???
         #ed.cmd(cmds.cmd_HideBottomPanel) #it works
-        app_proc(PROC_SHOW_BOTTOMPANEL_SET, False) #it also works
+        app.app_proc(app.PROC_SHOW_BOTTOMPANEL_SET, False) #it also works
         
         # for h in ed_handles():
             # e = Editor(h)
@@ -86,7 +90,7 @@ class Command:
 
     def init_console_form(self):
 
-        colors = app_proc(PROC_THEME_UI_DICT_GET,'')
+        colors = app.app_proc(app.PROC_THEME_UI_DICT_GET,'')
         color_btn_back = colors['ButtonBgPassive']['color']
         color_btn_font = colors['ButtonFont']['color']
 
@@ -97,8 +101,8 @@ class Command:
 
         cur_font_size = self.font_size
 
-        h = dlg_proc(0, DLG_CREATE)
-        dlg_proc(h, DLG_PROP_SET, prop={
+        h = app.dlg_proc(0, app.DLG_CREATE)
+        app.dlg_proc(h, app.DLG_PROP_SET, prop={
             'border': False,
             'keypreview': True,
             'on_key_down': self.form_key_down,
@@ -107,8 +111,8 @@ class Command:
             'color': color_btn_back,
             })
 
-        n = dlg_proc(h, DLG_CTL_ADD, 'button_ex')
-        dlg_proc(h, DLG_CTL_PROP_SET, index=n, prop={
+        n = app.dlg_proc(h, app.DLG_CTL_ADD, 'button_ex')
+        app.dlg_proc(h, app.DLG_CTL_PROP_SET, index=n, prop={
             'name': 'break',
             'a_l': None,
             'a_t': None,
@@ -121,8 +125,8 @@ class Command:
             'on_change': self.button_break_click,
             })
 
-        n = dlg_proc(h, DLG_CTL_ADD, 'editor_combo')
-        dlg_proc(h, DLG_CTL_PROP_SET, index=n, prop={
+        n = app.dlg_proc(h, app.DLG_CTL_ADD, 'editor_combo')
+        app.dlg_proc(h, app.DLG_CTL_PROP_SET, index=n, prop={
             'name': 'input',
             'border': True,
             'h': INPUT_H,
@@ -132,10 +136,10 @@ class Command:
             'font_size': cur_font_size,
             'texthint': 'Enter command here',
             })
-        self.input = Editor(dlg_proc(h, DLG_CTL_HANDLE, index=n))
+        self.input = Editor(app.dlg_proc(h, app.DLG_CTL_HANDLE, index=n))
 
-        n = dlg_proc(h, DLG_CTL_ADD, 'editor')
-        dlg_proc(h, DLG_CTL_PROP_SET, index=n, prop={
+        n = app.dlg_proc(h, app.DLG_CTL_ADD, 'editor')
+        app.dlg_proc(h, app.DLG_CTL_PROP_SET, index=n, prop={
             'name': 'memo',
             'a_t': ('', '['),
             'a_l': ('', '['),
@@ -143,12 +147,12 @@ class Command:
             'a_b': ('break', '['),
             'font_size': cur_font_size,
             })
-        self.memo = Editor(dlg_proc(h, DLG_CTL_HANDLE, index=n))
+        self.memo = Editor(app.dlg_proc(h, app.DLG_CTL_HANDLE, index=n))
         
         #check api ===Editor.set_prop===
         #self.memo.set_prop(PROP_RO, True)
         # self.memo.set_prop(PROP_CARET_VIRTUAL, False)
-        self.memo.set_prop(PROP_FOLD_ALWAYS, True)
+        self.memo.set_prop(app.PROP_FOLD_ALWAYS, True)
         # self.memo.set_prop(PROP_UNPRINTED_SHOW, False)
         # self.memo.set_prop(PROP_MARGIN, 2000)
         # self.memo.set_prop(PROP_MARGIN_STRING, '')
@@ -176,7 +180,7 @@ class Command:
         #self.memo.folding(FOLDING_FOLD_ALL, item_y=1, item_y2=3)
         #self.memo.folding(FOLDING_FOLD_ALL)
         #self.memo.decor(DECOR_SET, line=2)
-        self.memo.set_prop(PROP_LEXER_FILE, "Search results") #python is useless, bc it can't create folding
+        self.memo.set_prop(app.PROP_LEXER_FILE, "Search results") #python is useless, bc it can't create folding
 
         # self.input.set_prop(PROP_ONE_LINE, True)
         # self.input.set_prop(PROP_GUTTER_ALL, True)
@@ -190,7 +194,7 @@ class Command:
         # self.input.set_prop(PROP_HILITE_CUR_LINE, False)
         # self.input.set_prop(PROP_HILITE_CUR_COL, False)
 
-        dlg_proc(h, DLG_SCALE)
+        app.dlg_proc(h, app.DLG_SCALE)
         return h
 
 
