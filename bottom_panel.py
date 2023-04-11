@@ -11,21 +11,16 @@ from time import sleep
 from subprocess import Popen, PIPE, STDOUT
 from threading import Thread, Lock
 
-import          cudatext            as app
-import cudatext_keys as keys
+import cudatext     as app
 import cudatext_cmd as cmds
 from cudatext import *
 
 fn_icon = os.path.join(os.path.dirname(__file__), 'x_icon.png')
 fn_config = os.path.join(app_path(APP_DIR_SETTINGS), 'cuda_x_helper.ini')
-MAX_BUFFER = 100*1000
-IS_WIN = os.name=='nt'
-IS_MAC = sys.platform=='darwin'
-READSIZE = 4*1024
-HOMEDIR = os.path.expanduser('~')
+#IS_WIN = os.name=='nt'
+#IS_MAC = sys.platform=='darwin'
+#HOMEDIR = os.path.expanduser('~')
 INPUT_H = 26
-THEME_TOOLBAR_SMALL = 'toolbar_small_16x16'
-THEME_TOOLBAR_MAIN = 'toolbar_main_24x24'
 
 def bool_to_str(v):
     return '1' if v else '0'
@@ -53,17 +48,6 @@ class Command:
             self.font_size = int(ini_read(fn_config, 'op', 'font_size', '9'))
         except:
             pass
-
-        try:
-            self.max_history = int(ini_read(fn_config, 'op', 'max_history', '10'))
-        except:
-            pass
-
-        #self.dark_colors = str_to_bool(ini_read(fn_config, 'op', 'dark_colors', '1'))
-        #self.show_toolbar_small = str_to_bool(ini_read(fn_config, 'op', 'show_toolbar_small', '1'))
-        
-        #self.h_menu = menu_proc(0, MENU_CREATE)
-        #self.load_history()
 
 
     def init_forms(self):
@@ -206,8 +190,6 @@ class Command:
         # self.input.set_prop(PROP_HILITE_CUR_LINE, False)
         # self.input.set_prop(PROP_HILITE_CUR_COL, False)
 
-        #self.upd_history_combo()
-
         dlg_proc(h, DLG_SCALE)
         return h
 
@@ -224,37 +206,7 @@ class Command:
     def form_key_down(self, id_dlg, id_ctl, data='', info=''):
         pass
 
-    def update_output(self, s):
-
-        #self.memo.set_prop(PROP_RO, False)
-        #self.memo.set_text_all(s)
-        #self.memo.set_prop(PROP_RO, True)
-
-        #self.memo.cmd(cmds.cCommand_GotoTextEnd)
-        #self.memo.set_prop(PROP_LINE_TOP, self.memo.get_line_count()-3)
-        pass
 
     def button_break_click(self, id_dlg, id_ctl, data='', info=''):
 
         pass
-
-    def callback_list_dblclick(self, id_dlg, id_ctl, data='', info=''):
-
-        if ed.get_prop(PROP_RO):
-            return
-
-        index = listbox_proc(self.h_list, LISTBOX_GET_SEL)
-        if index<0:
-            return
-
-        ed.cmd(cmds.cCommand_TextInsert, 'Inserted item %d...'%index)
-
-
-    def action_open_project(self, info=None):
-        
-        msg_box('Open Project action', MB_OK)
-
-
-    def action_save_project_as(self, info=None):
-        
-        msg_box('Save Project As action', MB_OK)
