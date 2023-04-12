@@ -229,7 +229,11 @@ class Bpanel:
             return result
         def get_main_y(line):
             y = None
-            return y
+            y = line[3:] #strip "\t\t<" prefix
+            y = re.sub('>.+', '', y)
+            y.strip(line) #removing all leading and trailing whitespaces.
+            logx(f"y: {y}")
+            return int(y) - 1
         def check_text_line(line):
             #return string: "keyword" or "path" or "text" or ""
             result = ""
@@ -240,26 +244,36 @@ class Bpanel:
             if line.startswith("\t<tab:"):
                 return "path"
             return result
+            
         carets = self.bottom_ed.get_carets() #[(PosX, PosY, EndX, EndY),...]
         result_y = carets[0][1]
         logx(f"get_carets: {carets}")
         marks = self.bottom_ed.attr(app.MARKERS_GET) #return full mark on whole result
             #ex: [(tag, x, y, len,...
         #logx(f"{marks}")
-        mark = get_mark_on_line(result_y, marks)  #!!! need to check empty
-        #mark = mark[0]
+        mark = get_mark_on_line(result_y, marks)  # need to check empty
+        if not mark:
+            return
+        mark = mark[0]
         logx(f"{mark}")
         
         line_text = self.bottom_ed.get_text_line(result_y)
         logx(f"line_text: {line_text}")
         line_type = check_text_line(line_text)
         logx(f"line_type: {line_type}")
+        if not line_type:
+            return
+        if line_type == "keyword":
+            return
+        if line_type == "path":
+            #do sth
+            return
+        main_y = get_main_y(line_text)
         
-        #main_x = mark[1]
-        #main_y = 
-        #len = mark[3]
-        #ed.set_caret(main_x, ???, len)
-        #ed.focus()
+        main_x = mark[1]
+        len = mark[3]
+        ed.set_caret(main_x, main_y, len)
+        ed.focus()
 
     def config(self):
 
