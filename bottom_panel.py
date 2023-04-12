@@ -160,6 +160,7 @@ class Bpanel:
             'a_r': ('', ']'),
             'a_b': ('break', '['),
             'font_size': cur_font_size,
+            'on_click_dbl': self.ed_click_dbl,
             })
         
         self.bottom_ed = Editor(app.dlg_proc(h, app.DLG_CTL_HANDLE, index=n))
@@ -214,7 +215,10 @@ class Bpanel:
         app.dlg_proc(h, app.DLG_SCALE)
         return h
 
-
+    def ed_click_dbl(self, id_dlg, id_ctl, data='', info=''):
+        logx(f"get_carets: {self.bottom_ed.get_carets()}")
+        mark = self.bottom_ed.attr(app.MARKERS_GET)
+        print(f"{mark}")
 
     def config(self):
 

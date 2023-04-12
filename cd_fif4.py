@@ -3766,8 +3766,6 @@ class Reporter:
                 ed_.attr(    app.MARKERS_ADD, x=cl, y=rw, len=ln, **LPTH_FIND_STYLE)
         pass;                  #log("ok marks")
         print("Reporter's show_results in fif.py")
-        
-        
        #def show_results
        
     
