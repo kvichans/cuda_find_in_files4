@@ -231,7 +231,7 @@ class Bpanel:
             y = None
             y = line[3:] #strip "\t\t<" prefix
             y = re.sub('>.+', '', y)
-            y.strip(line) #removing all leading and trailing whitespaces.
+            y = y.strip() #removing all leading and trailing whitespaces.
             logx(f"y: {y}")
             return int(y) - 1
         def check_text_line(line):
@@ -270,7 +270,9 @@ class Bpanel:
             return
         main_y = get_main_y(line_text)
         
-        main_x = mark[1]
+        prefix = len(line_text) - len(re.sub('.+>: ', '', line_text)) #"\t\t<xx...x>:"
+        main_x = mark[1] - prefix
+
         len = mark[3]
         ed.set_caret(main_x, main_y, len)
         ed.focus()
