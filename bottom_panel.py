@@ -246,7 +246,10 @@ class Bpanel:
             return result
         def get_path_from_line(line):
             line = re.sub('\t<tab:[0-9]+\/', '', line) #strip "\t<tab:3125.../" prefix
-            logx("get_path_from_line: {line}")
+            logx(f"get_path_from_line: {line}")
+            line = re.sub('>: #[0-9]+', '', line) #strip ">: #154..." suffix
+            logx(f"get_path_from_line: {line}")
+            return line
             
         carets = self.bottom_ed.get_carets() #[(PosX, PosY, EndX, EndY),...]
         result_y = carets[0][1]
