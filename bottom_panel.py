@@ -217,11 +217,19 @@ class Bpanel:
 
     # Param "data" is tuple (x, y) with control-related coordinates.
     def ed_click_dbl(self, id_dlg, id_ctl, data='', info=''):
-        def get_mark_on_line(self, nline, mark):
+        def get_mark_on_line(y, marks):
+            result = []
+            for item in marks:
+                if item[2] == y:
+                    result.append(item)
             pass
-        logx(f"get_carets: {self.bottom_ed.get_carets()}")
-        mark = self.bottom_ed.attr(app.MARKERS_GET) #return full mark on whole result
-        print(f"{mark}")
+        carets = self.bottom_ed.get_carets() #[(PosX, PosY, EndX, EndY),...]
+        logx(f"get_carets: {carets}")
+        marks = self.bottom_ed.attr(app.MARKERS_GET) #return full mark on whole result
+            #ex: [(tag, x, y, len,...
+        #logx(f"{marks}")
+        mark = get_mark_on_line(carets[0][2], marks)
+        logx(f"{mark}")
 
     def config(self):
 
