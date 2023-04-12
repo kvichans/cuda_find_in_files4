@@ -165,6 +165,7 @@ class Bpanel:
         self.bottom_ed = Editor(app.dlg_proc(h, app.DLG_CTL_HANDLE, index=n))
         self.bottom_ed.set_prop(app.PROP_FOLD_ALWAYS, True)
         self.bottom_ed.set_prop(app.PROP_LEXER_FILE, "Search results") #python is useless, bc it can't create folding
+        self.bottom_ed.set_prop(app.PROP_TAB_SIZE, 1) #make tab-char narrow on all lines.
         logx(f"bottom_ed in bottom_panel.py: {self.bottom_ed}")
         
         #check api ===Editor.set_prop===
