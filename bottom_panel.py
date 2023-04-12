@@ -244,18 +244,13 @@ class Bpanel:
             if line.startswith("\t<tab:"):
                 return "path"
             return result
+        def get_path_from_line(line):
+            line = re.sub('\t<tab:[0-9]+\/', '', line) #strip "\t<tab:3125.../" prefix
+            logx("get_path_from_line: {line}")
             
         carets = self.bottom_ed.get_carets() #[(PosX, PosY, EndX, EndY),...]
         result_y = carets[0][1]
         logx(f"get_carets: {carets}")
-        marks = self.bottom_ed.attr(app.MARKERS_GET) #return full mark on whole result
-            #ex: [(tag, x, y, len,...
-        #logx(f"{marks}")
-        mark = get_mark_on_line(result_y, marks)  # need to check empty
-        if not mark:
-            return
-        mark = mark[0]
-        logx(f"{mark}")
         
         line_text = self.bottom_ed.get_text_line(result_y)
         logx(f"line_text: {line_text}")
@@ -267,7 +262,18 @@ class Bpanel:
             return
         if line_type == "path":
             #do sth
+            get_path_from_line(line_text)
             return
+            
+        marks = self.bottom_ed.attr(app.MARKERS_GET) #return full mark on whole result
+            #ex: [(tag, x, y, len,...
+        #logx(f"{marks}")
+        mark = get_mark_on_line(result_y, marks)  # need to check empty
+        if not mark:
+            return
+        mark = mark[0]
+        logx(f"{mark}")
+            
         main_y = get_main_y(line_text)
         logx( len(re.sub('.+>: ', '', line_text)) )
         prefix = len(line_text) - len(re.sub('.+>: ', '', line_text)) #"\t\t<xx...x>:"
