@@ -215,9 +215,12 @@ class Bpanel:
         app.dlg_proc(h, app.DLG_SCALE)
         return h
 
+    # Param "data" is tuple (x, y) with control-related coordinates.
     def ed_click_dbl(self, id_dlg, id_ctl, data='', info=''):
+        def get_mark_on_line(self, nline, mark):
+            pass
         logx(f"get_carets: {self.bottom_ed.get_carets()}")
-        mark = self.bottom_ed.attr(app.MARKERS_GET)
+        mark = self.bottom_ed.attr(app.MARKERS_GET) #return full mark on whole result
         print(f"{mark}")
 
     def config(self):
