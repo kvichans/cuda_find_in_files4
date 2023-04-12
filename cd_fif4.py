@@ -4037,7 +4037,10 @@ class TabsWalker:
             # Skip the tab?
             if not       any(map(lambda cl:fnmatch(title, cl), incls)):   continue#for
             if excls and any(map(lambda cl:fnmatch(title, cl), excls)):   continue#for
-            path    = f'tab:{tab_id}/{title}'
+            if filename:
+                path    = f'tab:{tab_id}/{filename}'
+            else:
+                path    = f'tab:{tab_id}/{title}'
             
             # Use!
             Walker.stats[Walker.WKST_UFNS]  += 1
