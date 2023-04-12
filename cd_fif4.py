@@ -3703,6 +3703,8 @@ class Reporter:
            #def node2body
         self.locs   = {}
         node2body(tree, body, self.locs)
+        #logx(f"marks: {marks}") #marks: [(2, 12, 4), (3, 10, 4), (4, 10, 4), ...
+        #logx(f"marks_fnd: {marks_fnd}") #marks_fnd: [True, True, True, ...
         pass;                  #log__('body=\n{}','\n'.join(body)         ,__=(log4fun,Reporter.log4cls))
         pass;                  #log__('marks=\n{}',(marks)         ,__=(log4fun,Reporter.log4cls))
         pass;                   log__('self.locs=\n{}',pfw(self.locs)         ,__=(log4fun,Reporter.log4cls)) if _log4mod>=0 else 0
@@ -3720,6 +3722,8 @@ class Reporter:
         #body show result without syntax
         #logx(f"body: {body}")
         logx(ed.get_filename())
+        logx(f"bpanel.bottom_ed in fif: {bpanel.bottom_ed}")
+        bpanel.bottom_ed.insert( 0, 0, '\n'.join(body) + "\n" )
         
         pass;                  #log("?? marks")
         if -1==-1 and app.app_api_version()>='1.0.310':# app 1.88.8 
@@ -3744,6 +3748,7 @@ class Reporter:
                 else:                           # Report about searches
                     rws, cls, lns   = list(zip(*marks))
                     ed_.attr(app.MARKERS_ADD_MANY, x=cls, y=rws, len=lns, **MARK_FIND_STYLE)
+                    bpanel.bottom_ed.attr(app.MARKERS_ADD_MANY, x=cls, y=rws, len=lns, **MARK_FIND_STYLE)
             
             if lpths:
                 rws, cls, lns = list(zip(*lpths))
@@ -3762,8 +3767,7 @@ class Reporter:
         pass;                  #log("ok marks")
         print("Reporter's show_results in fif.py")
         
-        logx(f"bpanel.bottom_ed in fif: {bpanel.bottom_ed}")
-        bpanel.bottom_ed.insert( 0, 0, '\n'.join(body) + "\n" )
+        
        #def show_results
        
     
