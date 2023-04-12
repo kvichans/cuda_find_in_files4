@@ -230,6 +230,16 @@ class Bpanel:
         def get_main_y(line):
             y = None
             return y
+        def check_text_line(line):
+            #return string: "keyword" or "path" or "text" or ""
+            result = ""
+            if line.startswith("+Search"):
+                return "keyword"
+            if line.startswith("\t\t<"):
+                return "text"
+            if line.startswith("\t<tab:"):
+                return "path"
+            return result
         carets = self.bottom_ed.get_carets() #[(PosX, PosY, EndX, EndY),...]
         result_y = carets[0][1]
         logx(f"get_carets: {carets}")
@@ -237,12 +247,17 @@ class Bpanel:
             #ex: [(tag, x, y, len,...
         #logx(f"{marks}")
         mark = get_mark_on_line(result_y, marks)  #!!! need to check empty
-        mark = mark[0]
+        #mark = mark[0]
         logx(f"{mark}")
         
-        main_x = mark[1]
+        line_text = self.bottom_ed.get_text_line(result_y)
+        logx(f"line_text: {line_text}")
+        line_type = check_text_line(line_text)
+        logx(f"line_type: {line_type}")
+        
+        #main_x = mark[1]
         #main_y = 
-        len = mark[3]
+        #len = mark[3]
         #ed.set_caret(main_x, ???, len)
         #ed.focus()
 

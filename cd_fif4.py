@@ -3726,10 +3726,13 @@ class Reporter:
         bpanel.bottom_ed.insert( 0, 0, '\n'.join(body) + "\n" )
         
         pass;                  #log("?? marks")
+        #logx(f"ltkns: {ltkns}")
+        #logx(f"marks: {marks}")
         if -1==-1 and app.app_api_version()>='1.0.310':# app 1.88.8 
             if ltkns:
                 ltkns   = merge_markers(ltkns, marks, MARK_FIND_STYLE)
                     # `marks` merges with self.rfrgs.st style. maybe rfrgs.st is original text lexer style?
+                logx(f"marks: {marks}")
                 ltkns_s = {}
                 ltkns_a = {}
                 for rw, cl, ln, st in ltkns:
