@@ -269,12 +269,13 @@ class Bpanel:
             #do sth
             return
         main_y = get_main_y(line_text)
-        
+        logx( len(re.sub('.+>: ', '', line_text)) )
         prefix = len(line_text) - len(re.sub('.+>: ', '', line_text)) #"\t\t<xx...x>:"
+        logx(prefix)
         main_x = mark[1] - prefix
 
-        len = mark[3]
-        ed.set_caret(main_x, main_y, len)
+        len_x = mark[3]
+        ed.set_caret(main_x, main_y, main_x+len_x, main_y) #select keyword
         ed.focus()
 
     def config(self):
