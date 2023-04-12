@@ -227,14 +227,24 @@ class Bpanel:
                 if item[2] == y:
                     result.append(item)
             return result
+        def get_main_y(line):
+            y = None
+            return y
         carets = self.bottom_ed.get_carets() #[(PosX, PosY, EndX, EndY),...]
-        y = carets[0][1]
+        result_y = carets[0][1]
         logx(f"get_carets: {carets}")
         marks = self.bottom_ed.attr(app.MARKERS_GET) #return full mark on whole result
             #ex: [(tag, x, y, len,...
         #logx(f"{marks}")
-        mark = get_mark_on_line(y, marks)
+        mark = get_mark_on_line(result_y, marks)  #!!! need to check empty
+        mark = mark[0]
         logx(f"{mark}")
+        
+        main_x = mark[1]
+        #main_y = 
+        len = mark[3]
+        #ed.set_caret(main_x, ???, len)
+        #ed.focus()
 
     def config(self):
 
