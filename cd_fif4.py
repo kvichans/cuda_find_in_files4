@@ -3729,6 +3729,7 @@ class Reporter:
         #logx(f"ltkns: {ltkns}")
         #logx(f"marks: {marks}")
         if -1==-1 and app.app_api_version()>='1.0.310':# app 1.88.8 
+            ltkns = {} # otherwise too many mark?
             if ltkns:
                 ltkns   = merge_markers(ltkns, marks, MARK_FIND_STYLE)
                     # `marks` merges with self.rfrgs.st style. maybe rfrgs.st is original text lexer style?
