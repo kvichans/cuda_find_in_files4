@@ -278,7 +278,7 @@ reload_opts()
 
 # How to format Results
 TRFM_PLL    = 'PLL'
-TRFM_P_LL   = 'P_LL'
+TRFM_P_LL   = 'P_LL' #default
 TRFM_D_FLL  = 'D_FLL'
 #TRFM_D_F_LL = 'D_F_LL'
 TRFMD2V     = dict([
@@ -3221,8 +3221,8 @@ def fifwork(observer, ed4rpt, walkers, fragmer, frgfilters, reporter, rplc=RPLC_
                 try:
                     pass;      #log("enco={}",(enco))
                     body,enc= walker.path2body_enc(fn, d(enco=enco))
-                    logx(f"body in fifwork: {body}")
-                    logx(f"enc in fifwork: {enc}")
+                    #logx(f"body in fifwork: {body}")
+                    #logx(f"enc in fifwork: {enc}")
                     found   = False
                     pass;      #log__("type(body)={}",(type(body))         ,__=(log4fun,)) if _log4mod>=0 else 0
                     for frgs in fragmer.provide_frag(body, build_new_body=(rplc!=RPLC_NO)):
@@ -3458,6 +3458,7 @@ class Reporter:
         logx("Reporter's build_tree")
         pass;                   log4fun=0
         pass;                   log__('trfm={}, self.rfrgs=\n{}',trfm, pfw(self.rfrgs,60)         ,__=(log4fun,Reporter.log4cls)) if _log4mod>=0 else 0
+        logx(f"trfm: {trfm}") #P_LL
         if trfm == TRFM_PLL:    # <path(r:c:w)>: line
             return [dcta(tp='fr', frs=[fr]) for fr in self.rfrgs]
         
@@ -3667,9 +3668,11 @@ class Reporter:
                     locs[len(body)] = [kid.p, []]
                     pass;      #log("kid=\n{}",pfw(kid))
                     tim     = ' ('+fit_ftim(kid.p)+')' if ftim and os.path.exists(kid.p) else ''
+                    
+                    #filename in result
                     body   += [f('{gap}<{fil}{tim}>: #{cnt}'
                                 , gap=TAB*dpth
-                                , fil=os.path.relpath(kid.p, root) if relp else kid.p
+                                , fil=kid.p #fifx for full path in diff folder
                                 , tim=tim
                                 , cnt=kid.cnt)]
                     node2body(kid.subs, body, locs, 1+dpth)
@@ -3691,7 +3694,7 @@ class Reporter:
 
                     fmt_vs  = dict(g=TAB*dpth, r=(1+rfrg.r if rfrg.r>=0 else ''), s=rfrg.s) # path has not r
 #                   fmt_vs  = dict(g=TAB*dpth, r=1+rfrg.r                       , s=rfrg.s)
-                    if finl:
+                    if finl: #default is None
                         fmt_vs['p'] = os.path.relpath(rfrg.f, root) if relp and os.path.isfile(rfrg.f) else rfrg.f
                     if shcw:
                         fmt_vs['c'] = str(1+rfrg.cws[0][0]) if rfrg.cws else ''
@@ -3705,7 +3708,9 @@ class Reporter:
                #for kid
            #def node2body
         self.locs   = {}
-        node2body(tree, body, self.locs)
+        #logx(f"body: {body}")  only ['+Search "xxx". Report with [styles].']
+        node2body(tree, body, self.locs) #append content to body
+        #logx(f"body22222222222: {body}")   append content
         #logx(f"marks: {marks}") #marks: [(2, 12, 4), (3, 10, 4), (4, 10, 4), ...
         #logx(f"marks_fnd: {marks_fnd}") #marks_fnd: [True, True, True, ...
         pass;                  #log__('body=\n{}','\n'.join(body)         ,__=(log4fun,Reporter.log4cls))
@@ -4245,7 +4250,7 @@ class FSWalker:
                     if sort else \
                   mtfps
         pass;                  #log("#paths={}",len(paths))
-        logx(f"FSWalker's provide_path() - paths: {paths}") #all files inside folder, including no text files
+        #logx(f"FSWalker's provide_path() - paths: {paths}") #all files inside folder, including no text files; full path
         yield from paths
        #def provide_path
     
