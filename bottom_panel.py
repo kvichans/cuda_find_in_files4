@@ -13,6 +13,7 @@ from threading import Thread, Lock
 
 import cudatext     as app
 import cudatext_cmd as cmds
+import cudax_lib    as apx
 from cudatext import ed
 from cudatext import Editor
 #from cudatext import *
@@ -242,7 +243,9 @@ class Bpanel:
             if line.startswith("\t\t<"):
                 return "text"
             if line.startswith("\t<tab:"):
-                return "path"
+                return "openedpath"
+            if line.startswith("\t<"):
+                return "closedpath"
             return result
         def get_path_from_line(line):
             line = re.sub('\t<tab:[0-9]+\/', '', line) #strip "\t<tab:3125.../" prefix
@@ -250,9 +253,20 @@ class Bpanel:
             line = re.sub('>: #[0-9]+', '', line) #strip ">: #154..." suffix
             logx(f"get_path_from_line: {line}")
             return line
+        def search_filepath(ed, result_y):
+            """look upward for pathline line by line"""
+            for i in reversed(range(result_y)):
+                line = ed.get_text_line(i)
+                logx(f"i, line: {i}, {line}")
+                if line.startswith("\t<"):
+                    line = re.sub('\t<', '', line) #strip "\t<" prefix
+                    line = re.sub('>: #[0-9]+', '', line) #strip ">: #154..." suffix
+                    logx(f"line: {line}")
+                    return line
+                    #return  "tab:12xx:path" or "path"
             
         carets = self.bottom_ed.get_carets() #[(PosX, PosY, EndX, EndY),...]
-        result_y = carets[0][1]
+        result_y = carets[0][1] #result_y is on search result's window
         logx(f"get_carets: {carets}")
         
         line_text = self.bottom_ed.get_text_line(result_y)
@@ -260,32 +274,49 @@ class Bpanel:
         line_type = check_text_line(line_text)
         logx(f"line_type: {line_type}")
         if not line_type:
+            print("no line type")
             return
         if line_type == "keyword":
             return
-        if line_type == "path":
-            #do sth
-            get_path_from_line(line_text)
+        if line_type == "openedpath":
             return
-            
+        if line_type == "closedpath":
+            return
+        
+        #if line_type == "text":
+        ########### change tab ###########
+        filepathinfo = search_filepath(self.bottom_ed, result_y) #get line's filepath
+        logx(f"filepathinfo: {filepathinfo}")
+        if filepathinfo.startswith('tab:'):
+            tab_id  = int(filepathinfo.split('/')[0].split(':')[1])
+            logx(f"tab_id: {tab_id}")
+            ed  = apx.get_tab_by_id(tab_id)
+            ed.focus()  if ed else 0
+        elif os.path.isfile(filepathinfo):
+            app.file_open(filepathinfo)
+            app.app_idle(True) # ax: helps to scroll to caret in tab_ed.set_caret below
+        ###################################
+        
+        ######### set caret ###############
         marks = self.bottom_ed.attr(app.MARKERS_GET) #return full mark on whole result
             #ex: [(tag, x, y, len,...
         #logx(f"{marks}")
         mark = get_mark_on_line(result_y, marks)  # need to check empty
         if not mark:
+            print("no mark? why?")
             return
         mark = mark[0]
         logx(f"{mark}")
             
-        main_y = get_main_y(line_text)
+        main_y = get_main_y(line_text) #main editor's y
         logx( len(re.sub('.+>: ', '', line_text)) )
         prefix = len(line_text) - len(re.sub('.+>: ', '', line_text)) #"\t\t<xx...x>:"
         logx(prefix)
         main_x = mark[1] - prefix
-
         len_x = mark[3]
         ed.set_caret(main_x, main_y, main_x+len_x, main_y) #select keyword
-        ed.focus()
+        logx(f"main_x: {main_x}, main_y: {main_y}, main_x_end: {main_x+len_x}, main_y: {main_y}")
+        #####################################
 
     def config(self):
 
