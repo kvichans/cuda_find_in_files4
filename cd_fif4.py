@@ -3221,6 +3221,8 @@ def fifwork(observer, ed4rpt, walkers, fragmer, frgfilters, reporter, rplc=RPLC_
                 try:
                     pass;      #log("enco={}",(enco))
                     body,enc= walker.path2body_enc(fn, d(enco=enco))
+                    logx(f"body in fifwork: {body}")
+                    logx(f"enc in fifwork: {enc}")
                     found   = False
                     pass;      #log__("type(body)={}",(type(body))         ,__=(log4fun,)) if _log4mod>=0 else 0
                     for frgs in fragmer.provide_frag(body, build_new_body=(rplc!=RPLC_NO)):
@@ -3237,6 +3239,7 @@ def fifwork(observer, ed4rpt, walkers, fragmer, frgfilters, reporter, rplc=RPLC_
                        #for frgs
                     if found and (rplc==RPLC_DO):
                          walker.body2path(fragmer.get_new_body(), fn, enc)
+                             #update srcf contents
                 except UnicodeError as ex:
                     print(f'Cannot read "{fn}": ({enco}) {ex}')     if enco_n==len(enco_l)-1 else 0
                     pass;      #print(_(f'Cannot read "{fn}": ({enco}) {ex}'))
@@ -4052,7 +4055,7 @@ class TabsWalker:
        #def provide_path
        
        
-    def body2path(self, body, path, ops=None):
+    def body2path(self, body, path, ops=None): #update srcf window's contents
         if not path.startswith('tab:'): raise ValueError()
         tab_id   = path[len('tab:'):].split('/')[0]
         tab_ed   = apx.get_tab_by_id(tab_id)
@@ -4242,6 +4245,7 @@ class FSWalker:
                     if sort else \
                   mtfps
         pass;                  #log("#paths={}",len(paths))
+        logx(f"FSWalker's provide_path() - paths: {paths}") #all files inside folder, including no text files
         yield from paths
        #def provide_path
     
