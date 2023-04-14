@@ -38,6 +38,11 @@ menu=op
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;; cuda_b_plugin ;;;;;;;;;;;;
+; a separator bar
+[item49]
+section=commands
+caption=Find in Files &X\-
+method=_
 
 [item50]
 section=commands
