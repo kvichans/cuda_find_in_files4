@@ -3760,7 +3760,7 @@ class Reporter:
                 else:                           # Report about searches
                     rws, cls, lns   = list(zip(*marks))
                     ed_.attr(app.MARKERS_ADD_MANY, x=cls, y=rws, len=lns, **MARK_FIND_STYLE)
-                    bpanel.bottom_ed.attr(app.MARKERS_ADD_MANY, x=cls, y=rws, len=lns, **MARK_FIND_STYLE)
+                    bpanel.bottom_ed.attr(app.MARKERS_ADD_MANY, x=cls, y=rws, len=lns, color_bg=0x00FF00)
             
             if lpths:
                 rws, cls, lns = list(zip(*lpths))
