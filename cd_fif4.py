@@ -677,9 +677,11 @@ class Fif4D:
         pref    = prefix_for_opts()
         hi_opts = fget_hist([pref, 'opts'] if pref else 'opts', {})
         m.opts  = update_tree(m.opts, hi_opts)
+        #logx(f"m.opts: {m.opts}")
         pass;                  #log("run_opts={}",pfw(run_opts))
         m.opts  = update_tree(m.opts, run_opts.get('with', {}))
         pass;                  #log("m.opts={}",pfw(m.opts))
+        #logx(f"m.opts2: {m.opts}")
         
         # Upgrade
         m.opts.vw.what_l.remove('') if '' in m.opts.vw.what_l else 0
@@ -1385,6 +1387,7 @@ class Fif4D:
 
         if aid=='di_find':                      # Start new search
             logx("aid=='di_find'")
+            logx(f"m.opts in aid=='di_find': {m.opts}")
             m.stbr_act('')                      # Clear status
             upd = self.work(ag, 'fast' if scam=='s' else data)
             if not upd and GOTO_FIRST_FR: m.do_acts(ag, 'go-next-fr')
@@ -1579,6 +1582,26 @@ class Fif4D:
                 m.stbr_act(f(_('Fill the field "{}"')   , m.caps['wk_fold']))   ;return d(fid='wk_fold')
             return []
 
+        if aid=='di_fdal':                      # Find All in Current Document
+            logx(f"in_what: {m.opts.in_what}") #Find keyword
+            m.opts.wk_fold = "<tabs>"
+            logx(f"wk_fold: {m.opts.wk_fold}") #From
+            m.opts.wk_incl = ed.get_prop(app.PROP_TAB_TITLE)
+            logx(f"wk_incl: {m.opts.wk_incl}") #Files
+            m.opts.wk_excl = ""
+            logx(f"wk_excl: {m.opts.wk_excl}") #Skip
+            m.opts.wk_dept = 0
+            logx(f"wk_dept: {m.opts.wk_dept}")
+            
+            #???????????????
+            #if aid=='di_find': 
+            m.stbr_act('')                      # Clear status
+            upd = self.work(ag, 'fast' if scam=='s' else data)
+            if not upd and GOTO_FIRST_FR: m.do_acts(ag, 'go-next-fr')
+            return upd
+            
+            return []
+            #return m.do_acts(ag, 'di_find') #do_acts will reset m.opts
         pass;                   msg_box('??do '+aid)
         return d(fid=self.cid_what())
        #def do_acts
@@ -1879,6 +1902,8 @@ class Fif4D:
       ),in_case=d(tp='chbt' ,tid='di_menu'  ,x=reex_x+WRDW*1,w=WRDW     ,cap='&aA'      ,hint=case_hi               ,p='pt'                 # &a
       ),in_word=d(tp='chbt' ,tid='di_menu'  ,x=reex_x+WRDW*2,w=WRDW     ,cap='"&w"'     ,hint=word_hi               ,p='pt'                 # &w
       ),rp_cntx=d(tp='chbt' ,tid='di_menu'  ,x=cntx_x       ,w=CTXW     ,cap=m.cntx_ca(),hint=cntx_hi               ,p='pt'                 # &-
+      ),di_fdal=d(tp='bttn' ,tid='di_menu'  ,x=cntx_x+WRDW*3,w=CTXW*1.55   ,cap='Find in Current Tab'  ,hint='curent Doc'          ,p='pt'  
+                    # Find All in Current Doc
       ),di_i4o_=d(tp='bvel' ,y  = 3         ,x=i4op_x       ,r=-5-FNDW-5,h=bttn_h                       ,a='r>'     ,p='pt' ,props='1'
       ),di_i4op=d(tp='labl' ,tid='di_menu'  ,x=i4op_x+4     ,r=-5-FNDW-9,cap=m.i4op_ca(),hint=i4op_hi   ,a='r>'     ,p='pt'
       ),di_find=d(tp='bttn' ,tid='di_menu'  ,x=-5-FNDW      ,r=-5       ,cap=find_ca    ,hint=find_hi   ,a='>>'     ,p='pt' ,def_bt=True    # &d Enter
@@ -2057,14 +2082,14 @@ class Fif4D:
                                              m.opts.in_what),m.sl_what_l     , unicase=False)
             m.opts.vw.what_l= add_to_history(m.opts.in_what, m.opts.vw.what_l, unicase=False)
             m.ag.update(vals=m.vals_opts('o2v'))
-
+        print("1111111")
         if m.ropts.get('work')=='in_tab' and m.opts.in_what:
             m.opts.wk_incl  = ed.get_prop(app.PROP_TAB_TITLE).strip('*')
             m.opts.wk_excl  = ''
             m.opts.wk_fold  = Walker.ROOT_IS_TABS
             m.ag.update(vals=m.vals_opts('o2v'))
             app.timer_proc(app.TIMER_START_ONE, m.on_timer, M.TIMER_DELAY, tag='di_find')
-
+        print("2222222")
         if m.ropts.get('work', '').startswith('by_ps'):
             ps_num  = int(m.ropts.get('work').split(':')[1])
             ps      = m.opts.ps_pset[ps_num]
@@ -2073,7 +2098,7 @@ class Fif4D:
                 m.opts[k]   = ps[k]
             m.ag.update(vals=m.vals_opts('o2v'))
             app.timer_proc(app.TIMER_START_ONE, m.on_timer, M.TIMER_DELAY, tag='di_find')
-
+        print("3333333")
         m.ag.show(on_exit=m.on_exit, onetime=False, modal=False) 
             #modal=False so window will not block main editor
         logx("close fif window")
@@ -2268,7 +2293,7 @@ class Fif4D:
                  ).show()
 
         if act=='repl':
-            #logx(f"par: {par}")
+            logx(f"par: {par}")
             sval    = par
             if not sval:    return sval
             if sval == '{p}':                                   # Project dirs
@@ -2569,6 +2594,7 @@ class Fif4D:
                 self._locked_cids.clear()
            #def lock_act
 
+        log(f"m.opts in work(): {m.opts}")
         wopts = dcta(m.opts)
         wopts.in_what = m.var_acts('repl', wopts.in_what)
         wopts.wk_incl = m.var_acts('repl', wopts.wk_incl)
@@ -2581,6 +2607,7 @@ class Fif4D:
 
         # Inspect user values
         test    = m.do_acts(ag, 'test-oblig')
+        log(f"test: {test}")
         if test:                                                                     return test
         if 0 != wopts.wk_fold.count('"')%2:
             m.stbr_act(f(_('Fix quotes in the field "{}"')  , m.caps['wk_fold']))   ;return d(fid='wk_fold')
