@@ -1,5 +1,5 @@
 [info]
-version=0.1.0
+version=1.0.0
 title=Find in Files X
 desc=Gives dialog to search for multiple files containing some string/regex, like in file managers.
 type=cudatext-plugin
@@ -13,25 +13,25 @@ api=1.0.302
 
 [item1]
 section=commands
-caption=&Find in Files X\&Find in files...
+caption=Find in Files &X\&Find in files...
 method=show_dlg
 
 [item2]
 section=commands
-caption=&Find in Files X\Find in current &tab...
+caption=Find in Files &X\Find in current &tab...
 method=show_dlg_and_find_in_tab
 ;menu=0
 
 [item3]
 section=commands
-caption=&Find in Files X\Find by &preset...
+caption=Find in Files &X\Find by &preset...
 method=choose_preset_to_run
 ;menu=0
 
 
 [item25]
 section=commands
-caption=&Find in Files X\&View and edit extra options...
+caption=Find in Files &X\&View and edit extra options...
 method=dlg_fif_opts
 menu=op
 
@@ -39,19 +39,19 @@ menu=op
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;; cuda_b_plugin ;;;;;;;;;;;;
 
-[item5]
+[item50]
 section=commands
-caption=X Plugin\Open console
+caption=Find in Files &X\&Open console
 method=open_console
 
-[item6]
+[item51]
 section=commands
-caption=X Plugin\Close console
+caption=Find in Files &X\&Close console
 method=close_console
 
-[item10]
+[item60]
 section=commands
-caption=X Plugin\Config
+caption=Find in Files &X\Config
 method=config
 menu=o
 ; menu=o hide this menu
