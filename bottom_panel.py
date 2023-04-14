@@ -80,9 +80,13 @@ class Bpanel:
         if not self.h_console:
             self.init_forms()
 
-        app.dlg_proc(self.h_console, app.DLG_CTL_FOCUS, name='input')
+        #app.dlg_proc(self.h_console, app.DLG_CTL_FOCUS, name='input') #focus input field; unnecessary
 
-        app.app_proc(app.PROC_BOTTOMPANEL_ACTIVATE, (self.title_console, True)) #True - set focus
+        app.app_proc(app.PROC_BOTTOMPANEL_ACTIVATE, (self.title_console, False)) #True - set focus
+            #can't open bottompanel from menu without this line
+            #can open bottompanel from bottomsidebar without this line
+        
+        
         
         print( ed.get_prop(app.PROP_TAB_TITLE) )
 
