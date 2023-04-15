@@ -1582,7 +1582,7 @@ class Fif4D:
                 m.stbr_act(f(_('Fill the field "{}"')   , m.caps['wk_fold']))   ;return d(fid='wk_fold')
             return []
 
-        if aid=='di_fdal':                      # Find All in Current Document
+        if aid=='di_fict':                      # Find All in Current Document
             logx(f"in_what: {m.opts.in_what}") #Find keyword
             m.opts.wk_fold = "<tabs>"
             logx(f"wk_fold: {m.opts.wk_fold}") #From
@@ -1604,8 +1604,30 @@ class Fif4D:
             bpanel.open_console() #open search result window
             m.ag.hide() #hide find window #will this cause problem???
             return upd
-
             #return m.do_acts(ag, 'di_find') #do_acts() again will reset m.opts
+        
+        if aid=='di_fiat':                      # Find All in All Document
+            m.opts.wk_fold = "<tabs>"
+            logx(f"wk_fold: {m.opts.wk_fold}") #From
+            m.opts.wk_incl = "*"
+            logx(f"wk_incl: {m.opts.wk_incl}") #Files
+            m.opts.wk_excl = ""
+            logx(f"wk_excl: {m.opts.wk_excl}") #Skip
+            m.opts.wk_dept = 0
+            logx(f"wk_dept: {m.opts.wk_dept}")
+            
+            m.ag.update(vals=m.vals_opts('o2v'))
+            
+            ##### same as  if aid=='di_find': ####
+            m.stbr_act('')                      # Clear status
+            upd = self.work(ag, 'fast' if scam=='s' else data)
+            if not upd and GOTO_FIRST_FR: m.do_acts(ag, 'go-next-fr')
+            ######################################
+            
+            bpanel.open_console() #open search result window
+            m.ag.hide() #hide find window #will this cause problem???
+            return upd
+            
         pass;                   msg_box('??do '+aid)
         return d(fid=self.cid_what())
        #def do_acts
@@ -1906,8 +1928,10 @@ class Fif4D:
       ),in_case=d(tp='chbt' ,tid='di_menu'  ,x=reex_x+WRDW*1,w=WRDW     ,cap='&aA'      ,hint=case_hi               ,p='pt'                 # &a
       ),in_word=d(tp='chbt' ,tid='di_menu'  ,x=reex_x+WRDW*2,w=WRDW     ,cap='"&w"'     ,hint=word_hi               ,p='pt'                 # &w
       ),rp_cntx=d(tp='chbt' ,tid='di_menu'  ,x=cntx_x       ,w=CTXW     ,cap=m.cntx_ca(),hint=cntx_hi               ,p='pt'                 # &-
-      ),di_fdal=d(tp='bttn' ,tid='di_menu'  ,x=cntx_x+WRDW*3,w=CTXW*1.55   ,cap='Find in Current Tab'  ,hint='ignore Files, Skip, From, Depth value'          ,p='pt'  
+      ),di_fict=d(tp='bttn' ,tid='di_menu'  ,x=cntx_x+WRDW*3,w=CTXW*1.55   ,cap='Find in Current Tab'  ,hint='ignore Files, Skip, From, Depth value'          ,p='pt'  
                     # Find All in Current Doc
+      ),di_fiat=d(tp='bttn' ,tid='di_menu'  ,x=cntx_x+WRDW*6,w=CTXW*1.55   ,cap='Find in All Tabs'  ,hint='ignore Files, Skip, From, Depth value'          ,p='pt'  
+                    # Find All in All Opened Doc
       ),di_i4o_=d(tp='bvel' ,y  = 3         ,x=i4op_x       ,r=-5-FNDW-5,h=bttn_h                       ,a='r>'     ,p='pt' ,props='1'
       ),di_i4op=d(tp='labl' ,tid='di_menu'  ,x=i4op_x+4     ,r=-5-FNDW-9,cap=m.i4op_ca(),hint=i4op_hi   ,a='r>'     ,p='pt'
       ),di_find=d(tp='bttn' ,tid='di_menu'  ,x=-5-FNDW      ,r=-5       ,cap=find_ca    ,hint=find_hi   ,a='>>'     ,p='pt' ,def_bt=True    # &d Enter
