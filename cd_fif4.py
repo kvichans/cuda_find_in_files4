@@ -1904,7 +1904,7 @@ class Fif4D:
       ),in_case=d(tp='chbt' ,tid='di_menu'  ,x=reex_x+WRDW*1,w=WRDW     ,cap='&aA'      ,hint=case_hi               ,p='pt'                 # &a
       ),in_word=d(tp='chbt' ,tid='di_menu'  ,x=reex_x+WRDW*2,w=WRDW     ,cap='"&w"'     ,hint=word_hi               ,p='pt'                 # &w
       ),rp_cntx=d(tp='chbt' ,tid='di_menu'  ,x=cntx_x       ,w=CTXW     ,cap=m.cntx_ca(),hint=cntx_hi               ,p='pt'                 # &-
-      ),di_fdal=d(tp='bttn' ,tid='di_menu'  ,x=cntx_x+WRDW*3,w=CTXW*1.55   ,cap='Find in Current Tab'  ,hint='curent Doc'          ,p='pt'  
+      ),di_fdal=d(tp='bttn' ,tid='di_menu'  ,x=cntx_x+WRDW*3,w=CTXW*1.55   ,cap='Find in Current Tab'  ,hint='ignore Files, Skip, From, Depth value'          ,p='pt'  
                     # Find All in Current Doc
       ),di_i4o_=d(tp='bvel' ,y  = 3         ,x=i4op_x       ,r=-5-FNDW-5,h=bttn_h                       ,a='r>'     ,p='pt' ,props='1'
       ),di_i4op=d(tp='labl' ,tid='di_menu'  ,x=i4op_x+4     ,r=-5-FNDW-9,cap=m.i4op_ca(),hint=i4op_hi   ,a='r>'     ,p='pt'
