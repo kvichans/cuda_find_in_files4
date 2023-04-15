@@ -1593,15 +1593,14 @@ class Fif4D:
             m.opts.wk_dept = 0
             logx(f"wk_dept: {m.opts.wk_dept}")
             
-            #???????????????
-            #if aid=='di_find': 
+            ##### same as  if aid=='di_find': ####
             m.stbr_act('')                      # Clear status
             upd = self.work(ag, 'fast' if scam=='s' else data)
             if not upd and GOTO_FIRST_FR: m.do_acts(ag, 'go-next-fr')
             return upd
+            ######################################
             
-            return []
-            #return m.do_acts(ag, 'di_find') #do_acts will reset m.opts
+            #return m.do_acts(ag, 'di_find') #do_acts() again will reset m.opts
         pass;                   msg_box('??do '+aid)
         return d(fid=self.cid_what())
        #def do_acts
