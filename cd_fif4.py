@@ -1593,6 +1593,8 @@ class Fif4D:
             m.opts.wk_dept = 0
             logx(f"wk_dept: {m.opts.wk_dept}")
             
+            m.ag.update(vals=m.vals_opts('o2v'))
+            
             ##### same as  if aid=='di_find': ####
             m.stbr_act('')                      # Clear status
             upd = self.work(ag, 'fast' if scam=='s' else data)
@@ -2611,6 +2613,7 @@ class Fif4D:
         test    = m.do_acts(ag, 'test-oblig')
             #check whether user values is empty or not. If user value is empty, it return one of empty field.
             #ex: {'fid': 'wk_incl'} or {'fid': 'wk_fold'}
+            #do_acts() will reset some m.opts !!!
         log(f"test: {test}")
         if test:                                                                     return test
             #remove this line will make original Find button non response when user empty the input field.
