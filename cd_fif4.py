@@ -2613,6 +2613,7 @@ class Fif4D:
             #ex: {'fid': 'wk_incl'} or {'fid': 'wk_fold'}
         log(f"test: {test}")
         if test:                                                                     return test
+            #remove this line will make original Find button non response when user empty the input field.
         if 0 != wopts.wk_fold.count('"')%2:
             m.stbr_act(f(_('Fix quotes in the field "{}"')  , m.caps['wk_fold']))   ;return d(fid='wk_fold')
         if 0 != wopts.wk_incl.count('"')%2:
