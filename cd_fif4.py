@@ -1597,9 +1597,11 @@ class Fif4D:
             m.stbr_act('')                      # Clear status
             upd = self.work(ag, 'fast' if scam=='s' else data)
             if not upd and GOTO_FIRST_FR: m.do_acts(ag, 'go-next-fr')
-            return upd
             ######################################
             
+            bpanel.open_console()
+            return upd
+
             #return m.do_acts(ag, 'di_find') #do_acts() again will reset m.opts
         pass;                   msg_box('??do '+aid)
         return d(fid=self.cid_what())
