@@ -1599,7 +1599,8 @@ class Fif4D:
             if not upd and GOTO_FIRST_FR: m.do_acts(ag, 'go-next-fr')
             ######################################
             
-            bpanel.open_console()
+            bpanel.open_console() #open search result window
+            m.ag.hide() #hide find window #will this cause problem???
             return upd
 
             #return m.do_acts(ag, 'di_find') #do_acts() again will reset m.opts
