@@ -1,5 +1,5 @@
 [info]
-version=1.0.0
+version=2.0.0
 title=Find in Files X
 desc=Gives dialog to search for multiple files containing some string/regex, like in file managers.
 type=cudatext-plugin
