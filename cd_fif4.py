@@ -2609,6 +2609,8 @@ class Fif4D:
 
         # Inspect user values
         test    = m.do_acts(ag, 'test-oblig')
+            #check whether user values is empty or not. If user value is empty, it return one of empty field.
+            #ex: {'fid': 'wk_incl'} or {'fid': 'wk_fold'}
         log(f"test: {test}")
         if test:                                                                     return test
         if 0 != wopts.wk_fold.count('"')%2:
