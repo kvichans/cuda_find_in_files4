@@ -1,15 +1,8 @@
 #click bottombar icon [X] (or from plugin menu), will show console.
 #click [X] again will close console.
 
-#from .cd_fif4 import *
-
-import sys
-import datetime
 import os
 import re
-from time import sleep
-from subprocess import Popen, PIPE, STDOUT
-from threading import Thread, Lock
 
 import cudatext     as app
 import cudatext_cmd as cmds
@@ -25,26 +18,6 @@ def logx(x):
 
 fn_icon = os.path.join(os.path.dirname(__file__), 'x_icon.png')
 fn_config = os.path.join(app.app_path(app.APP_DIR_SETTINGS), 'cuda_x_helper.ini')
-#IS_WIN = os.name=='nt'
-#IS_MAC = sys.platform=='darwin'
-#HOMEDIR = os.path.expanduser('~')
-INPUT_H = 26
-
-
-def bool_to_str(v):
-    return '1' if v else '0'
-
-def str_to_bool(s):
-    return s=='1'
-
-# class Command:
-
-    ###### from cd_fif4 #######
-    # def dlg_fif_opts(self):             return dlg_fif4_xopts()
-    # def show_dlg(self):                 return show_fif4()
-    # def show_dlg_and_find_in_tab(self): return show_fif4(d(work='in_tab'))
-    # def choose_preset_to_run(self):     return choose_preset_to_run()
-    ###########################
 
 #bottom panel
 class Bpanel:
@@ -60,10 +33,8 @@ class Bpanel:
 
         try:
             self.font_size = int(app.ini_read(fn_config, 'op', 'font_size', '9'))
-            print("in Bpanel Class in bottom_panel.py")
-            #logx(f"111: {self.bottom_ed}")
+            logx("in Bpanel Class in bottom_panel.py")
             self.init_forms()
-            #logx(f"222: {self.bottom_ed}")
             pass
         except:
             pass
@@ -100,13 +71,6 @@ class Bpanel:
         #ed.cmd(cmds.cmd_HideBottomPanel) #it works
         app.app_proc(app.PROC_SHOW_BOTTOMPANEL_SET, False) #it also works
         
-        
-        # for h in ed_handles():
-            # e = Editor(h)
-            # print(e)
-            # print(e.get_filename())
-            #e.focus()
-            # Editor(h).focus()
 
     def init_console_form(self):
 
@@ -125,38 +89,11 @@ class Bpanel:
         app.dlg_proc(h, app.DLG_PROP_SET, prop={
             'border': False,
             'keypreview': True,
-            'on_key_down': self.form_key_down,
+            #'on_key_down': self.form_key_down,
             #'on_show': self.form_show,
             #'on_hide': self.form_hide,
             'color': color_btn_back,
             })
-
-        n = app.dlg_proc(h, app.DLG_CTL_ADD, 'button_ex')
-        app.dlg_proc(h, app.DLG_CTL_PROP_SET, index=n, prop={
-            'name': 'break',
-            'a_l': None,
-            'a_t': None,
-            'a_r': ('', ']'),
-            'a_b': ('', ']'),
-            'w': 90,
-            'h': INPUT_H,
-            'cap': 'Break',
-            'hint': 'Hotkey: Break',
-            'on_change': self.button_break_click,
-            })
-
-        n = app.dlg_proc(h, app.DLG_CTL_ADD, 'editor_combo')
-        app.dlg_proc(h, app.DLG_CTL_PROP_SET, index=n, prop={
-            'name': 'input',
-            'border': True,
-            'h': INPUT_H,
-            'a_l': ('', '['),
-            'a_r': ('break', '['),
-            'a_t': ('break', '-'),
-            'font_size': cur_font_size,
-            'texthint': 'Enter command here',
-            })
-        self.input = Editor(app.dlg_proc(h, app.DLG_CTL_HANDLE, index=n))
 
         n = app.dlg_proc(h, app.DLG_CTL_ADD, 'editor')
         app.dlg_proc(h, app.DLG_CTL_PROP_SET, index=n, prop={
@@ -189,34 +126,6 @@ class Bpanel:
         # self.bottom_ed.set_prop(PROP_MICROMAP, False)
         # self.bottom_ed.set_prop(PROP_COLOR, (COLOR_ID_TextBg, color_memo_back))
         # self.bottom_ed.set_prop(PROP_COLOR, (COLOR_ID_TextFont, color_memo_font))
-        
-        # self.bottom_ed.set_text_all("""['+Search "code". Report with [styles].', 
-        # '\t<tab:4/a1.md>: #8', 
-        # '\t\t< 92>: ## Code', 
-        # '\t\t< 94>: Inline `code`', '\t\t< 96>: Indented code', '\t\t< 99>:     line 1 of code', '\t\t<100>:     line 2 of code', '\t\t<101>:     line 3 of code', '\t\t<104>: Block code "fences"', '\t\t<220>:         { some code, part of Definition 2 }']""")
-        
-        body = ['aaaaaaaaaaaaaa+Search "code". Report with [styles].', '\t<tab:4/a1.md>: #8', '\t\t< 92>: ## Code', '\t\t< 94>: Inline `code`', '\t\t< 96>: Indented code', '\t\t< 99>:     line 1 of code', '\t\t<100>:     line 2 of code', '\t\t<101>:     line 3 of code', '\t\t<104>: Block code "fences"', '\t\t<220>:         { some code, part of Definition 2 }']
-        body2 = ['bbbbbbbbbbbbb+Search "code2". Report with [styles].', '\t<tab:4/a12.md>: #8', '\t\t< 92>: ## Code2', '\t\t< 94>: Inline `code`', '\t\t< 96>: Indented code', '\t\t< 99>:     line 1 of code', '\t\t<100>:     line 2 of code', '\t\t<101>:     line 3 of code', '\t\t<104>: Block code "fences"', '\t\t<220>:         { some code, part of Definition 2 }']
-        #self.bottom_ed.set_text_all( "\n".join(body) )
-        #self.bottom_ed.insert( 0, 0, "\n")
-        #self.bottom_ed.insert( 0, 0, "\n".join(body2)+"\n" )
-                
-        #self.bottom_ed.folding(app.FOLDING_ADD, item_x=-1, item_y=1, item_y2=3)
-        #self.bottom_ed.folding(FOLDING_FOLD_ALL, item_y=1, item_y2=3)
-        #self.bottom_ed.folding(FOLDING_FOLD_ALL)
-        #self.bottom_ed.decor(DECOR_SET, line=2)
-
-        # self.input.set_prop(PROP_ONE_LINE, True)
-        # self.input.set_prop(PROP_GUTTER_ALL, True)
-        # self.input.set_prop(PROP_GUTTER_NUM, False)
-        # self.input.set_prop(PROP_GUTTER_FOLD, False)
-        # self.input.set_prop(PROP_GUTTER_BM, False)
-        # self.input.set_prop(PROP_GUTTER_STATES, False)
-        # self.input.set_prop(PROP_UNPRINTED_SHOW, False)
-        # self.input.set_prop(PROP_MARGIN, 2000)
-        # self.input.set_prop(PROP_MARGIN_STRING, '')
-        # self.input.set_prop(PROP_HILITE_CUR_LINE, False)
-        # self.input.set_prop(PROP_HILITE_CUR_COL, False)
 
         app.dlg_proc(h, app.DLG_SCALE)
         return h
@@ -322,20 +231,5 @@ class Bpanel:
         ed.set_caret(main_x, main_y, main_x+len_x, main_y) #select keyword
         logx(f"main_x: {main_x}, main_y: {main_y}, main_x_end: {main_x+len_x}, main_y: {main_y}")
         #####################################
-
-    def config(self):
-
-        ini_write(fn_config, 'op', 'max_history', str(self.max_history))
-        ini_write(fn_config, 'op', 'font_size', str(self.font_size))
-        #ini_write(fn_config, 'op', 'dark_colors', bool_to_str(self.dark_colors))
-        #ini_write(fn_config, 'op', 'show_toolbar_small', bool_to_str(self.show_toolbar_small))
-
-        file_open(fn_config)
         
-    def form_key_down(self, id_dlg, id_ctl, data='', info=''):
-        pass
 
-
-    def button_break_click(self, id_dlg, id_ctl, data='', info=''):
-
-        pass
