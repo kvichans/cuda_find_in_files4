@@ -3819,7 +3819,16 @@ class Reporter:
                 else:                           # Report about searches
                     rws, cls, lns   = list(zip(*marks))
                     ed_.attr(app.MARKERS_ADD_MANY, x=cls, y=rws, len=lns, **MARK_FIND_STYLE)
-                    bpanel.bottom_ed.attr(app.MARKERS_ADD_MANY, x=cls, y=rws, len=lns, color_bg=0x00FF00)
+                    theme = app.app_proc(app.PROC_THEME_SYNTAX_DICT_GET, '')
+                    if theme and theme["LightBG5"]:
+                        if theme["LightBG5"]["color_back"]:
+                            color_back = theme["LightBG5"]["color_back"]
+                            color_ft = theme["LightBG5"]["color_font"]
+                            logx(theme)
+                    else:
+                        color_back = 0x00FF00
+                        #color_ft = 
+                    bpanel.bottom_ed.attr(app.MARKERS_ADD_MANY, x=cls, y=rws, len=lns, color_font=color_ft, color_bg=color_back)
             
             if lpths:
                 rws, cls, lns = list(zip(*lpths))
