@@ -100,7 +100,7 @@ class Bpanel:
             'a_l': ('', '['),
             'a_r': ('', ']'),
             'a_b': ('break', '['),
-            'font_size': cur_font_size,
+            #'font_size': cur_font_size,
             'on_click_dbl': self.ed_click_dbl,
             })
         
