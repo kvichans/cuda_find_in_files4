@@ -58,9 +58,7 @@ class Bpanel:
             #can't open bottompanel from menu without this line
             #can open bottompanel from bottomsidebar without this line
         
-        
-        
-        print( ed.get_prop(app.PROP_TAB_TITLE) )
+        logx( ed.get_prop(app.PROP_TAB_TITLE) )
 
     def close_console(self):
         
