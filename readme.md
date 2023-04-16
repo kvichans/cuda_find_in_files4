@@ -1,6 +1,8 @@
 # Find in files X
 
-insert result inside bottom panel like notepad++
+* insert result inside bottom panel like notepad++
+
+* add two button:
 
 _Find in Current Tab_ button: 
 It finds keywords in the active document.

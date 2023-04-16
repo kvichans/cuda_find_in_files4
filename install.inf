@@ -1,7 +1,7 @@
 [info]
 version=2.0.0
 title=Find in Files X
-desc=Gives dialog to search for multiple files containing some string/regex, like in file managers.
+desc=Gives dialog to search for multiple files containing some string/regex, show result in bottom panel.
 type=cudatext-plugin
 subdir=cuda_find_in_filesX
 homepage=https://github.com/jackusay/cuda_find_in_filesX
