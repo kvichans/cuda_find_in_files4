@@ -21,6 +21,7 @@ from cudatext import Editor
   
 def logx(x):
     print(x)
+    pass
 
 fn_icon = os.path.join(os.path.dirname(__file__), 'x_icon.png')
 fn_config = os.path.join(app.app_path(app.APP_DIR_SETTINGS), 'cuda_x_helper.ini')

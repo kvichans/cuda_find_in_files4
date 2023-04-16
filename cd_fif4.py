@@ -2110,14 +2110,14 @@ class Fif4D:
                                              m.opts.in_what),m.sl_what_l     , unicase=False)
             m.opts.vw.what_l= add_to_history(m.opts.in_what, m.opts.vw.what_l, unicase=False)
             m.ag.update(vals=m.vals_opts('o2v'))
-        print("1111111")
+
         if m.ropts.get('work')=='in_tab' and m.opts.in_what:
             m.opts.wk_incl  = ed.get_prop(app.PROP_TAB_TITLE).strip('*')
             m.opts.wk_excl  = ''
             m.opts.wk_fold  = Walker.ROOT_IS_TABS
             m.ag.update(vals=m.vals_opts('o2v'))
             app.timer_proc(app.TIMER_START_ONE, m.on_timer, M.TIMER_DELAY, tag='di_find')
-        print("2222222")
+
         if m.ropts.get('work', '').startswith('by_ps'):
             ps_num  = int(m.ropts.get('work').split(':')[1])
             ps      = m.opts.ps_pset[ps_num]
@@ -2126,7 +2126,7 @@ class Fif4D:
                 m.opts[k]   = ps[k]
             m.ag.update(vals=m.vals_opts('o2v'))
             app.timer_proc(app.TIMER_START_ONE, m.on_timer, M.TIMER_DELAY, tag='di_find')
-        print("3333333")
+
         m.ag.show(on_exit=m.on_exit, onetime=False, modal=False) 
             #modal=False so window will not block main editor
         logx("close fif window")

@@ -27,6 +27,7 @@ section=commands
 caption=Find in Files &X\Find by &preset...
 method=choose_preset_to_run
 ;menu=0
+;menu=0 hide this menu
 
 
 [item25]
@@ -34,7 +35,7 @@ section=commands
 caption=Find in Files &X\&View and edit extra options...
 method=dlg_fif_opts
 menu=op
-
+;menu=op / menu=o show menu on plugin and option
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;; cuda_b_plugin ;;;;;;;;;;;;
@@ -58,8 +59,7 @@ method=close_console
 section=commands
 caption=Find in Files &X\Config
 method=config
-menu=o
-; menu=o hide this menu
+menu=0
 
 [bottombar1]
 hint=X Console
