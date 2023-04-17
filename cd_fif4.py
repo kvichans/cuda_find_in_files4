@@ -1603,6 +1603,7 @@ class Fif4D:
             
             bpanel.open_console() #open search result window
             m.ag.hide() #hide find window #will this cause problem???
+            logx("22222222222222222")
             return upd
             #return m.do_acts(ag, 'di_find') #do_acts() again will reset m.opts
         
@@ -1626,6 +1627,7 @@ class Fif4D:
             
             bpanel.open_console() #open search result window
             m.ag.hide() #hide find window #will this cause problem???
+            logx("sssssssssssssssssssssssssss")
             return upd
             
         pass;                   msg_box('??do '+aid)
@@ -2127,7 +2129,7 @@ class Fif4D:
             m.ag.update(vals=m.vals_opts('o2v'))
             app.timer_proc(app.TIMER_START_ONE, m.on_timer, M.TIMER_DELAY, tag='di_find')
 
-        m.ag.show(on_exit=m.on_exit, onetime=False, modal=False) 
+        m.ag.show(on_exit=m.on_exit, onetime=False) 
             #modal=False so window will not block main editor
         logx("close fif window")
        #def show
@@ -2470,6 +2472,7 @@ class Fif4D:
             pass;              #log("frg_info={}",(frg_info))
             prev_fi     = m._prev_frgi[0] if m._prev_frgi else ''
             if  m._prev_frgi == frg_info:    return []   # Already ok
+            logx("www2222222222222222")
             m._prev_frgi=  frg_info
             frg_file,   \
             frg_b_rc,   \
@@ -2622,7 +2625,7 @@ class Fif4D:
                 self._locked_cids.clear()
            #def lock_act
 
-        log(f"m.opts in work(): {m.opts}")
+        #log(f"m.opts in work(): {m.opts}")
         wopts = dcta(m.opts)
         wopts.in_what = m.var_acts('repl', wopts.in_what)
         wopts.wk_incl = m.var_acts('repl', wopts.wk_incl)
@@ -3824,7 +3827,6 @@ class Reporter:
                         if theme["LightBG5"]["color_back"]:
                             color_back = theme["LightBG5"]["color_back"]
                             color_ft = theme["LightBG5"]["color_font"]
-                            logx(theme)
                     else:
                         color_back = 0x00FF00
                         #color_ft = 

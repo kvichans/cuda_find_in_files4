@@ -17,7 +17,6 @@ def logx(x):
     pass
 
 fn_icon = os.path.join(os.path.dirname(__file__), 'x_icon.png')
-fn_config = os.path.join(app.app_path(app.APP_DIR_SETTINGS), 'cuda_x_helper.ini')
 
 #bottom panel
 class Bpanel:
@@ -32,7 +31,6 @@ class Bpanel:
     def __init__(self):
 
         try:
-            self.font_size = int(app.ini_read(fn_config, 'op', 'font_size', '9'))
             logx("in Bpanel Class in bottom_panel.py")
             self.init_forms()
             pass
@@ -72,25 +70,10 @@ class Bpanel:
 
     def init_console_form(self):
 
-        colors = app.app_proc(app.PROC_THEME_UI_DICT_GET,'')
-        color_btn_back = colors['ButtonBgPassive']['color']
-        color_btn_font = colors['ButtonFont']['color']
-
-        #color_memo_back = 0x0 if self.dark_colors else color_btn_back
-        #color_memo_font = 0xC0C0C0 if self.dark_colors else color_btn_font
-        color_memo_back = color_btn_back
-        color_memo_font = color_btn_font
-
-        cur_font_size = self.font_size
-
         h = app.dlg_proc(0, app.DLG_CREATE)
         app.dlg_proc(h, app.DLG_PROP_SET, prop={
             'border': False,
             'keypreview': True,
-            #'on_key_down': self.form_key_down,
-            #'on_show': self.form_show,
-            #'on_hide': self.form_hide,
-            'color': color_btn_back,
             })
 
         n = app.dlg_proc(h, app.DLG_CTL_ADD, 'editor')
@@ -100,7 +83,6 @@ class Bpanel:
             'a_l': ('', '['),
             'a_r': ('', ']'),
             'a_b': ('break', '['),
-            #'font_size': cur_font_size,
             'on_click_dbl': self.ed_click_dbl,
             })
         
@@ -110,20 +92,8 @@ class Bpanel:
         self.bottom_ed.set_prop(app.PROP_TAB_SIZE, 1) #make tab-char narrow on all lines.
         logx(f"bottom_ed in bottom_panel.py: {self.bottom_ed}")
         
-        #check api ===Editor.set_prop===
         #self.bottom_ed.set_prop(PROP_RO, True)
         # self.bottom_ed.set_prop(PROP_CARET_VIRTUAL, False)
-        # self.bottom_ed.set_prop(PROP_UNPRINTED_SHOW, False)
-        # self.bottom_ed.set_prop(PROP_MARGIN, 2000)
-        # self.bottom_ed.set_prop(PROP_MARGIN_STRING, '')
-        # self.bottom_ed.set_prop(PROP_LAST_LINE_ON_TOP, False)
-        # self.bottom_ed.set_prop(PROP_HILITE_CUR_LINE, False)
-        # self.bottom_ed.set_prop(PROP_HILITE_CUR_COL, False)
-        # self.bottom_ed.set_prop(PROP_MODERN_SCROLLBAR, True)
-        # self.bottom_ed.set_prop(PROP_MINIMAP, False)
-        # self.bottom_ed.set_prop(PROP_MICROMAP, False)
-        # self.bottom_ed.set_prop(PROP_COLOR, (COLOR_ID_TextBg, color_memo_back))
-        # self.bottom_ed.set_prop(PROP_COLOR, (COLOR_ID_TextFont, color_memo_font))
 
         app.dlg_proc(h, app.DLG_SCALE)
         return h
