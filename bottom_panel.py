@@ -101,7 +101,27 @@ class Bpanel:
 
     # Param "data" is tuple (x, y) with control-related coordinates.
     def ed_click_dbl(self, id_dlg, id_ctl, data='', info=''):
+        """ Response when user double click search result window.
+        
+        Here we have two windows ([main] window and search [result] window), so we have two (x, y): (main_y, main_x), (result_x, result_y).
+        Result window has three type of lines. 1. keyword 2. filepath 3. text.
+        
+        result content ex:
+        +Search "cudatext". Report with [styles].
+            <tab:1/Untitled1>: #2
+                < 13>: ERROR: Exception in CudaText for cudatext._dlg_proc_callback_proxy: Unhandled SystemExit exception. Code: None
+            <tab:2/C:...new2.md>: #20
+                <  2>: module "cudatext_cmd"    
+        """ 
         def get_mark_on_line(y, marks):
+            """In result window, original FiF store all mark info every line, we need to find out which one we need based on the line of user clicking.
+            
+            Args:
+                y: result's y
+                
+            Returns:
+                result: result's mark
+            """
             #logx(f"y: {y}")
             #logx(f"marks: {marks}")
             result = []
@@ -112,6 +132,7 @@ class Bpanel:
                     result.append(item)
             return result
         def get_main_y(line):
+            """give it result's line, return main_y"""
             y = None
             y = line[3:] #strip "\t\t<" prefix
             y = re.sub('>.+', '', y)
@@ -119,6 +140,7 @@ class Bpanel:
             logx(f"y: {y}")
             return int(y) - 1
         def check_text_line(line):
+            """give it result's line, return type of line"""
             #return string: "keyword" or "path" or "text" or ""
             result = ""
             if line.startswith("+Search"):
@@ -182,7 +204,7 @@ class Bpanel:
         
         ######### set caret ###############
         marks = self.bottom_ed.attr(app.MARKERS_GET) #return full mark on whole result
-            #ex: [(tag, x, y, len,...
+            #ex: [(tag, x, y, len,...),(tag2, x2,...)...
         #logx(f"{marks}")
         mark = get_mark_on_line(result_y, marks)  # need to check empty
         if not mark:
