@@ -13,7 +13,7 @@ from cudatext import Editor
   #in app/py/cudatext.py 
   
 def logx(x):
-    print(x)
+    #print(x)
     pass
 
 fn_icon = os.path.join(os.path.dirname(__file__), 'x_icon.png')
@@ -31,7 +31,7 @@ class Bpanel:
     def __init__(self):
 
         try:
-            logx("in Bpanel Class in bottom_panel.py")
+            logx("Bpanel Class - __init__(self)")
             self.init_forms()
             pass
         except:
@@ -56,6 +56,7 @@ class Bpanel:
             #can't open bottompanel from menu without this line
             #can open bottompanel from bottomsidebar without this line
         
+        logx("Bpanel Class - open_console")
         logx( ed.get_prop(app.PROP_TAB_TITLE) )
 
     def close_console(self):
@@ -90,7 +91,7 @@ class Bpanel:
         self.bottom_ed.set_prop(app.PROP_FOLD_ALWAYS, True)
         self.bottom_ed.set_prop(app.PROP_LEXER_FILE, "Search results") #python is useless, bc it can't create folding
         self.bottom_ed.set_prop(app.PROP_TAB_SIZE, 1) #make tab-char narrow on all lines.
-        logx(f"bottom_ed in bottom_panel.py: {self.bottom_ed}")
+        logx(f"Bpanel Class - bottom_ed in bottom_panel.py: {self.bottom_ed}")
         
         #self.bottom_ed.set_prop(PROP_RO, True)
         # self.bottom_ed.set_prop(PROP_CARET_VIRTUAL, False)

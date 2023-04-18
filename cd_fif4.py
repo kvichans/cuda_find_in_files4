@@ -10,7 +10,6 @@ Version:
 
 from            .bottom_panel   import *
 
-
 import  re, os, traceback, locale, itertools, codecs, time, collections, datetime as dt #, types, json
 from            pathlib         import Path
 from            fnmatch         import fnmatch
@@ -76,7 +75,7 @@ try:    _   = get_translation(__file__)
 except: _   = lambda p:p
 
 def logx(x):
-    print(x)
+    #print(x)
     pass
 
 # Shorter names of usefull tools 
@@ -916,7 +915,7 @@ class Fif4D:
     @Dcrs.clear_st_msg(  1, 'help', 'wk_clea', 'di_menu', 'nf_frag', 'nf_frlp')     # aid in the list
     @Dcrs.timing_to_stbr(1, 'di_find', 'up_rslt', 'di_rplc', 'di_emul')             # aid in the list
     def do_acts(self, ag, aid, data='', ops={}):        #NOTE: do_acts
-        logx(f"do_acts: {aid}")
+        logx(f"do_acts begin - aid: {aid}")
         # help xopts call-find call-repl
         # in_reex in_case in_word
         # more-fh less-fh more-fw less-fw more-r less-r more-ml less-ml fit-fh
@@ -1603,7 +1602,8 @@ class Fif4D:
             
             bpanel.open_console() #open search result window
             m.ag.hide() #hide find window #will this cause problem???
-            logx("22222222222222222")
+            m.ag.update()
+            logx("di_fict - end")
             return upd
             #return m.do_acts(ag, 'di_find') #do_acts() again will reset m.opts
         
@@ -1627,7 +1627,13 @@ class Fif4D:
             
             bpanel.open_console() #open search result window
             m.ag.hide() #hide find window #will this cause problem???
-            logx("sssssssssssssssssssssssssss")
+            m.ag.update() #check github.com/kvichans/cuda_kv_dlg/wiki
+            #m.ag.__del__() #program will freeze
+            #app.app_idle(True) #useless
+            #sys.exit() #raise error
+            #quit() #raise error
+            #m.ag.show() #useless
+            logx("di_fiat -end")
             return upd
             
         pass;                   msg_box('??do '+aid)
@@ -2430,6 +2436,7 @@ class Fif4D:
             m.srcf.fif_path         = path
             app.app_idle()                      # Hack to problem: PROP_LINE_TOP sometime 
                                                 # is skipped after set_prop(PROP_LEXER_FILE)
+            logx(f"rslt_srcf_acts end - act: {act}")
             return 
         
         if act=='on_rslt_fld':                  # Show Source and select fragment
@@ -2472,7 +2479,6 @@ class Fif4D:
             pass;              #log("frg_info={}",(frg_info))
             prev_fi     = m._prev_frgi[0] if m._prev_frgi else ''
             if  m._prev_frgi == frg_info:    return []   # Already ok
-            logx("www2222222222222222")
             m._prev_frgi=  frg_info
             frg_file,   \
             frg_b_rc,   \
@@ -2499,6 +2505,7 @@ class Fif4D:
                 pass;           log__("lexer,ADV_LEXERS={}",(lexer,ADV_LEXERS)         ,__=(log4fun,M.log4cls)) if _log4mod>=0 else 0
                 if m.opts.rp_lexp and lexer and (not ADV_LEXERS or lexer in ADV_LEXERS):
                     m.rslt_srcf_acts('src-lex-path', (frg_info,rfi))
+            logx(f"rslt_srcf_acts end - act: {act}")
             return []
 
         if act in ('rslt-to-tab',):
