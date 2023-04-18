@@ -2456,6 +2456,7 @@ class Fif4D:
             if not m.reporter:      return []
             if not m.srcf.fif_path: return []
             pass;              #log("m.srcf.fif_path={}",(m.srcf.fif_path))
+            m.rslt_srcf_acts('on_rslt_crt') # trigger on_caret event of 'results' view, 'source' view will be updated
             tab_ed  = None
             path    = m.srcf.fif_path
             if path.startswith('tab:'):
