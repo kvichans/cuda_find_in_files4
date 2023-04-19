@@ -1,4 +1,4 @@
-# Find in files X
+# Find in files J
 
 Everything works like original FiF version, except:
 

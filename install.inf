@@ -1,10 +1,10 @@
 [info]
-version=2.0.0
-title=Find in Files X
+version=2.2.0
+title=Find in Files J
 desc=Gives dialog to search for multiple files containing some string/regex, show result in bottom panel.
 type=cudatext-plugin
-subdir=cuda_find_in_filesX
-homepage=https://github.com/jackusay/cuda_find_in_filesX
+subdir=cuda_find_in_filesJ
+homepage=https://github.com/jackusay/cuda_find_in_filesJ
 api=1.0.302
 
 ;[item400]
@@ -13,18 +13,18 @@ api=1.0.302
 
 [item1]
 section=commands
-caption=Find in Files &X\&Find in files...
+caption=Find in Files &J\&Find in files...
 method=show_dlg
 
 [item2]
 section=commands
-caption=Find in Files &X\Find in current &tab...
+caption=Find in Files &J\Find in current &tab...
 method=show_dlg_and_find_in_tab
 ;menu=0
 
 [item3]
 section=commands
-caption=Find in Files &X\Find by &preset...
+caption=Find in Files &J\Find by &preset...
 method=choose_preset_to_run
 ;menu=0
 ;menu=0 hide this menu
@@ -32,7 +32,7 @@ method=choose_preset_to_run
 
 [item25]
 section=commands
-caption=Find in Files &X\&View and edit extra options...
+caption=Find in Files &J\&View and edit extra options...
 method=dlg_fif_opts
 menu=op
 ;menu=op / menu=o show menu on plugin and option
@@ -48,22 +48,22 @@ events=on_start2
 ; a separator bar
 [item49]
 section=commands
-caption=Find in Files &X\-
+caption=Find in Files &J\-
 method=_
 
 [item50]
 section=commands
-caption=Find in Files &X\&Open console
+caption=Find in Files &J\&Open console
 method=open_console
 
 [item51]
 section=commands
-caption=Find in Files &X\&Close console
+caption=Find in Files &J\&Close console
 method=close_console
 
 [item60]
 section=commands
-caption=Find in Files &X\Config
+caption=Find in Files &J\Config
 method=config
 menu=0
 
