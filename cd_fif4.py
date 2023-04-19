@@ -376,6 +376,13 @@ class Command:
        # bpanel = Bpanel() #error; to bpanel.open_console(), 'bpanel' is not defined
     def open_console(self):                   return bpanel.open_console()
     def close_console(self):                   return bpanel.close_console()
+    #def on_exit(self, ed_self):               return bpanel.close_console() #useless
+        #maybe on_exit event is happening too late (after state of bottom panel has been already recorded to session)
+        #https://github.com/jackusay/cuda_find_in_filesX/issues/13
+    def on_start2(self, ed_self):               return bpanel.close_console()
+        #problem: if user open normal console, it will be closed.
+    #def on_start(self, ed_self):               return bpanel.close_console()
+        #too early, PROC_BOTTOMPANEL_GET always empty
    #class Command:
 
 

@@ -24,7 +24,7 @@ class Bpanel:
     title_side = 'X Objects'
     title_console = 'X Console'
     h_side = None
-    h_console = None
+    h_console = None                #form handle
     
     bottom_ed = None
 
@@ -61,17 +61,24 @@ class Bpanel:
 
     def close_console(self):
         
-        # useless
-        #app.app_proc(PROC_BOTTOMPANEL_REMOVE, (self.title_console, False)) #False - unset focus?
+        #app.app_proc(app.PROC_BOTTOMPANEL_REMOVE, self.title_console) #remove bottombar icon
         
-        # ed_self???
-        #ed.cmd(cmds.cmd_HideBottomPanel) #it works
-        app.app_proc(app.PROC_SHOW_BOTTOMPANEL_SET, False) #it also works
+        #ed.cmd(cmds.cmd_HideBottomPanel) #it works; also close normal console
+        #app.app_proc(app.PROC_SHOW_BOTTOMPANEL_SET, False) #it also works; also close normal console
         
+        #close only bottom panel is opened, otherwise it will even close normal (terminal) console
+        activated_console = app.app_proc(app.PROC_BOTTOMPANEL_GET, True)
+        logx(f"activated console - {activated_console}")
+        if activated_console == "X Console":
+            app.app_proc(app.PROC_SHOW_BOTTOMPANEL_SET, False)
+            
+        # if self.h_console:
+            # app.dlg_proc(self.h_console, app.DLG_HIDE) #bottom panel is gone, but space remain gray
+            # app.dlg_proc(self.h_console, app.DLG_FREE) #bottom panel is gone, but space remain gray
 
     def init_console_form(self):
 
-        h = app.dlg_proc(0, app.DLG_CREATE)
+        h = app.dlg_proc(0, app.DLG_CREATE) #returns form "handle"
         app.dlg_proc(h, app.DLG_PROP_SET, prop={
             'border': False,
             'keypreview': True,
@@ -223,4 +230,3 @@ class Bpanel:
         logx(f"main_x: {main_x}, main_y: {main_y}, main_x_end: {main_x+len_x}, main_y: {main_y}")
         #####################################
         
-

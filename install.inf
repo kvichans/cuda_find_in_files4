@@ -39,6 +39,12 @@ menu=op
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;; cuda_b_plugin ;;;;;;;;;;;;
+
+; for avoid show empty bottom panel when opening cudatext
+[item500]
+section=events
+events=on_start2
+
 ; a separator bar
 [item49]
 section=commands
