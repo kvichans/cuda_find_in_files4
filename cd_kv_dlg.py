@@ -2,7 +2,7 @@
 Authors:
     Andrey Kvichansky    (kvichans on github.com)
 Version:
-    '1.1.01 2019-07-01'
+    '1.1.02 2023-08-27'
 Content
     See github.com/kvichans/cuda_kv_dlg/wiki
 ToDo: (see end of file)
@@ -21,6 +21,7 @@ VERSION_V,  \
 VERSION_D   = VERSION.split(' ')
 
 version     = lambda: VERSION_V
+IS_QT       = app.app_proc(app.PROC_GET_COMPILER_INFO, '')['widgetset'].lower().startswith('qt')
 
 _       = None
 try:
@@ -1693,6 +1694,8 @@ def _os_scale(id_action, prop=None, index=-1, index2=-1, name=''):
 
 _gui_width_cache= {}
 def get_gui_autosize_width(ctrl_def):
+    if IS_QT:
+        return 60
     ctrl_str    = str(ctrl_def)
     wd  = _gui_width_cache.get(ctrl_str, 0)
     if wd==0:
@@ -1739,6 +1742,9 @@ def _get_gui_height(ctrl_type):
              'scrollbar'
     """
     pass;                       log4fun=0                       # Order log in the function
+    if IS_QT:
+        return app.app_proc(app.PROC_GET_GUI_HEIGHT, ctrl_type)
+
     global _gui_height_cache
     if 0 == _gui_height_cache['button']:
         for tpc in _gui_height_cache:
