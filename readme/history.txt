@@ -1,4 +1,7 @@
-﻿4.8.12 2022-06-21
+﻿4.8.14 2023-12-27
+fixed: avoid deprecated API
+
+4.8.12 2022-06-21
 fixed: Skip unnecessary text replacing in Results and Source panes.
 
 4.8.08 2022-02-01

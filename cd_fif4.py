@@ -2,7 +2,7 @@
 Authors:
     Andrey Kvichansky   (kvichans on github.com)
 Version:
-    '4.8.12 2022-06-21'
+    '4.8.14 2023-12-27'
 '''
 
 import  re, os, traceback, locale, itertools, codecs, time, collections, datetime as dt #, types, json
@@ -2349,24 +2349,24 @@ class Fif4D:
         
         if act=='on_rslt_fld':                  # Show Source and select fragment
             doall   = par
-            fldi_l  = m.rslt.folding(app.FOLDING_GET_LIST)
+            fldi_l  = m.rslt.folding(app.FOLDING_ENUM)
             if not fldi_l:                      return []
             row     = m.rslt.get_carets()[0][1]
-            r_fldi_l= [(fldi_i,fldi_d,row-fldi_d[0]) for fldi_i,fldi_d in enumerate(fldi_l) 
-                        if fldi_d[0] <= row <= fldi_d[1] and
-                           fldi_d[0] !=        fldi_d[1]]         # [0]/[1] line of range start/end
+            r_fldi_l= [(fldi_i,fldi_d,row-fldi_d['y']) for fldi_i,fldi_d in enumerate(fldi_l) 
+                        if fldi_d['y'] <= row <= fldi_d['y2'] and
+                           fldi_d['y'] !=        fldi_d['y2']]         # [0]/[1] line of range start/end
             if not r_fldi_l:  return 
             r_fldi_l.sort(key=lambda ifd:ifd[2])
             fldi_i, \
             fldi_d  = r_fldi_l[0][:2]
-            fldied  = fldi_d[4]
+            fldied  = fldi_d['folded']
             if doall:
                 m.rslt.folding(app.FOLDING_UNFOLD_ALL   if fldied else app.FOLDING_FOLD_ALL)
                 m.rslt.folding(app.FOLDING_UNFOLD, index=0) if not fldied else 0
             else:
                 m.rslt.folding(app.FOLDING_UNFOLD       if fldied else app.FOLDING_FOLD, index=fldi_i)
             if not fldied:
-                m.rslt.set_caret(0, fldi_d[0])
+                m.rslt.set_caret(0, fldi_d['y'])
 
         if act=='on_rslt_crt':                  # Show Source and select fragment
             m.stbr_act('')
