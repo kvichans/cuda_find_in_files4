@@ -2,7 +2,7 @@
 Authors:
     Andrey Kvichansky   (kvichans on github.com)
 Version:
-    '4.8.14 2023-12-27'
+    '4.8.15 2023-12-28'
 '''
 
 import  re, os, traceback, locale, itertools, codecs, time, collections, datetime as dt #, types, json
@@ -1961,6 +1961,7 @@ class Fif4D:
             for pr in true_prs:
                 ded.set_prop(pr, true_prs[pr])
             ded.set_prop(app.PROP_LEXER_FILE, lex) if lex else 0
+            ded.set_prop(app.PROP_LINKS_SHOW, False)
             return ded
         
         m.rslt = fit_editor(m.ag, 'di_rslt', FIF_LEXER
