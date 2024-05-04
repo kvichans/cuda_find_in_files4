@@ -2,7 +2,7 @@
 Authors:
     Andrey Kvichansky   (kvichans on github.com)
 Version:
-    '4.8.15 2023-12-28'
+    '4.8.16 2024-05-04'
 '''
 
 import  re, os, traceback, locale, itertools, codecs, time, collections, datetime as dt #, types, json
@@ -1971,6 +1971,7 @@ class Fif4D:
                         ,app.PROP_MARGIN            :2000
                         ,app.PROP_TAB_SIZE          :1
                         ,app.PROP_MODERN_SCROLLBAR  :True
+                        ,app.PROP_WRAP              :False
                         })
         m.rslt.igno_sel = False
         

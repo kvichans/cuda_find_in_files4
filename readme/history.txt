@@ -1,4 +1,7 @@
-﻿4.8.15 2023-12-28
+﻿4.8.16 2024-05-04
+fixed: upper 'results' editor must always have word_wrap=off
+
+4.8.15 2023-12-28
 fixed: disabled URLs highlight in FIF's dialog fields
 fixed: avoid deprecated API
 
