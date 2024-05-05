@@ -472,7 +472,7 @@ DLG_HELP_KEYS = _t('DLG_HELP_KEYS', _('DLG_HELP_KEYS'), _(r'''
 │ Choose preset to apply                │              Alt+S │                                    │
 │ Restore prev/next executed parameters │            Alt+←/→ │                                    │
 ├───────────────────────────────────────┼────────────────────┼────────────────────────────────────┤
-│ Append macro-var to current field     │             Ctrl+A │ If focus in editable field         │
+│ Append macro-var to current field     │             Ctrl+M │ If focus in editable field         │
 │ Show fields after vars substitution   │       Ctrl+Shift+A │                                    │
 ├───────────────────────────────────────┼────────────────────┼────────────────────────────────────┤
 │ Expand/Shrink Results height          │       Ctrl+Alt+↓/↑ │                                    │
@@ -637,7 +637,7 @@ r'''Plugin provides ...
 
 ———————————————————————————————————————————————————————————————————————————————————————————— 
 String to replace (pattern) can include macro variable.
-Use Ctrl+A to view all variables, select and append one.
+Use Ctrl+M to view all variables, select and append one.
 In single-line control the newlines are shown as §.
 
 

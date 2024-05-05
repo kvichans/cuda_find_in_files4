@@ -1501,7 +1501,7 @@ class Fif4D:
                 elif do_emul and (scam,key)==( 's',VK_F4):  ag_.hide('emul')
                 elif (scam,key)==( 'c',VK_DOWN):                # Ctrl+Dn
                     upd     = d(vals=d(repl=ag_.val('in_what')))
-                elif (scam,key)==( 'c',ord('A')):               # Ctrl+A
+                elif (scam,key)==( 'c',ord('M')):               # Ctrl+M
                     vr_sgn  = m.var_acts('ask', _('With'))
                     if not vr_sgn:                  return []
                     cval    = ag_.val('repl')+vr_sgn
@@ -1767,7 +1767,7 @@ class Fif4D:
                                             ) for n,ps in enumerate(m.opts.ps_pset)]
         nm_macro= [(
     ),d(tag='a:vr-add'          ,cap=_('&Append macro var')+f'{" ("+fidc+")" if fidc else ""}'+DDD 
-       ,key='Ctrl+A'                                        ,en=bool(fidc) 
+       ,key='Ctrl+M'                                        ,en=bool(fidc) 
     ),d(tag='a:vr-new'          ,cap=_('Define n&ew custom var')+DDD
     ),d(                         cap=_('Chan&ge/remove custom var') ,en=bool(m.opts.vs_defs)    ,sub=[
       d(tag='a:vr-edt_'+str(n)  ,cap=var['nm']+' '+var['bd'][:25]+DDD)
@@ -2137,7 +2137,7 @@ class Fif4D:
         elif skey==('sca',VK_LEFT):                     upd=m.do_acts(ag, 'ps_prvr')            # Shift+Ctrl+Alt+LF
         elif skey==('sca',VK_RIGHT):                    upd=m.do_acts(ag, 'ps_nxtr')            # Shift+Ctrl+Alt+RT
         elif ('c',ord('1'))<=skey<=('c',ord('9')):      upd=m.do_acts(ag, 'ps_load_'+ckey1)     # Ctrl+1..9
-        elif skey==( 'c',ord('A')) and in_edct:         upd=m.do_acts(ag, 'vr-add')             # Ctrl+      A
+        elif skey==( 'c',ord('M')) and in_edct:         upd=m.do_acts(ag, 'vr-add')             # Ctrl+      M
         elif skey==('sc',ord('A')):                     upd=m.do_acts(ag, 'vr-sub')             # Ctrl+Shift+A
 #       elif skey==('a', 190):  
 #           pass;               log("m.opts.in_reex={}",(m.opts.in_reex))

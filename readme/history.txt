@@ -1,4 +1,5 @@
-﻿4.8.16 2024-05-04
+﻿4.8.16 2024-05-05
+change: hotkey Ctrl+A (when Find-what is focused) changed to Ctrl+M; Ctrl+A is reserved to select-all
 fixed: upper 'results' editor must always have word_wrap=off
 
 4.8.15 2023-12-28
