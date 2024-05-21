@@ -3464,7 +3464,7 @@ class Reporter:
                     if not node_dr:
                         node_fr = dcta(tp='fr', frs=[newFR(fr.f, fnm, fr)])
 #                       node_fr = dcta(tp='fr', frs=[newFR(fr.f, fr)])
-                        node_dr = dcta(tp='ff', subs=[node_fr], p=fr.p, f=dp, cnt=len(fr.cws) - (1 if fr.e else 0))
+                        node_dr = dcta(tp='ff', subs=[node_fr], p=dp, f=dp, cnt=len(fr.cws) - (1 if fr.e else 0))
 #                       node_dr = dcta(tp='ff', subs=[node_fr], p=dp        , cnt=len(fr.cws) - (1 if fr.e else 0))
                         dirs[dp]    = node_dr
                         root       += [node_dr]
@@ -3520,7 +3520,7 @@ class Reporter:
                     node_dr     = dirs.get(dp)
                     if not node_dr:
                         node_fr = dcta(tp='fr', frs=[newFR(fr.f, fnm, fr)])
-                        node_dr = dcta(tp='ff', subs=[node_fr], p=fr.p, f=dp, cnt=len(fr.cws) - (1 if fr.e else 0))
+                        node_dr = dcta(tp='ff', subs=[node_fr], p=dp, f=dp, cnt=len(fr.cws) - (1 if fr.e else 0))
 #                       node_dr = dcta(tp='ff', subs=[node_fr], p=dp        , cnt=len(fr.cws) - (1 if fr.e else 0))
                         dirs[dp]    = node_dr
                         root       += [node_dr]
