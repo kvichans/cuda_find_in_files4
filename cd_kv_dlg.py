@@ -2,7 +2,7 @@
 Authors:
     Andrey Kvichansky    (kvichans on github.com)
 Version:
-    '1.1.02 2023-09-13'
+    '1.1.03 2024-06-10'
 Content
     See github.com/kvichans/cuda_kv_dlg/wiki
 ToDo: (see end of file)
@@ -1702,7 +1702,7 @@ def get_gui_autosize_width(ctrl_def):
         idd=app.dlg_proc(   0,   app.DLG_CREATE)
         idc=app.dlg_proc(   idd, app.DLG_CTL_ADD, tp)
         app.dlg_proc(       idd, app.DLG_CTL_PROP_SET, index=idc, prop=prc)
-        app.dlg_proc(       idd, app.DLG_PROP_SET, prop={'x':7777, 'y':7777, 'w':100, 'h':100})
+        app.dlg_proc(       idd, app.DLG_PROP_SET, prop={'x':-50, 'y':-50, 'w':0, 'h':0})
 #       app.dlg_proc(       idd, app.DLG_PROP_SET, prop={'x':-1000, 'y':-1000, 'w':100, 'h':100})
         app.dlg_proc(       idd, app.DLG_SHOW_NONMODAL)
         prc = app.dlg_proc( idd, app.DLG_CTL_PROP_GET, index=idc)
@@ -1755,7 +1755,7 @@ def _get_gui_height(ctrl_type):
             if tpc in ('combo' 'combo_ro'):
                 prc['items']='item0'
             app.dlg_proc(       idd,    app.DLG_CTL_PROP_SET, index=idc, prop=prc)
-        app.dlg_proc(           idd,    app.DLG_PROP_SET, prop={'x':7777, 'y':7777, 'w':100, 'h':100})
+        app.dlg_proc(           idd,    app.DLG_PROP_SET, prop={'x':-50, 'y':-50, 'w':0, 'h':0})
 #       app.dlg_proc(           idd,    app.DLG_PROP_SET, prop={'x':-1000, 'y':-1000, 'w':100, 'h':100})
         app.dlg_proc(           idd,    app.DLG_SHOW_NONMODAL)
 
