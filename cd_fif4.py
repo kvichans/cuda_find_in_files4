@@ -2,7 +2,7 @@
 Authors:
     Andrey Kvichansky   (kvichans on github.com)
 Version:
-    '4.8.17 2024-05-21'
+    '4.8.19 2024-07-10'
 '''
 
 import  re, os, traceback, locale, itertools, codecs, time, collections, datetime as dt #, types, json
@@ -401,7 +401,9 @@ def show_fif4(run_opts=None):
 #   pass;                       return 
 
     global the_fif4
-    the_fif4    = the_fif4 if the_fif4 else Fif4D(run_opts)
+    if the_fif4:
+        del the_fif4
+    the_fif4 = Fif4D(run_opts)
     the_fif4.show(run_opts)
    #def show_fif4
 

@@ -1,4 +1,7 @@
-﻿4.8.18 2024-06-10
+﻿4.8.19 2024-07-10
+fixed: if FindInFiles is opened from Project Manager via "Selected folder / Find in folder", first used folder remains in next calls
+
+4.8.18 2024-06-10
 fixed: Qt5 app version shows small 100x100 'parasite' windows
 
 4.8.16 2024-05-05
