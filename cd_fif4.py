@@ -2,7 +2,7 @@
 Authors:
     Andrey Kvichansky   (kvichans on github.com)
 Version:
-    '4.8.19 2024-07-10'
+    '4.8.20 2024-09-12'
 '''
 
 import  re, os, traceback, locale, itertools, codecs, time, collections, datetime as dt #, types, json
@@ -1843,7 +1843,7 @@ class Fif4D:
         dept_x  = WHTW + what_x   - W_EXCL_EDIT
         excl_x  = dept_x
         brow_x  = what_x + fold_w + 10
-        form_w  = 5+ LBSW +5+ WHTW  +5 
+        form_w  = 850 # 5+ LBSW +5+ WHTW  +5 
         # editors
         rslt_h  = m.opts.vw.rslt_h
         srcf_h  = M.SRCF_H

@@ -1,4 +1,7 @@
-﻿4.8.19 2024-07-10
+﻿4.8.20 2024-09-12
+fixed: prevent dialog growing on each call, but now dlg size is not remembered
+
+4.8.19 2024-07-10
 fixed: if FindInFiles is opened from Project Manager via "Selected folder / Find in folder", first used folder remains in next calls
 
 4.8.18 2024-06-10
