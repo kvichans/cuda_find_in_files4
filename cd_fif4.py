@@ -1843,7 +1843,7 @@ class Fif4D:
         dept_x  = WHTW + what_x   - W_EXCL_EDIT
         excl_x  = dept_x
         brow_x  = what_x + fold_w + 10
-        form_w  = 850 # 5+ LBSW +5+ WHTW  +5 
+        form_w  = 5+ LBSW +5+ WHTW  +5 
         # editors
         rslt_h  = m.opts.vw.rslt_h
         srcf_h  = M.SRCF_H
@@ -1931,7 +1931,7 @@ class Fif4D:
         m.last_fid  = m.opts.us_focus
         m.ag = DlgAg(
             form    =dict(cap=DLG_CAP_BS+f' ({VERSION_V})'
-                         ,h=form_h,w=form_w             ,h_min0=form_h0,w_min0=form_w
+                         ,h=600, w=850                  ,h_min0=form_h0,w_min0=form_w
                                                         ,h_min=form_h0,w_min=form_w
 #                        ,frame='resize-min-max'
 #                        ,frame='resize'
