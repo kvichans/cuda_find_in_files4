@@ -1,5 +1,6 @@
-﻿4.8.21 2024-09-22
+﻿4.8.22 2024-09-22
 fixed: plugin's command "Find in current tab" must double-quote the filename if it has spaces
+fixed: bug with replacing unix home-dir to '~'
 
 4.8.20 2024-09-12
 fixed: prevent dialog growing on each call, but now dlg size is not remembered
