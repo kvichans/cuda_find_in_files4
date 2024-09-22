@@ -2,7 +2,7 @@
 Authors:
     Andrey Kvichansky   (kvichans on github.com)
 Version:
-    '4.8.20 2024-09-12'
+    '4.8.21 2024-09-22'
 '''
 
 import  re, os, traceback, locale, itertools, codecs, time, collections, datetime as dt #, types, json
@@ -2044,6 +2044,8 @@ class Fif4D:
 
         if m.ropts.get('work')=='in_tab' and m.opts.in_what:
             m.opts.wk_incl  = ed.get_prop(app.PROP_TAB_TITLE).strip('*')
+            if ' ' in m.opts.wk_incl:
+                m.opts.wk_incl = '"'+m.opts.wk_incl+'"'
             m.opts.wk_excl  = ''
             m.opts.wk_fold  = Walker.ROOT_IS_TABS
             m.ag.update(vals=m.vals_opts('o2v'))
