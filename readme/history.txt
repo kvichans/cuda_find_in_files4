@@ -1,4 +1,7 @@
-﻿4.8.20 2024-09-12
+﻿4.8.21 2024-09-22
+fixed: plugin's command "Find in current tab" must double-quote the filename if it has spaces
+
+4.8.20 2024-09-12
 fixed: prevent dialog growing on each call, but now dlg size is not remembered
 
 4.8.19 2024-07-10
