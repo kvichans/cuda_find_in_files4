@@ -2,7 +2,7 @@
 Authors:
     Andrey Kvichansky   (kvichans on github.com)
 Version:
-    '4.8.21 2024-09-22'
+    '4.8.22 2024-09-22'
 '''
 
 import  re, os, traceback, locale, itertools, codecs, time, collections, datetime as dt #, types, json
@@ -77,9 +77,16 @@ defdict     = lambda: defaultdict(int)
 mtime       = lambda f: dt.datetime.fromtimestamp(os.path.getmtime(f)) if os.path.exists(f) else 0
 msg_box     = lambda txt, flags=app.MB_OK: app.msg_box(txt, flags)
 ptime       = time.monotonic#time.process_time
+USERHOME    = os.path.expanduser('~')
 
 # Std tools
 def first_true(iterable, default=False, pred=None):return next(filter(pred, iterable), default) # 10.1.2. Itertools Recipes
+
+def collapse_filename(fn):
+    if os.name != 'nt':
+        if (fn+'/').startswith(USERHOME+'/'):
+            fn = fn.replace(USERHOME, '~', 1)
+    return fn
 
 _set_text_all_text  = ''
 def set_text_all(to_ed, text):
@@ -488,8 +495,6 @@ class Fif4D:
            #def timing_to_stbr
        #class Dcrs
 
-    USERHOME        = os.path.expanduser('~')
-    
     AGEF_CP = _('A&ge of files')
     AGEF_L1 = [  'h',          'd',         'w',          'm',           'y'        ]
     AGEF_U1 = [_('h'),       _('d'),      _('w'),       _('m'),        _('y')       ]
@@ -1304,14 +1309,14 @@ class Fif4D:
         
         def set_dir(path):                      # Tool to set current folder/file/tab[s]
             if not path:    return d(fid=self.cid_what())
-            m.opts.wk_fold = path.replace(M.USERHOME, '~')
+            m.opts.wk_fold = collapse_filename(path)
             m.opts.wk_fold = '"'+m.opts.wk_fold+'"' if ' ' in m.opts.wk_fold else m.opts.wk_fold;
             return d(fid=self.cid_what()
                     ,vals=d(wk_fold=m.opts.wk_fold))
         def set_fn(fn, fold=None):              # Tool to set current folder/file/tab[s]
             if not fn:      return d(fid=self.cid_what())
             m.opts.wk_incl = os.path.basename(fn)
-            m.opts.wk_fold = fold if fold else os.path.dirname(fn).replace(M.USERHOME, '~')
+            m.opts.wk_fold = fold if fold else collapse_filename(os.path.dirname(fn))
             m.opts.wk_fold = '"'+m.opts.wk_fold+'"' if ' ' in m.opts.wk_fold else m.opts.wk_fold;
             m.opts.wk_excl = ''
             m.opts.wk_dept = 1
