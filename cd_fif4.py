@@ -2,7 +2,7 @@
 Authors:
     Andrey Kvichansky   (kvichans on github.com)
 Version:
-    '4.8.22 2024-09-22'
+    '4.8.23 2024-09-22'
 '''
 
 import  re, os, traceback, locale, itertools, codecs, time, collections, datetime as dt #, types, json
@@ -81,6 +81,12 @@ USERHOME    = os.path.expanduser('~')
 
 # Std tools
 def first_true(iterable, default=False, pred=None):return next(filter(pred, iterable), default) # 10.1.2. Itertools Recipes
+
+def quote_if_space(s):
+    if ' ' in s:
+        return '"' + s + '"'
+    else:
+        return s
 
 def collapse_filename(fn):
     if os.name != 'nt':
@@ -1310,14 +1316,14 @@ class Fif4D:
         def set_dir(path):                      # Tool to set current folder/file/tab[s]
             if not path:    return d(fid=self.cid_what())
             m.opts.wk_fold = collapse_filename(path)
-            m.opts.wk_fold = '"'+m.opts.wk_fold+'"' if ' ' in m.opts.wk_fold else m.opts.wk_fold;
+            m.opts.wk_fold = quote_if_space(m.opts.wk_fold)
             return d(fid=self.cid_what()
                     ,vals=d(wk_fold=m.opts.wk_fold))
         def set_fn(fn, fold=None):              # Tool to set current folder/file/tab[s]
             if not fn:      return d(fid=self.cid_what())
             m.opts.wk_incl = os.path.basename(fn)
             m.opts.wk_fold = fold if fold else collapse_filename(os.path.dirname(fn))
-            m.opts.wk_fold = '"'+m.opts.wk_fold+'"' if ' ' in m.opts.wk_fold else m.opts.wk_fold;
+            m.opts.wk_fold = quote_if_space(m.opts.wk_fold)
             m.opts.wk_excl = ''
             m.opts.wk_dept = 1
             return d(fid=self.cid_what()
@@ -2048,9 +2054,7 @@ class Fif4D:
             m.ag.update(vals=m.vals_opts('o2v'))
 
         if m.ropts.get('work')=='in_tab' and m.opts.in_what:
-            m.opts.wk_incl  = ed.get_prop(app.PROP_TAB_TITLE).strip('*')
-            if ' ' in m.opts.wk_incl:
-                m.opts.wk_incl = '"'+m.opts.wk_incl+'"'
+            m.opts.wk_incl  = quote_if_space(ed.get_prop(app.PROP_TAB_TITLE).strip('*'))
             m.opts.wk_excl  = ''
             m.opts.wk_fold  = Walker.ROOT_IS_TABS
             m.ag.update(vals=m.vals_opts('o2v'))
@@ -3879,7 +3883,7 @@ class Walker:
         """
         mask    = mask.strip()
         if '"' in mask:
-            # Temporary replace all ' ' into "" to '·'
+            # Temporary replace all spaces in "" to '·'
             re_binqu= re.compile(r'"([^"]+) ([^"]+)"')
             while re_binqu.search(mask):
                 mask= re_binqu.sub(r'"\1·\2"', mask) 
@@ -3906,7 +3910,7 @@ class Walker:
             return [mask]
         flds    = mask.split(' ')
         if '"' in mask:
-            # Temporary replace all ' ' into "" to '·'
+            # Temporary replace all spaces in "" to '·'
             re_binqu= re.compile(r'"([^"]+) ([^"]+)"')
             while re_binqu.search(mask):
                 mask= re_binqu.sub(r'"\1·\2"', mask) 
@@ -4590,8 +4594,7 @@ def _get_proj_dirs():
                 if is_ext: break
             if not is_ext: 
                 pdirs.append(p)
-        pdirs   = [f'"{p}"' if ' ' in p else p
-                    for p in pdirs]
+        pdirs   = [quote_if_space(p) for p in pdirs]
     except:
         pass;                  #log("ex",())
         pdirs = []

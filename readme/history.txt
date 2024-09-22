@@ -1,4 +1,4 @@
-﻿4.8.22 2024-09-22
+﻿4.8.23 2024-09-22
 fixed: plugin's command "Find in current tab" must double-quote the filename if it has spaces
 fixed: bug with replacing unix home-dir to '~'
 
