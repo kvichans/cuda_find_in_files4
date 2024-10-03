@@ -5,6 +5,8 @@ Version:
     '4.8.23 2024-09-22'
 '''
 
+from            .bottom_panel   import Bpanel
+
 import  re, os, traceback, locale, itertools, codecs, time, collections, datetime as dt #, types, json
 from            pathlib         import Path
 from            fnmatch         import fnmatch
@@ -367,12 +369,17 @@ def dlg_fif4_help(fif):
    #def dlg_fif4_help
 
 
-
+bpanel = Bpanel()
 class Command:
     def dlg_fif_opts(self):             return dlg_fif4_xopts()
     def show_dlg(self):                 return show_fif4()
     def show_dlg_and_find_in_tab(self): return show_fif4(d(work='in_tab'))
     def choose_preset_to_run(self):     return choose_preset_to_run()
+    
+    def open_console(self):                   return bpanel.open_console()
+        #be triggered via clicking sidebar icon
+    def on_start2(self, ed_self):               return bpanel.close_console()
+        #so user won't get a opened empty console when opening cudatext
    #class Command:
 
 
@@ -1572,6 +1579,53 @@ class Fif4D:
             if not m.opts.wk_fold:
                 m.stbr_act(f(_('Fill the field "{}"')   , m.caps['wk_fold']))   ;return d(fid='wk_fold')
             return []
+            
+
+        if aid=='di_fict':                      # Find All in Current Document
+            #m.opts.in_what #Find keyword
+            m.opts.wk_fold = "<tabs>" #From
+            m.opts.wk_incl = quote_if_space(ed.get_prop(app.PROP_TAB_TITLE).strip('*')) #Files
+            m.opts.wk_excl = "" #Skip
+            m.opts.wk_dept = 0
+            
+            m.ag.update(vals=m.vals_opts('o2v'))
+            
+            ##### same as  if aid=='di_find': ####
+            m.stbr_act('')                      # Clear status
+            upd = self.work(ag, 'fast' if scam=='s' else data)
+            if not upd and GOTO_FIRST_FR: m.do_acts(ag, 'go-next-fr')
+            ######################################
+            
+            bpanel.open_console() #open search result window
+            m.ag.hide() #hide find window #will this cause problem???
+            m.ag.update()
+            return upd
+            #return m.do_acts(ag, 'di_find') #do_acts() again will reset m.opts
+        
+        if aid=='di_fiat':                      # Find All in All Document
+            m.opts.wk_fold = "<tabs>" #From
+            m.opts.wk_incl = "*" #Files
+            m.opts.wk_excl = "" #Skip
+            m.opts.wk_dept = 0
+            
+            m.ag.update(vals=m.vals_opts('o2v'))
+            
+            ##### same as  if aid=='di_find': ####
+            m.stbr_act('')                      # Clear status
+            upd = self.work(ag, 'fast' if scam=='s' else data)
+            if not upd and GOTO_FIRST_FR: m.do_acts(ag, 'go-next-fr')
+            ######################################
+            
+            bpanel.open_console() #open search result window
+            m.ag.hide() #hide find window #will this cause problem???
+            m.ag.update() #check github.com/kvichans/cuda_kv_dlg/wiki
+            #m.ag.__del__() #program will freeze
+            #app.app_idle(True) #useless
+            #sys.exit() #raise error
+            #quit() #raise error
+            #m.ag.show() #useless
+            return upd
+
 
         pass;                   msg_box('??do '+aid)
         return d(fid=self.cid_what())
@@ -1873,6 +1927,10 @@ class Fif4D:
       ),in_case=d(tp='chbt' ,tid='di_menu'  ,x=reex_x+WRDW*1,w=WRDW     ,cap='&aA'      ,hint=case_hi               ,p='pt'                 # &a
       ),in_word=d(tp='chbt' ,tid='di_menu'  ,x=reex_x+WRDW*2,w=WRDW     ,cap='"&w"'     ,hint=word_hi               ,p='pt'                 # &w
       ),rp_cntx=d(tp='chbt' ,tid='di_menu'  ,x=cntx_x       ,w=CTXW     ,cap=m.cntx_ca(),hint=cntx_hi               ,p='pt'                 # &-
+      ),di_fict=d(tp='bttn' ,tid='di_menu'  ,x=cntx_x+WRDW*3,w=CTXW*1.55   ,cap='Find in Current Tab'  ,hint='ignore Files, Skip, From, Depth value'          ,p='pt'  
+                    # Find All in Current Doc
+      ),di_fiat=d(tp='bttn' ,tid='di_menu'  ,x=cntx_x+WRDW*6,w=CTXW*1.55   ,cap='Find in All Tabs'  ,hint='ignore Files, Skip, From, Depth value'          ,p='pt'  
+                    # Find All in All Opened Doc
       ),di_i4o_=d(tp='bvel' ,y  = 3         ,x=i4op_x       ,r=-5-FNDW-5,h=bttn_h                       ,a='r>'     ,p='pt' ,props='1'
       ),di_i4op=d(tp='labl' ,tid='di_menu'  ,x=i4op_x+4     ,r=-5-FNDW-9,cap=m.i4op_ca(),hint=i4op_hi   ,a='r>'     ,p='pt'
       ),di_find=d(tp='bttn' ,tid='di_menu'  ,x=-5-FNDW      ,r=-5       ,cap=find_ca    ,hint=find_hi   ,a='>>'     ,p='pt' ,def_bt=True    # &d Enter
@@ -3626,7 +3684,7 @@ class Reporter:
                     tim     = ' ('+fit_ftim(kid.p)+')' if ftim and os.path.exists(kid.p) else ''
                     body   += [f('{gap}<{fil}{tim}>: #{cnt}'
                                 , gap=TAB*dpth
-                                , fil=os.path.relpath(kid.p, root) if relp else kid.p
+                                , fil=kid.p #fifx always need full path
                                 , tim=tim
                                 , cnt=kid.cnt)]
                     node2body(kid.subs, body, locs, 1+dpth)
@@ -3677,8 +3735,35 @@ class Reporter:
         set_text_all(ed_,'\n'.join(body))
         ed_.set_prop(app.PROP_RO         ,True)
         
+        bpanel.bottom_ed.insert( 0, 0, '\n'.join(body) + "\n" )
+
+
         pass;                  #log("?? marks")
+        ### for bpanel keyword style###
+        try:
+            theme = app.app_proc(app.PROC_THEME_SYNTAX_DICT_GET, '')
+            bpanel_keyword_color_back = theme["LightBG5"]["color_back"]
+            bpanel_keyword_color_font = theme["LightBG5"]["color_font"]
+        except:
+            bpanel_keyword_color_back = 12632240 #theme["LightBG5"]["color_back"]
+            bpanel_keyword_color_font = 0 #theme["LightBG5"]["color_font"]
+                #Highlight the matching words in the search results within bpanel.
+                #For the search keyword style in bpanel.
+                #
+                #user change theme also change bottom panel theme except keyword part.
+        ###############################
+        
         if -1==-1 and app.app_api_version()>='1.0.310':# app 1.88.8
+            
+            ### for bpanel keyword style###
+            if marks:
+                rws, cls, lns   = list(zip(*marks))
+                #bpanel.bottom_ed.attr(app.MARKERS_ADD_MANY, x=cls, y=rws, len=lns, **MARK_FIND_STYLE)
+                    #original FiF keyword style, which is simple **underline** the keyword
+                bpanel.bottom_ed.attr(app.MARKERS_ADD_MANY, x=cls, y=rws, len=lns, color_font=bpanel_keyword_color_font, color_bg=bpanel_keyword_color_back)
+                    #highlighting the keyword
+            ###############################
+            
             if ltkns:
                 ltkns   = merge_markers(ltkns, marks, MARK_FIND_STYLE)
                 ltkns_s = {}
@@ -3704,6 +3789,14 @@ class Reporter:
                 rws, cls, lns = list(zip(*lpths))
                 ed_.attr(app.MARKERS_ADD_MANY, x=cls, y=rws, len=lns, **LPTH_FIND_STYLE)
         else:
+            ### for bpanel keyword style###
+            if marks:
+                for rw, cl, ln in marks:
+                    #bpanel.bottom_ed.attr(app.MARKERS_ADD, x=cl, y=rw, len=ln, **MARK_FIND_STYLE)
+                        #original FiF keyword style
+                    bpanel.bottom_ed.attr(app.MARKERS_ADD, x=cl, y=rw, len=ln, color_font=bpanel_keyword_color_font, color_bg=bpanel_keyword_color_back)
+            ###############################
+            
             if ltkns:
                 ltkns   = merge_markers(ltkns, marks, MARK_FIND_STYLE)
                 for rw, cl, ln, st in ltkns:
@@ -3983,7 +4076,12 @@ class TabsWalker:
             # Skip the tab?
             if not       any(map(lambda cl:fnmatch(title, cl), incls)):   continue#for
             if excls and any(map(lambda cl:fnmatch(title, cl), excls)):   continue#for
-            path    = f'tab:{tab_id}/{title}'
+            
+            #bpanel needs full path
+            if filename: #filename is full path
+                path    = f'tab:{tab_id}/{filename}'
+            else: #for unsaved file (temp file)
+                path    = f'tab:{tab_id}/{title}'
             
             # Use!
             Walker.stats[Walker.WKST_UFNS]  += 1
