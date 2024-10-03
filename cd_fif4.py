@@ -1582,6 +1582,8 @@ class Fif4D:
             
 
         if aid=='di_fict':                      # Find All in Current Document
+            bpanel.click_fict_or_fiat = True
+            
             #m.opts.in_what #Find keyword
             m.opts.wk_fold = "<tabs>" #From
             m.opts.wk_incl = quote_if_space(ed.get_prop(app.PROP_TAB_TITLE).strip('*')) #Files
@@ -1599,10 +1601,15 @@ class Fif4D:
             bpanel.open_console() #open search result window
             m.ag.hide() #hide find window #will this cause problem???
             m.ag.update()
+            
+            # after using bpanel, without this line, menu option becomes invalid until CudaText is restarted.
+            bpanel.click_fict_or_fiat = False
             return upd
             #return m.do_acts(ag, 'di_find') #do_acts() again will reset m.opts
         
         if aid=='di_fiat':                      # Find All in All Document
+            bpanel.click_fict_or_fiat = True
+
             m.opts.wk_fold = "<tabs>" #From
             m.opts.wk_incl = "*" #Files
             m.opts.wk_excl = "" #Skip
@@ -1624,6 +1631,9 @@ class Fif4D:
             #sys.exit() #raise error
             #quit() #raise error
             #m.ag.show() #useless
+            
+            # after using bpanel, without this line, menu option becomes invalid until CudaText is restarted.
+            bpanel.click_fict_or_fiat = False
             return upd
 
 
@@ -3628,6 +3638,8 @@ class Reporter:
         pass;                   log__('trfm,shcw,relp,finl,ftim,root={}',(trfm,shcw,relp,finl,ftim,root)         ,__=(log4fun,Reporter.log4cls)) if _log4mod>=0 else 0
 
         # Prepare Results tree
+        if bpanel.click_fict_or_fiat:
+            trfm = TRFM_P_LL #bpanel need default format
         tree        = self.build_tree(trfm)
         pass;                   trfm = trfm if tree else                 TRFM_PLL
         pass;                   tree = tree if tree else self.build_tree(TRFM_PLL)
@@ -3684,7 +3696,8 @@ class Reporter:
                     tim     = ' ('+fit_ftim(kid.p)+')' if ftim and os.path.exists(kid.p) else ''
                     body   += [f('{gap}<{fil}{tim}>: #{cnt}'
                                 , gap=TAB*dpth
-                                , fil=kid.p #fifx always need full path
+                                , fil=kid.p if bpanel.click_fict_or_fiat else \
+                                 (os.path.relpath(kid.p, root) if relp else kid.p) #bpanel need full path
                                 , tim=tim
                                 , cnt=kid.cnt)]
                     node2body(kid.subs, body, locs, 1+dpth)
@@ -3735,7 +3748,8 @@ class Reporter:
         set_text_all(ed_,'\n'.join(body))
         ed_.set_prop(app.PROP_RO         ,True)
         
-        bpanel.bottom_ed.insert( 0, 0, '\n'.join(body) + "\n" )
+        if bpanel.click_fict_or_fiat:
+            bpanel.bottom_ed.insert( 0, 0, '\n'.join(body) + "\n" )
 
 
         pass;                  #log("?? marks")
@@ -4078,9 +4092,12 @@ class TabsWalker:
             if excls and any(map(lambda cl:fnmatch(title, cl), excls)):   continue#for
             
             #bpanel needs full path
-            if filename: #filename is full path
-                path    = f'tab:{tab_id}/{filename}'
-            else: #for unsaved file (temp file)
+            if bpanel.click_fict_or_fiat: #for bpanel only
+                if filename: #filename is full path
+                    path    = f'tab:{tab_id}/{filename}'
+                else: #for unsaved file
+                    path    = f'tab:{tab_id}/{title}'
+            else: #for original Find in Find
                 path    = f'tab:{tab_id}/{title}'
             
             # Use!

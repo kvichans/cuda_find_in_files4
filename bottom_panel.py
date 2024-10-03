@@ -21,12 +21,11 @@ fn_icon = os.path.join(os.path.dirname(__file__), 'x_icon.png')
 #bottom panel
 class Bpanel:
 
-    title_side = 'X Objects'
-    title_console = 'X Console'
-    h_side = None
-    h_console = None                #form handle
+    __title_console = 'X Console'
+    __h_console = None                #form handle
     
     bottom_ed = None
+    click_fict_or_fiat = False #check if user click [find in current tab] or [find in all tabs] button
 
     def __init__(self):
 
@@ -40,19 +39,19 @@ class Bpanel:
 
     def init_forms(self):
         
-        self.h_console = self.init_console_form()
-        app.app_proc(app.PROC_BOTTOMPANEL_ADD_DIALOG, (self.title_console, self.h_console, fn_icon))
+        self.__h_console = self.init_console_form()
+        app.app_proc(app.PROC_BOTTOMPANEL_ADD_DIALOG, (self.__title_console, self.__h_console, fn_icon))
 
 
     def open_console(self):
 
         #dont init form twice!
-        if not self.h_console:
+        if not self.__h_console:
             self.init_forms()
 
-        #app.dlg_proc(self.h_console, app.DLG_CTL_FOCUS, name='input') #focus input field; unnecessary
+        #app.dlg_proc(self.__h_console, app.DLG_CTL_FOCUS, name='input') #focus input field; unnecessary
 
-        app.app_proc(app.PROC_BOTTOMPANEL_ACTIVATE, (self.title_console, False)) #True - set focus
+        app.app_proc(app.PROC_BOTTOMPANEL_ACTIVATE, (self.__title_console, False)) #True - set focus
             #can't open bottompanel from menu without this line
             #can open bottompanel from bottomsidebar without this line
         
@@ -61,7 +60,7 @@ class Bpanel:
 
     def close_console(self):
         
-        #app.app_proc(app.PROC_BOTTOMPANEL_REMOVE, self.title_console) #remove bottombar icon
+        #app.app_proc(app.PROC_BOTTOMPANEL_REMOVE, self.__title_console) #remove bottombar icon
         
         #ed.cmd(cmds.cmd_HideBottomPanel) #it works; also close normal console
         #app.app_proc(app.PROC_SHOW_BOTTOMPANEL_SET, False) #it also works; also close normal console
@@ -72,9 +71,9 @@ class Bpanel:
         if activated_console == "X Console":
             app.app_proc(app.PROC_SHOW_BOTTOMPANEL_SET, False)
             
-        # if self.h_console:
-            # app.dlg_proc(self.h_console, app.DLG_HIDE) #bottom panel is gone, but space remain gray
-            # app.dlg_proc(self.h_console, app.DLG_FREE) #bottom panel is gone, but space remain gray
+        # if self.__h_console:
+            # app.dlg_proc(self.__h_console, app.DLG_HIDE) #bottom panel is gone, but space remain gray
+            # app.dlg_proc(self.__h_console, app.DLG_FREE) #bottom panel is gone, but space remain gray
 
     def init_console_form(self):
 
