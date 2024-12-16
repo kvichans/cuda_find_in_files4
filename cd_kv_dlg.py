@@ -2,7 +2,7 @@
 Authors:
     Andrey Kvichansky    (kvichans on github.com)
 Version:
-    '1.1.03 2024-06-10'
+    '1.1.04 2024-12-16'
 Content
     See github.com/kvichans/cuda_kv_dlg/wiki
 ToDo: (see end of file)
@@ -649,13 +649,11 @@ class DlgAg:
             fpr['h_min']    = fpr.get('h_min', h0)
             fpr.pop('resize', None)
 
-        '''
         # Restore prev pos/sizes
-        # Commented 2024/09 becase dlg grows on each call
         fpr     = _form_acts('move', fprs=fpr                   # Move and (maybe) resize
                             , key4store=self.opts.get('form data key')) \
                     if self.opts.get('restore_position', True) else fpr
-        '''
+
         pass;                  #log("fpr['on_resize']={}",(fpr['on_resize']))
         pass;                  #log("fpr={}",(fpr))
         if      'on_resize' in fpr and (fpr['w'],fpr['h']) != (w0,h0):

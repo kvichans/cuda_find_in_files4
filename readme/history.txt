@@ -1,4 +1,7 @@
-﻿4.8.23 2024-09-22
+﻿4.8.24 2024-12-16
+fixed: enable to save last dialog sizes to config (after regression in CudaText was fixed)
+
+4.8.23 2024-09-22
 fixed: plugin's command "Find in current tab" must double-quote the filename if it has spaces
 fixed: bug with replacing unix home-dir to '~'
 
