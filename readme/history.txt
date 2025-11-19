@@ -1,4 +1,7 @@
-﻿4.8.24 2024-12-16
+﻿4.8.25 2025-11-19
+fixed: avoid deprecated API: MARKERS_GET
+
+4.8.24 2024-12-16
 fixed: enable to save last dialog sizes to config (after regression in CudaText was fixed)
 
 4.8.23 2024-09-22
