@@ -2,7 +2,7 @@
 Authors:
     Andrey Kvichansky   (kvichans on github.com)
 Version:
-    '4.8.23 2024-09-22'
+    '4.8.25 2025-11-19'
 '''
 
 import  re, os, traceback, locale, itertools, codecs, time, collections, datetime as dt #, types, json
@@ -2430,9 +2430,9 @@ class Fif4D:
             ed.set_prop(app.PROP_ENC,       'UTF-8')
             ed.set_prop(app.PROP_TAB_TITLE, _('Results'))
             ed.set_text_all(m.rslt.get_text_all())
-            mrks    = m.rslt.attr(app.MARKERS_GET)
-            for mrk in (mrks if mrks else []):
-                ed.attr(app.MARKERS_ADD, *mrk)
+            mrks    = m.rslt.attr(app.MARKERS_GET_DICT)
+            for mrk in mrks:
+                ed.attr(app.MARKERS_ADD, **mrk)
             ed.set_prop(app.PROP_LEXER_FILE, FIF_LEXER)
             ed.set_prop(app.PROP_TAB_SIZE  , 1)
             return []
