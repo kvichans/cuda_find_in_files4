@@ -2,7 +2,7 @@
 Authors:
     Andrey Kvichansky   (kvichans on github.com)
 Version:
-    '4.8.25 2025-11-19'
+    '4.8.26 2025-11-20'
 '''
 
 import  re, os, traceback, locale, itertools, codecs, time, collections, datetime as dt #, types, json
@@ -2787,9 +2787,11 @@ class LexHelper:
 
     @staticmethod
     def get_lx_path(tid, rc, id_prnt=0, prefix=''):
-        kids    = app.tree_proc(tid, app.TREE_ITEM_ENUM, id_prnt)
+        kids    = app.tree_proc(tid, app.TREE_ITEM_ENUM_EX, id_prnt)
         if kids is None:    return prefix
-        for kid, cap in kids:
+        for node in kids:
+            kid = node['id']
+            cap = node['text']
             bc,br,ec,er = app.tree_proc(tid, app.TREE_ITEM_GET_RANGE, kid)
             pass;              #log__("cap,br,er,prefix={}",(cap,br,er,prefix)         ,__=(log4fun,M.log4cls)) if _log4mod>=0 else 0
             if er < rc[0]:  continue
