@@ -34,3 +34,17 @@ section=commands
 caption=&Find in Files 4\&View and edit extra options...
 method=dlg_fif_opts
 menu=op
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;; cuda_b_plugin ;;;;;;;;;;;;
+
+; for avoid show empty bottom panel when opening cudatext
+[item500]
+section=events
+events=on_start2
+
+[bottombar1]
+hint=X Console
+icon={dir}/x_icon.png
+method=open_console
